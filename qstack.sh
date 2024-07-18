@@ -100,7 +100,7 @@ qstack-push() {
     fi
     
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        EXISING_REMOTE_BRANCH=$(git for-each-ref --format='%(upstream:short)' "refs/heads/$BRANCH")
+        EXISING_REMOTE_BRANCH=$(git for-each-ref --format='%(upstream:lstrip=3)' "refs/heads/$BRANCH")
         if [ -z "$EXISING_REMOTE_BRANCH" ]; then
             NEW_REMOTE_BRANCH=${BRANCH%"/$QS_TIP_OF_STACK"}
             echo "Pushing to new remote branch $BRANCH -> $NEW_REMOTE_BRANCH"
