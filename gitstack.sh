@@ -11,7 +11,7 @@ gitstack-create() {
     if [[ "$1" == *"."* ]]; then
         echo "Stack name cannot contain any periods"
         return 1
-    else
+    fi
     if [ -z "$2" ]; then
         echo "Must specify a name for the first branch in the stack"
         return 1
@@ -19,7 +19,7 @@ gitstack-create() {
     if [[ "$2" == *"."* ]]; then
         echo "Branch name cannot contain any periods"
         return 1
-    else
+    fi
 
     NEW_BRANCH="$GS_BRANCH_PREFIX.$1.$2.$GS_TIP_OF_STACK"
     git checkout $GS_BASE_BRANCH && \
@@ -36,7 +36,7 @@ gitstack-branch() {
     if [[ "$1" == *"."* ]]; then
         echo "Branch name cannot contain any periods"
         return 1
-    else
+    fi
 
     CURRENT_BRANCH=$(git branch --show-current)
     if [[ ! "$CURRENT_BRANCH" == *"$GS_TIP_OF_STACK" ]]; then
