@@ -12,23 +12,27 @@ qstack() {
     COMMAND=$1
     shift
 
-    if [ "$COMMAND" = "create" ]; then
+    if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
         qstack-create "$@"
-    elif [ "$COMMAND" = "branch" ]; then
+    elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
         qstack-branch "$@"
-    elif [ "$COMMAND" = "push" ]; then
+    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
         qstack-push "$@"
-    elif [ "$COMMAND" = "list" ]; then
+    elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "l" ]; then
         qstack-list "$@"
-    elif [ "$COMMAND" = "list-branches" ]; then
+    elif [ "$COMMAND" = "list-branches" ] || [ "$COMMAND" = "lb" ]; then
         qstack-list-branches "$@"
-    elif [ "$COMMAND" = "checkout" ]; then
-        qstack-checkout "$@"
-    elif [ "$COMMAND" = "rebase" ]; then
+    elif [ "$COMMAND" = "switch" ] || [ "$COMMAND" = "s" ]; then
+        qstack-switch "$@"
+    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
         qstack-rebase "$@"
     else
        echo "Invalid command"
     fi
+}
+
+qs() {
+    qstack "$@"
 }
 
 qstack-create() {
@@ -135,7 +139,7 @@ qstack-list-branches() {
     done
 }
 
-qstack-checkout() {
+qstack-switch() {
     if [ -z "$1" ]; then
         echo "Must specify stack name"
         return 1
