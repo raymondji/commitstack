@@ -83,7 +83,7 @@ Inspired by one of my favourite League of Legends champions, Nasus :)
 
 ## Comparison with other tools
 
-Good overview of the available tools: https://graphite.dev/stacking. Find one that speaks to you!
+Good overview of the available tools: https://stacking.dev. Find one that speaks to you!
 
 https://github.com/spacedentist/spr
 - API is based on phabricator (one commit per PR)
