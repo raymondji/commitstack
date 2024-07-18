@@ -4,6 +4,8 @@
 
 ## Recommended `~/.gitconfig` settings
 
+These settings are not required to use gitstack, but will be helpful for any git operations you do outside of the core gitstack commands.
+
 ```
 [push]
     autoSetupRemote = true

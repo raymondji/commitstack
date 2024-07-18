@@ -1,6 +1,5 @@
 #!/bin/bash
-
-GS_BASE_BRANCH=${BASE_BRANCH:-main}
+GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
 GS_BRANCH_PREFIX=${GS_BRANCH_PREFIX:-$(whoami)}
 GS_TIP_OF_STACK="TIP"
 
@@ -14,8 +13,8 @@ gitstack-create() {
         return 1
     fi
 
-    git checkout $GS_BASE_BRANCH
-    git pull
+    git checkout $GS_BASE_BRANCH && \
+    git pull && \
     git checkout -b "$GS_BRANCH_PREFIX/$1/$2/$GS_TIP_OF_STACK"
 }
 
@@ -34,17 +33,19 @@ gitstack-branch() {
     STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
     NEW_BRANCH="$GS_BRANCH_PREFIX/$STACK/$1/$GS_TIP_OF_STACK"
 
-    git branch -m $RENAMED_CURRENT_BRANCH
+    git branch -m $RENAMED_CURRENT_BRANCH && \
     git checkout -b $NEW_BRANCH
 }
 
 gitstack-push() {
-    if [ -z "$1" ]; then
-        echo "Must specify stack name"
+    CURRENT_BRANCH=$(git branch --show-current)
+    STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
+    if [ -z "$STACK" ]; then
+        echo "Not within a stack"
         return 1
     fi
 
-    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/${1}/**/*")
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/$STACK/**/*")
     if [ -z "$BRANCHES" ]; then
         echo "No branches found for stack '${1}'"
         return 1
@@ -53,19 +54,39 @@ gitstack-push() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         echo "Pushing branch: $BRANCH"
         git push origin "$BRANCH" --force-with-lease
+        echo "" # newline
     done
 }
 
 gitstack-list() {
-    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/*/*/$GS_TIP_OF_STACK")
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/**/*/$GS_TIP_OF_STACK")
     if [ -z "$BRANCHES" ]; then
-        echo "No stackes foun"
+        echo "No stacks found"
         return 1
     fi
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         STACK=$(echo $BRANCH | cut -d'/' -f2)
         echo $STACK
+    done
+}
+
+gitstack-list-branches() {
+    CURRENT_BRANCH=$(git branch --show-current)
+    STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
+    if [ -z "$STACK" ]; then
+        echo "Not within a stack"
+        return 1
+    fi
+
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/$GS_BRANCH_PREFIX/$STACK/**/*")
+    if [ -z "$BRANCHES" ]; then
+        echo "No branches found"
+        return 1
+    fi
+
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo $BRANCH
     done
 }
 
@@ -94,6 +115,8 @@ gitstack-rebase() {
         return 1
     fi
 
-    git pull origin $BASE_BRANCH
-    git rebase -i $BASE_BRANCH
+    git checkout $GS_BASE_BRANCH && \
+    git pull && \
+    git checkout - && \
+    git rebase -i $GS_BASE_BRANCH
 }
