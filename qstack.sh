@@ -3,6 +3,10 @@ QS_BASE_BRANCH=${QS_BASE_BRANCH:-main}
 QS_BRANCH_PREFIX=${QS_BRANCH_PREFIX:-$(whoami)}
 QS_TIP_OF_STACK="TIP"
 
+qs() {
+    qstack "$@"
+}
+
 qstack() {
     if [ $# -eq 0 ]; then
         echo "Must provide command"
@@ -29,10 +33,6 @@ qstack() {
     else
        echo "Invalid command"
     fi
-}
-
-qs() {
-    qstack "$@"
 }
 
 qstack-create() {

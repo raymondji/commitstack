@@ -15,34 +15,34 @@ The simplest* tool for stacking git branches.
 ## Sample usage
 
 ```
-> qstack-create logging frontend
+> qstack create logging frontend
 Switched to a new branch 'user/logging/frontend/TIP'
 
-> qstack-branch backend
+> qstack branch backend
 Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
 Switched to a new branch 'user/logging/backend/TIP'
 
-> qstack-push
+> qstack push
 Pushing branch: user/logging/backend/TIP -> user/logging/backend
 ...
 
 Pushing branch: user/logging/frontend -> user/logging/frontend
 ...
 
-> qstack-rebase
+> qstack rebase
 # starts interactive rebase
 
-> qstack-create helm prometheus
+> qstack create helm prometheus
 Switched to a new branch 'user/helm/prometheus/TIP'
 
-> qstack-list
+> qstack list
 helm
 logging
 
-> qstack-checkout logging
+> qstack switch logging
 Switched to branch 'user/logging/backend/TIP'
 
-> qstack-list-branches
+> qstack list-branches
 user/logging/backed/TIP
 user/logging/frontend
 ```
