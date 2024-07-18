@@ -58,7 +58,7 @@ gitstack-push() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         REMOTE_BRANCH=${BRANCH%"/$GS_TIP_OF_STACK"}
         echo "Pushing branch $BRANCH -> $REMOTE_BRANCH"
-        git push origin "$BRANCH":"$REMOTE_BRANCH" --force
+        git push origin --set-upstream "$BRANCH":"$REMOTE_BRANCH" --force
         echo "" # newline
     done
 }
