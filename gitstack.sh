@@ -13,9 +13,11 @@ gitstack-create() {
         return 1
     fi
 
+    NEW_BRANCH="$GS_BRANCH_PREFIX/$1/$2/$GS_TIP_OF_STACK"
     git checkout $GS_BASE_BRANCH && \
     git pull && \
-    git checkout -b "$GS_BRANCH_PREFIX/$1/$2/$GS_TIP_OF_STACK"
+    git checkout -b $NEW_BRANCH && \
+    git commit --allow-empty -m $NEW_BRANCH
 }
 
 gitstack-branch() {
