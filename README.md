@@ -1,8 +1,55 @@
-# gitstack
+# qstack: simple stacked diffs in git
+
+The simplest* tool for stacking git branches.
+
+*In my opinion :)
+
+## Design goals
+
+- Works alongside the git commands you already know, does not try to replace the whole git CLI
+- All state is tracked within git and easy for humans to understand and edit manually when needed
+- Lean on built-in git functionality (like `--update-refs`) rather than implementing complex custom logic
+- No dependencies besides bash and git
+- Works with github, gitlab, or any other service provider
+
+## Sample usage
+
+```
+> qstack-create logging frontend
+Switched to a new branch 'user/logging/frontend/TIP'
+
+> qstack-branch backend
+Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
+Switched to a new branch 'user/logging/backend/TIP'
+
+> qstack-push
+Pushing branch: user/logging/backend/TIP -> user/logging/backend
+...
+
+Pushing branch: user/logging/frontend -> user/logging/frontend
+...
+
+> qstack-rebase
+# starts interactive rebase
+
+> qstack-create helm prometheus
+Switched to a new branch 'user/helm/prometheus/TIP'
+
+> qstack-list
+helm
+logging
+
+> qstack-checkout logging
+Switched to branch 'user/logging/backend/TIP'
+
+> qstack-list-branches
+user/logging/backed/TIP
+user/logging/frontend
+```
 
 ## Setup
 
-Clone this repo somewhere, e.g. `~/dev/gitstack`
+Clone this repo somewhere, e.g. `~/dev/qstack`
 
 In your `~/.zshrc` or `~/.bashrc`:
 ```
@@ -10,47 +57,12 @@ In your `~/.zshrc` or `~/.bashrc`:
 # export GS_BASE_BRANCH="..."
 # export GS_BRANCH_PREFIX="..."
 
-source ~/dev/gitstack/gitstack.sh
-```
-
-## Usage
-
-Sample usage:
-```
-> gitstack-create logging frontend
-Switched to a new branch 'user/logging/frontend/TIP'
-
-> gitstack-branch backend
-Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
-Switched to a new branch 'user/logging/backend/TIP'
-
-> gitstack-push
-Pushing branch: user/logging/backend/TIP
-...
-
-Pushing branch: user/logging/frontend
-...
-
-> gitstack-rebase
-
-> gitstack-create helm prometheus
-Switched to a new branch 'user/helm/prometheus/TIP'
-
-> gitstack-list
-helm
-logging
-
-> gitstack-checkout logging
-Switched to branch 'user/logging/backend/TIP'
-
-> gitstack-list-branches
-user/logging/backed/TIP
-user/logging/frontend
-```
+source ~/dev/qstack/qstack.sh
+``` 
 
 ## Recommended `~/.gitconfig` settings
 
-These settings are not required to use gitstack, but will be helpful for git operations you do outside of the gitstack commands.
+These settings are not required to use `qstack`, but will be helpful for git operations you do outside of the `qstack` commands.
 
 ```
 [push]
@@ -61,6 +73,15 @@ These settings are not required to use gitstack, but will be helpful for git ope
     updateRefs = true
 ```
 
-`gitstack` makes significant use of renaming local branches, so `default = upstream` avoids errors when you try to re-push after renaming a local branch.
+`qstack` makes significant use of renaming local branches, so `default = upstream` avoids errors when you try to re-push after renaming a local branch.
 
 `updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
+
+## Naming
+
+Inspired by one of my favourite League of Legends characters, Nasus :)
+
+## Other tools
+
+- https://github.com/spacedentist/spr
+- https://graphite.dev/
