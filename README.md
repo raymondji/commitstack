@@ -17,17 +17,35 @@ source ~/dev/gitstack/gitstack.sh
 
 Sample usage:
 ```
-gitstack-create logging frontend
-git add .
-git commit -m "Add frontend logging"
+> gitstack-create logging frontend
+Switched to a new branch 'user/logging/frontend/TIP'
 
-gitstack-branch backend
-git add .
-git commit -m "Add backend logging"
+> gitstack-branch backend
+Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
+Switched to a new branch 'user/logging/backend/TIP'
 
-gitstack-push
+> gitstack-push
+Pushing branch: user/logging/backend
+...
 
-gitstack-rebase
+Pushing branch: user/logging/frontend
+...
+
+> gitstack-rebase
+
+> gitstack-create helm prometheus
+Switched to a new branch 'user/helm/prometheus/TIP'
+
+> gitstack-list
+helm
+logging
+
+> gitstack-checkout logging
+Switched to branch 'user/logging/backend/TIP'
+
+> gitstack-list-branches
+user/logging/backed/TIP
+user/logging/frontend
 ```
 
 ## Recommended `~/.gitconfig` settings
