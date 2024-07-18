@@ -49,7 +49,7 @@ gitstack-push() {
         return 1
     fi
 
-    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}.$STACK.**.*")
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}.$STACK.**")
     if [ -z "$BRANCHES" ]; then
         echo "No branches found for stack '${1}'"
         return 1
