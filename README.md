@@ -81,7 +81,12 @@ These settings are not required to use `qstack`, but will be helpful for git ope
 
 Inspired by one of my favourite League of Legends characters, Nasus :)
 
-## Other tools
+## Comparison with other tools
 
-- https://github.com/spacedentist/spr
-- https://graphite.dev/
+https://github.com/spacedentist/spr
+- only works with Github
+- requires Github personal access token
+- API is based on phabricator (strictly one commit per PR)
+
+https://graphite.dev/
+- paid SaaS
