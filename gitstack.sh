@@ -35,7 +35,8 @@ gitstack-branch() {
 
     git branch -m $RENAMED_CURRENT_BRANCH && \
     echo "Renamed branch $CURRENT_BRANCH -> $RENAMED_CURRENT_BRANCH" && \
-    git checkout -b $NEW_BRANCH
+    git checkout -b $NEW_BRANCH && \
+    git commit --allow-empty -m $NEW_BRANCH
 }
 
 gitstack-push() {

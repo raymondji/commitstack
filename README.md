@@ -25,7 +25,7 @@ Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
 Switched to a new branch 'user/logging/backend/TIP'
 
 > gitstack-push
-Pushing branch: user/logging/backend
+Pushing branch: user/logging/backend/TIP
 ...
 
 Pushing branch: user/logging/frontend
