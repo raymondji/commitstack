@@ -81,12 +81,9 @@ These settings are not required to use `qstack`, but will be helpful for git ope
 
 Inspired by one of my favourite League of Legends champions, Nasus :)
 
-## Other stacked workflow tools
+## Comparison with other tools
 
 Good overview of the available tools: https://stacking.dev. Find one that speaks to you!
-
-
-### Comparisons
 
 https://github.com/spacedentist/spr
 - API is based on phabricator (one commit per PR)
