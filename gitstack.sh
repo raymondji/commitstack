@@ -8,8 +8,16 @@ gitstack-create() {
         echo "Must specify new stack name"
         return 1
     fi
+    if [[ "$1" == *"/"* ]]; then
+        echo "Stack name cannot contain /"
+        return 1
+    fi
     if [ -z "$2" ]; then
         echo "Must specify a name for the first branch in the stack"
+        return 1
+    fi
+    if [[ "$2" == *"/"* ]]; then
+        echo "Branch name cannot contain /"
         return 1
     fi
 
@@ -23,6 +31,10 @@ gitstack-create() {
 gitstack-branch() {
     if [ -z "$1" ]; then
         echo "Must specify new branch name"
+        return 1
+    fi
+    if [[ "$1" == *"/"* ]]; then
+        echo "Branch name cannot contain /"
         return 1
     fi
 
