@@ -14,3 +14,7 @@ qstack list
 qstack switch logging
 qstack list-branches
 qstack rebase
+
+# Cleanup
+git checkout main
+git branch | grep -v "main" | xargs git branch -D 
