@@ -31,7 +31,6 @@ Pushing branch: user/logging/frontend -> user/logging/frontend
 
 > qstack rebase
 ...
-Current branch user/logging/backend/TIP is up to date.
 
 > qstack create helm prometheus
 Switched to a new branch 'user/helm/prometheus/TIP'

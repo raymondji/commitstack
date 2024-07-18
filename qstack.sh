@@ -165,11 +165,6 @@ qstack-switch() {
 }
 
 qstack-rebase() {
-    if [[ ! "$1" == "-i" ]] && [ ! -z "$1" ] ; then
-        echo "Arg can only be -i"
-        return 1
-    fi 
-
     CURRENT_BRANCH=$(git branch --show-current)
     if [[ ! "$CURRENT_BRANCH" == *"$QS_TIP_OF_STACK" ]]; then
         echo "You must be on the tip of the stack to rebase the stack"
@@ -179,5 +174,5 @@ qstack-rebase() {
     git checkout $QS_BASE_BRANCH && \
     git pull && \
     git checkout - && \
-    git rebase ${1} $QS_BASE_BRANCH --update-refs
+    git rebase -i $QS_BASE_BRANCH --update-refs
 }
