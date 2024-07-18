@@ -52,6 +52,7 @@ user/logging/frontend
 
 These settings are not required to use gitstack, but will be helpful for git operations you do outside of the gitstack commands.
 
+
 ```
 [push]
     autoSetupRemote = true
