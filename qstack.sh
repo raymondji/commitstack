@@ -49,7 +49,7 @@ create ${stack} ${branch}
 
 branch ${branch}
     alias: b
-    create a new branch on top of the current stack
+    create and checkout a new branch on top of the current stack
 
 push
     alias: p
@@ -61,11 +61,11 @@ list
 
 list-branches
     alias: lb
-    lis all branches in the current stack (unordered)
+    lis all branches in the current stack (not ordered)
 
 switch ${stack}
     alias: s
-    checkout the tip of the stack
+    checkout the branch at the top of the stack
 
 rebase
     alias: r
