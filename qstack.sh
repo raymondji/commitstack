@@ -38,28 +38,38 @@ qstack() {
 }
 
 qstack-help() {
-    echo 'usage:
-qstack create ${stack} ${branch}
-  aliases: qstack c, qs create, qs c
-  create a new stack
-qstack branch ${branch}
-  aliases: qstack b, qs branch, qs b
-  create a new branch on top of the current stack
-qstack push
-  aliases: qstack p, qs push, qs p
-  push all branches in the current stack to remote
-qstack list
-  aliases: qstack l, qs list, qs l
-  list all stacks
-qstack list-branches
-  aliases: qstack lb, qs list-branches, qs lb
-  lis all branches in the current stack (unordered)
-qstack switch ${stack}
-  aliases: qstack s, qs switch, qs s
-  checkout the tip of the stack
-qstack rebase
-  aliases: qstack r, qs rebase, qs r
-  start interactive rebase of the current stack against the base branch'
+    echo 'usage: qstack ${subcommand} ...
+    alias: qs
+
+subcommands:
+
+create ${stack} ${branch}
+    alias: c
+    create a new stack
+
+branch ${branch}
+    alias: b
+    create a new branch on top of the current stack
+
+push
+    alias: p
+    push all branches in the current stack to remote
+
+list
+    alias: l
+    list all stacks
+
+list-branches
+    alias: lb
+    lis all branches in the current stack (unordered)
+
+switch ${stack}
+    alias: s
+    checkout the tip of the stack
+
+rebase
+    alias: r
+    start interactive rebase of the current stack against the base branch'
 }
 
 qstack-create() {
