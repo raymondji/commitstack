@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-set -o xtrace
+set -x
 
 source ./qstack.sh
 
