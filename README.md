@@ -1,8 +1,6 @@
 # qstack: simple stacked diffs in git
 
-The simplest* [stacking workflow](https://www.stacking.dev/) for git.
-
-*In my opinion :)
+A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
 ## Design goals
 
