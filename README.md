@@ -1,6 +1,6 @@
 # qstack: simple stacked diffs in git
 
-The simplest* [stacking workflow]([url](https://www.stacking.dev/)) in git.
+The simplest* [stacking workflow](https://www.stacking.dev/) in git.
 
 *In my opinion :)
 
