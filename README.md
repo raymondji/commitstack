@@ -79,7 +79,7 @@ These settings are not required to use `qstack`, but will be helpful for git ope
 
 ## Naming
 
-Inspired by one of my favourite League of Legends characters, Nasus :)
+Inspired by one of my favourite League of Legends champions, Nasus :)
 
 ## Comparison with other tools
 
