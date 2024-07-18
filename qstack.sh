@@ -98,12 +98,16 @@ qstack-branch() {
     fi
 
     CURRENT_BRANCH=$(git branch --show-current)
+    STACK=$(parse-stack "$CURRENT_BRANCH")
+    if [ -z "$STACK" ]; then
+        echo "Not within a stack"
+        return 1
+    fi
     if [[ ! "$CURRENT_BRANCH" == *"$QS_TIP_OF_STACK" ]]; then
         echo "You must be on the tip of the stack to add a new branch"
         return 1
     fi
     RENAMED_CURRENT_BRANCH=${CURRENT_BRANCH%"/$QS_TIP_OF_STACK"}
-    STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
     NEW_BRANCH="$QS_BRANCH_PREFIX/$STACK/$1/$QS_TIP_OF_STACK"
 
     git branch -m $RENAMED_CURRENT_BRANCH && \
@@ -114,7 +118,7 @@ qstack-branch() {
 
 qstack-push() {
     CURRENT_BRANCH=$(git branch --show-current)
-    STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
+    STACK=$(parse-stack "$CURRENT_BRANCH")
     if [ -z "$STACK" ]; then
         echo "Not within a stack"
         return 1
@@ -149,14 +153,14 @@ qstack-list() {
     fi
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        STACK=$(echo $BRANCH | cut -d'/' -f2)
+        STACK=$(parse-stack "$BRANCH")
         echo $STACK
     done
 }
 
 qstack-list-branches() {
     CURRENT_BRANCH=$(git branch --show-current)
-    STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
+    STACK=$(parse-stack "$CURRENT_BRANCH")
     if [ -z "$STACK" ]; then
         echo "Not within a stack"
         return 1
@@ -202,4 +206,14 @@ qstack-rebase() {
     git pull && \
     git checkout - && \
     git rebase -i $QS_BASE_BRANCH --update-refs
+}
+
+parse-stack() {
+    # Check if there are at least 3 parts separated by '/'
+    if [[ $(echo "$1" | tr '/' '\n' | wc -l) -lt 3 ]]; then
+        echo ""
+    else
+        # Extract the second part (index 1, zero-based) which is 'stack'
+        echo "$1" | cut -d '/' -f 2
+    fi
 }
