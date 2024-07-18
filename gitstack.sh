@@ -34,6 +34,7 @@ gitstack-branch() {
     NEW_BRANCH="$GS_BRANCH_PREFIX/$STACK/$1/$GS_TIP_OF_STACK"
 
     git branch -m $RENAMED_CURRENT_BRANCH && \
+    echo "Renamed branch $CURRENT_BRANCH -> $RENAMED_CURRENT_BRANCH" && \
     git checkout -b $NEW_BRANCH
 }
 
