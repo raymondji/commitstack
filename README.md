@@ -15,6 +15,21 @@ source ~/dev/gitstack/gitstack.sh
 
 ## Usage
 
+Sample usage:
+```
+gitstack-create logging frontend
+git add .
+git commit -m "Add frontend logging"
+
+gitstack-branch backend
+git add .
+git commit -m "Add backend logging"
+
+gitstack-push
+
+gitstack-rebase
+```
+
 ## Recommended `~/.gitconfig` settings
 
 These settings are not required to use gitstack, but will be helpful for git operations you do outside of the gitstack commands.
