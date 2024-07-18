@@ -57,7 +57,7 @@ gitstack-push() {
     
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         echo "Pushing branch: $BRANCH"
-        git push origin "$BRANCH" --force-with-lease
+        git push origin "$BRANCH" --force
         echo "" # newline
     done
 }
