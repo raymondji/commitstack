@@ -1,10 +1,10 @@
 #!/bin/bash
 
-BASE_BRANCH=${BASE_BRANCH:-main}
-BRANCH_PREFIX=${BRANCH_PREFIX:-$(whoami)}
-BRANCH_SUFFIX_TIP_OF_STACK="TIP"
+GS_BASE_BRANCH=${BASE_BRANCH:-main}
+GS_BRANCH_PREFIX=${GS_BRANCH_PREFIX:-$(whoami)}
+GS_TIP_OF_STACK="TIP"
 
-git-stack-create() {
+gitstack-create() {
     if [ -z "$1" ]; then
         echo "Must specify new stack name"
         return 1
@@ -14,71 +14,86 @@ git-stack-create() {
         return 1
     fi
 
-    git checkout $BASE_BRANCH
+    git checkout $GS_BASE_BRANCH
     git pull
-    git checkout -b "$BRANCH_PREFIX/$1/$2/$TIP_OF_STACK"
+    git checkout -b "$GS_BRANCH_PREFIX/$1/$2/$GS_TIP_OF_STACK"
 }
 
-git-stack-branch() {
+gitstack-branch() {
     if [ -z "$1" ]; then
         echo "Must specify new branch name"
         return 1
     fi
 
     CURRENT_BRANCH=$(git branch --show-current)
-    if [[ ! "$CURRENT_BRANCH" == *"$BRANCH_SUFFIX_TIP_OF_STACK" ]]; then
+    if [[ ! "$CURRENT_BRANCH" == *"$GS_TIP_OF_STACK" ]]; then
         echo "You must be on the tip of the stack to add a new branch"
         return 1
     fi
-    RENAMED_CURRENT_BRANCH=${CURRENT_BRANCH%"/$BRANCH_SUFFIX_TIP_OF_STACK"}
+    RENAMED_CURRENT_BRANCH=${CURRENT_BRANCH%"/$GS_TIP_OF_STACK"}
     STACK=$(echo $CURRENT_BRANCH | cut -d'/' -f2)
-    NEW_BRANCH="$BRANCH_PREFIX/$STACK/$1/$BRANCH_SUFFIX_TIP_OF_STACK"
+    NEW_BRANCH="$GS_BRANCH_PREFIX/$STACK/$1/$GS_TIP_OF_STACK"
+
     git branch -m $RENAMED_CURRENT_BRANCH
     git checkout -b $NEW_BRANCH
 }
 
-git-stack-push() {
+gitstack-push() {
     if [ -z "$1" ]; then
         echo "Must specify stack name"
         return 1
     fi
 
-    branches=$(git for-each-ref --format='%(refnameshort)' "refs/heads/${BRANCH_PREFIX}/${1}/**/*")
-    if [ -z "$branches" ]; then
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/${1}/**/*")
+    if [ -z "$BRANCHES" ]; then
         echo "No branches found for stack '${1}'"
         return 1
     fi
     
-    echo "$branches" | while IFS= read -r branch; do
-        echo "Pushing branch: $branch"
-        git push origin "$branch" --force-with-lease
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo "Pushing branch: $BRANCH"
+        git push origin "$BRANCH" --force-with-lease
     done
 }
 
-git-stack-list() {
-    if [ -z "$1" ]; then
-        echo "Must specify stack name"
+gitstack-list() {
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/*/*/$GS_TIP_OF_STACK")
+    if [ -z "$BRANCHES" ]; then
+        echo "No stackes foun"
         return 1
     fi
 
-    git for-each-ref --format='%(refnameshort)' "refs/heads/${BRANCH_PREFIX}/${1}/**/$BRANCH_SUFFIX_TIP_OF_STACK"
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        STACK=$(echo $BRANCH | cut -d'/' -f2)
+        echo $STACK
+    done
 }
 
-git-stack-checkout() {
+gitstack-checkout() {
     if [ -z "$1" ]; then
         echo "Must specify stack name"
         return 1
     fi 
 
-    branches=$(git for-each-ref --format='%(refnameshort)' "refs/heads/${BRANCH_PREFIX}/${1}/**/$BRANCH_SUFFIX_TIP_OF_STACK")
-    if [ -z "$branches" ]; then
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}/${1}/*/$GS_TIP_OF_STACK")
+    if [ -z "$BRANCHES" ]; then
         echo "No branches found for stack '${1}'"
         return 1
     fi
     
-    echo "$branches" | while IFS= read -r branch; do
-        git checkout "$branch"
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        git checkout "$BRANCH"
         return 0
     done
 }
 
+gitstack-rebase() {
+    CURRENT_BRANCH=$(git branch --show-current)
+    if [[ ! "$CURRENT_BRANCH" == *"$GS_TIP_OF_STACK" ]]; then
+        echo "You must be on the tip of the stack to rebase the stack"
+        return 1
+    fi
+
+    git pull origin $BASE_BRANCH
+    git rebase -i $BASE_BRANCH
+}
