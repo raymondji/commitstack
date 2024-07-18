@@ -64,7 +64,7 @@ gitstack-push() {
 }
 
 gitstack-list() {
-    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}.**.*.$GS_TIP_OF_STACK")
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/${GS_BRANCH_PREFIX}.*.*.$GS_TIP_OF_STACK")
     if [ -z "$BRANCHES" ]; then
         echo "No stacks found"
         return 1
@@ -84,7 +84,7 @@ gitstack-list-branches() {
         return 1
     fi
 
-    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/$GS_BRANCH_PREFIX.$STACK.**.*")
+    BRANCHES=$(git for-each-ref --format='%(refname:short)' "refs/heads/$GS_BRANCH_PREFIX.$STACK.**")
     if [ -z "$BRANCHES" ]; then
         echo "No branches found"
         return 1
