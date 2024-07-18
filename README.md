@@ -1,5 +1,7 @@
 # gitstack
 
+## Setup
+
 ## Recommended `~/.gitconfig` settings
 
 ```
