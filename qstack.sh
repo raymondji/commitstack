@@ -3,6 +3,38 @@ QS_BASE_BRANCH=${QS_BASE_BRANCH:-main}
 QS_BRANCH_PREFIX=${QS_BRANCH_PREFIX:-$(whoami)}
 QS_TIP_OF_STACK="TIP"
 
+qs() {
+    qstack "$@"
+}
+
+qstack() {
+    if [ $# -eq 0 ]; then
+        echo "Must provide command"
+        return 1
+    fi
+
+    COMMAND=$1
+    shift
+
+    if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
+        qstack-create "$@"
+    elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
+        qstack-branch "$@"
+    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
+        qstack-push "$@"
+    elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "l" ]; then
+        qstack-list "$@"
+    elif [ "$COMMAND" = "list-branches" ] || [ "$COMMAND" = "lb" ]; then
+        qstack-list-branches "$@"
+    elif [ "$COMMAND" = "switch" ] || [ "$COMMAND" = "s" ]; then
+        qstack-switch "$@"
+    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
+        qstack-rebase "$@"
+    else
+       echo "Invalid command"
+    fi
+}
+
 qstack-create() {
     if [ -z "$1" ]; then
         echo "Must specify new stack name"
@@ -107,7 +139,7 @@ qstack-list-branches() {
     done
 }
 
-qstack-checkout() {
+qstack-switch() {
     if [ -z "$1" ]; then
         echo "Must specify stack name"
         return 1
