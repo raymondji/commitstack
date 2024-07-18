@@ -16,8 +16,8 @@ gitstack-create() {
     NEW_BRANCH="$GS_BRANCH_PREFIX/$1/$2/$GS_TIP_OF_STACK"
     git checkout $GS_BASE_BRANCH && \
     git pull && \
-    git checkout -b $NEW_BRANCH && \
-    git commit --allow-empty -m $NEW_BRANCH
+    git checkout -b $NEW_BRANCH
+    # git commit --allow-empty -m $NEW_BRANCH
 }
 
 gitstack-branch() {
@@ -37,8 +37,8 @@ gitstack-branch() {
 
     git branch -m $RENAMED_CURRENT_BRANCH && \
     echo "Renamed branch $CURRENT_BRANCH -> $RENAMED_CURRENT_BRANCH" && \
-    git checkout -b $NEW_BRANCH && \
-    git commit --allow-empty -m $NEW_BRANCH
+    git checkout -b $NEW_BRANCH
+    # git commit --allow-empty -m $NEW_BRANCH
 }
 
 gitstack-push() {
@@ -122,5 +122,5 @@ gitstack-rebase() {
     git checkout $GS_BASE_BRANCH && \
     git pull && \
     git checkout - && \
-    git rebase -i $GS_BASE_BRANCH
+    git rebase -i $GS_BASE_BRANCH --update-refs
 }
