@@ -100,9 +100,8 @@ qstack-push() {
     fi
     
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        REMOTE_BRANCH=${BRANCH%"/$QS_TIP_OF_STACK"}
-        echo "Pushing branch $BRANCH -> $REMOTE_BRANCH"
-        git push origin --set-upstream "$BRANCH":"$REMOTE_BRANCH" --force
+        echo "Pushing branch $BRANCH"
+        git push origin "$BRANCH" --force
         echo "" # newline
     done
 }
