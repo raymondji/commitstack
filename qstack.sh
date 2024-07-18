@@ -16,7 +16,9 @@ qstack() {
     COMMAND=$1
     shift
 
-    if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
+    if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
+        qstack-help "$@"
+    elif [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
         qstack-create "$@"
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
         qstack-branch "$@"
@@ -33,6 +35,31 @@ qstack() {
     else
        echo "Invalid command"
     fi
+}
+
+qstack-help() {
+    echo 'usage:'
+    echo 'qstack create ${stack} ${branch}'
+    echo '  aliases: qstack c, qs create, qs c'
+    echo '  create a new stack'
+    echo 'qstack branch ${branch}'
+    echo '  aliases: qstack b, qs branch, qs b'
+    echo '  create a new branch on top of the current stack'
+    echo 'qstack push'
+    echo '  aliases: qstack p, qs push, qs p'
+    echo '  push all branches in the current stack to remote'
+    echo 'qstack list'
+    echo '  aliases: qstack l, qs list, qs l'
+    echo '  list all stacks'
+    echo 'qstack list-branches'
+    echo '  aliases: qstack lb, qs list-branches, qs lb'
+    echo '  lis all branches in the current stack (unordered)'
+    echo 'qstack switch ${stack}'
+    echo '  aliases: qstack s, qs switch, qs s'
+    echo '  checkout the tip of the stack'
+    echo 'qstack rebase'
+    echo '  aliases: qstack r, qs rebase, qs r'
+    echo '  start interactive rebase of the current stack against the base branch'
 }
 
 qstack-create() {
