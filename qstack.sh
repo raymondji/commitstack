@@ -22,7 +22,7 @@ qstack() {
         qstack-create "$@"
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
         qstack-branch "$@"
-    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
+    elif [ "$COMMAND" = "push" ]; then
         qstack-push "$@"
     elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "l" ]; then
         qstack-list "$@"
