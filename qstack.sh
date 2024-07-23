@@ -16,7 +16,7 @@ qstack() {
 
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         qstack-help "$@"
-    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
+    elif [ "$COMMAND" = "push" ]; then
         qstack-push "$@"
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
         qstack-branch "$@"
@@ -26,6 +26,8 @@ qstack() {
         qstack-log "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
         qstack-rebase "$@"
+    elif [ "$COMMAND" = "pull" ]; then
+        qstack-pull "$@"
     else
        echo "Invalid command"
     fi
@@ -38,8 +40,10 @@ qstack-help() {
 subcommands:
 
 push
-    alias: p
     push all branches in the current stack to remote
+
+pull
+    update the base branch from mainstream, then rebase the stack onto the base branch
 
 log
     alias: l
@@ -113,9 +117,16 @@ qstack-list() {
 }
 
 qstack-log() {
-    git log $QS_BASE_BRANCH.. --decorate-refs=refs/heads
+    git log $QS_BASE_BRANCH..
 }
 
 qstack-rebase() {
     git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
 }
+
+qstack-pull() {
+    git checkout $QS_BASE_BRANCH
+    git pull
+    git rebase -i $QS_BASE_BRANCH --update-refs
+}
+
