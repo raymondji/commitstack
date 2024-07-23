@@ -11,6 +11,8 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Sample usage
 
+TODO: v2
+
 ```
 > qstack create logging frontend
 Switched to a new branch 'user/logging/frontend/TIP'
