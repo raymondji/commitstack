@@ -95,6 +95,13 @@ qstack-push() {
     done
 }
 
+qstack-pull() {
+    git checkout $QS_BASE_BRANCH
+    git pull
+    git checkout -
+    git rebase -i $QS_BASE_BRANCH --update-refs
+}
+
 qstack-list() {
     BRANCHES=$(git branch --format='%(refname:short)')
     LEAVES=()
@@ -123,11 +130,3 @@ qstack-log() {
 qstack-rebase() {
     git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
 }
-
-qstack-pull() {
-    git checkout $QS_BASE_BRANCH
-    git pull
-    git checkout -
-    git rebase -i $QS_BASE_BRANCH --update-refs
-}
-
