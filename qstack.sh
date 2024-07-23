@@ -109,7 +109,7 @@ qstack-list() {
         HAS_DESCENDENT=false
 
         echo "$BRANCHES" | while IFS= read -r MAYBE_DESCENDENT; do
-            IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT; echo $?)
+            IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT^; echo $?)
             if [[ $BRANCH != $MAYBE_DESCENDENT ]] && [[ $IS_ANCESTOR == "0" ]]; then
                 HAS_DESCENDENT=true
                 break
