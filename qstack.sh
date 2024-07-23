@@ -26,7 +26,9 @@ qstack() {
         qstack-list "$@"
     elif [ "$COMMAND" = "log" ] || [ "$COMMAND" = "l" ]; then
         qstack-log "$@"
-    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
+    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "rb" ]; then
+        qstack-rebase "$@"
+    elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
         qstack-rebase "$@"
     else
        echo "Invalid command"
@@ -43,7 +45,7 @@ push
     push all branches in the current stack to remote
 
 pull
-    update the base branch from mainstream, then rebase the stack onto the base branch
+    update the base branch from mainstream, then rebase the current stack onto the base branch
 
 log
     alias: l
@@ -58,8 +60,12 @@ branch
     list all branches in thestacks
 
 rebase
-    alias: r
-    start interactive rebase of the current stack against the base branch'
+    alias: rb
+    start interactive rebase of the current stack against the base branch
+
+reoder
+    alias: ro
+    start interactive rebase to reorder branches in the current stack'
 }
 
 qstack-branch() {
@@ -96,9 +102,9 @@ qstack-push() {
 }
 
 qstack-pull() {
-    git checkout $QS_BASE_BRANCH
-    git pull
-    git checkout -
+    git checkout $QS_BASE_BRANCH && \
+    git pull && \
+    git checkout - && \
     git rebase -i $QS_BASE_BRANCH --update-refs
 }
 
@@ -129,4 +135,11 @@ qstack-log() {
 
 qstack-rebase() {
     git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
+}
+
+qstack-reorder() {
+    git checkout -b tmp-reorder-branch && \
+    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
+    git checkout - && \
+    git branch -D tmp-reorder-branch
 }
