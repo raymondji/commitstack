@@ -69,7 +69,7 @@ reoder
 }
 
 qstack-branch() {
-    BRANCHES=$(git log --pretty='format:%D' main.. --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
@@ -82,7 +82,7 @@ qstack-branch() {
 
 qstack-push() {
     # Reverse so we push from bottom -> top
-    BRANCHES=$(git log --pretty='format:%D' main.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
