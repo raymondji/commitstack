@@ -18,6 +18,8 @@ qstack() {
         qstack-help "$@"
     elif [ "$COMMAND" = "push" ]; then
         qstack-push "$@"
+    elif [ "$COMMAND" = "pull" ]; then
+        qstack-pull "$@"
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
         qstack-branch "$@"
     elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "li" ]; then
@@ -26,8 +28,6 @@ qstack() {
         qstack-log "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
         qstack-rebase "$@"
-    elif [ "$COMMAND" = "pull" ]; then
-        qstack-pull "$@"
     else
        echo "Invalid command"
     fi
