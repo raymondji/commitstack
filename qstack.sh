@@ -117,7 +117,7 @@ qstack-list() {
 }
 
 qstack-log() {
-    git log $QS_BASE_BRANCH^..
+    git log $QS_BASE_BRANCH..
 }
 
 qstack-rebase() {
