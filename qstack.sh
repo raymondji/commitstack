@@ -127,6 +127,7 @@ qstack-rebase() {
 qstack-pull() {
     git checkout $QS_BASE_BRANCH
     git pull
+    git checkout -
     git rebase -i $QS_BASE_BRANCH --update-refs
 }
 
