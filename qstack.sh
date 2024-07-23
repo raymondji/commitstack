@@ -18,6 +18,8 @@ qstack() {
         qstack-help "$@"
     elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
         qstack-push "$@"
+    elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
+        qstack-branch "$@"
     elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "li" ]; then
         qstack-list "$@"
     elif [ "$COMMAND" = "log" ] || [ "$COMMAND" = "l" ]; then
@@ -56,8 +58,21 @@ rebase
     start interactive rebase of the current stack against the base branch'
 }
 
+qstack-branch() {
+    BRANCHES=$(git log --pretty='format:%D' main.. --decorate-refs=refs/heads | grep -v '^$')
+    if [ -z "$BRANCHES" ]; then
+        echo "No branches in the current stack"
+        return 1
+    fi
+
+    echo "----Top------"
+    echo $BRANCHES
+    echo "---Bottom----"
+}
+
 qstack-push() {
-    BRANCHES=$(git log --pretty='format:%D' main.. --decorate-refs=refs/heads)
+    # Reverse so we push from bottom -> top
+    BRANCHES=$(git log --pretty='format:%D' main.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
