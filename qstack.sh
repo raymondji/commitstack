@@ -75,9 +75,11 @@ qstack-branch() {
         return 1
     fi
 
-    echo "----Top------"
-    echo $BRANCHES
-    echo "---Bottom----"
+    ARR=()
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        ARR+=($BRANCH)
+    done
+    git branch --list $ARR[@]
 }
 
 qstack-push() {
