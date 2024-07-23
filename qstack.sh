@@ -29,7 +29,7 @@ qstack() {
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "rb" ]; then
         qstack-rebase "$@"
     elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
-        qstack-rebase "$@"
+        qstack-reorder "$@"
     else
        echo "Invalid command"
     fi
