@@ -77,10 +77,6 @@ These settings are not required to use `qstack`, but will be helpful for git ope
 
 `updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
 
-## Naming
-
-Inspired by one of my favourite League of Legends champions, Nasus :)
-
 ## Comparison with other tools
 
 Good overview of the available tools: https://stacking.dev. Find one that speaks to you!
