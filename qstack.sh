@@ -1,11 +1,11 @@
 #!/bin/bash
-QS_BASE_BRANCH=${QS_BASE_BRANCH:-main}
+GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
 
-qs() {
-    qstack "$@"
+gs() {
+    git-stacked "$@"
 }
 
-qstack() {
+git-stacked() {
     if [ $# -eq 0 ]; then
         echo "Must provide command"
         return 1
@@ -15,60 +15,62 @@ qstack() {
     shift
 
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
-        qstack-help "$@"
-    elif [ "$COMMAND" = "push" ]; then
-        qstack-push "$@"
-    elif [ "$COMMAND" = "pull" ]; then
-        qstack-pull "$@"
+        git-stacked-help "$@"
+    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
+        git-stacked-push "$@"
+    elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
+        git-stacked-pull-rebase "$@"
+    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
+        git-stacked-rebase "$@"
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
-        qstack-branch "$@"
-    elif [ "$COMMAND" = "list" ] || [ "$COMMAND" = "li" ]; then
-        qstack-list "$@"
+        git-stacked-branch "$@"
+    elif [ "$COMMAND" = "stack" ] || [ "$COMMAND" = "s" ]; then
+        git-stacked-stack "$@"
     elif [ "$COMMAND" = "log" ] || [ "$COMMAND" = "l" ]; then
-        qstack-log "$@"
-    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "rb" ]; then
-        qstack-rebase "$@"
+        git-stacked-log "$@"
     elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
-        qstack-reorder "$@"
+        git-stacked-reorder "$@"
     else
        echo "Invalid command"
     fi
 }
 
-qstack-help() {
-    echo 'usage: qstack ${subcommand} ...
-    alias: qs
+git-stacked-help() {
+    echo 'usage: git-stacked ${subcommand} ...
+    alias: gs
 
 subcommands:
 
 push
+    alias: p
     push all branches in the current stack to remote
 
-pull
+pull-rebase
+    alias: pr
     update the base branch from mainstream, then rebase the current stack onto the base branch
+
+rebase
+    alias: r
+    start interactive rebase of the current stack against the base branch
 
 log
     alias: l
     git log helper
 
-list
-    alias: li
+stack
+    alias: s
     list all stacks
 
 branch
     alias: b
-    list all branches in thestacks
+    list all branches in the current stack
 
-rebase
-    alias: rb
-    start interactive rebase of the current stack against the base branch
-
-reoder
+reorder
     alias: ro
     start interactive rebase to reorder branches in the current stack'
 }
 
-qstack-branch() {
+git-stacked-branch() {
     BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
@@ -82,7 +84,7 @@ qstack-branch() {
     git branch --list $ARR[@]
 }
 
-qstack-push() {
+git-stacked-push() {
     # Reverse so we push from bottom -> top
     BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
@@ -103,14 +105,34 @@ qstack-push() {
     done
 }
 
-qstack-pull() {
+git-stacked-pull-rebase() {
     git checkout $QS_BASE_BRANCH && \
     git pull && \
     git checkout - && \
     git rebase -i $QS_BASE_BRANCH --update-refs
 }
 
-qstack-list() {
+git-stacked-rebase() {
+    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
+}
+
+git-stacked-reorder() {
+    echo "Please make sure to update target branches of all merge requests in this stack first"
+    read -p "Acknowledge with Y to continue: " input
+    if [[ "$input" == "Y" || "$input" == "y" ]]; then
+       echo "Proceeding..."
+    else
+        echo "Exiting..."
+        exit 1
+    fi
+
+    git checkout -b tmp-reorder-branch && \
+    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
+    git checkout - && \
+    git branch -D tmp-reorder-branch
+}
+
+git-stacked-stack() {
     BRANCHES=$(git branch --format='%(refname:short)')
     LEAVES=()
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
@@ -131,17 +153,6 @@ qstack-list() {
     git branch --list $LEAVES[@]
 }
 
-qstack-log() {
+git-stacked-log() {
     git log $QS_BASE_BRANCH..
-}
-
-qstack-rebase() {
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
-}
-
-qstack-reorder() {
-    git checkout -b tmp-reorder-branch && \
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
-    git checkout - && \
-    git branch -D tmp-reorder-branch
 }
