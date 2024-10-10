@@ -10,59 +10,21 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 - Core dependencies only include bash and git
 - Core functionality works with any git service provider
 
-## Sample usage
-
-TODO: update with v2 changes
-
-```
-> qstack create logging frontend
-Switched to a new branch 'user/logging/frontend/TIP'
-
-> qstack branch backend
-Renamed branch 'user/logging/frontend/TIP' -> 'user/logging/frontend'
-Switched to a new branch 'user/logging/backend/TIP'
-
-> qstack push
-Pushing branch: user/logging/backend/TIP -> user/logging/backend
-...
-
-Pushing branch: user/logging/frontend -> user/logging/frontend
-...
-
-> qstack rebase
-...
-
-> qstack create helm prometheus
-Switched to a new branch 'user/helm/prometheus/TIP'
-
-> qstack list
-helm
-logging
-
-> qstack switch logging
-Switched to branch 'user/logging/backend/TIP'
-
-> qstack list-branches
-user/logging/backed/TIP
-user/logging/frontend
-```
-
 ## Setup
 
-Clone this repo somewhere, e.g. `~/dev/qstack`
+Clone this repo somewhere, e.g. `~/dev/git-stacked`
 
 In your `~/.zshrc` or `~/.bashrc`:
 ```
 # Optional:
 # export GS_BASE_BRANCH="..."
-# export GS_BRANCH_PREFIX="..."
 
-source ~/dev/qstack/qstack.sh
+source ~/dev/git-stacked/git-stacked.sh
 ``` 
 
 ## Recommended `~/.gitconfig` settings
 
-These settings are not required to use `qstack`, but will be helpful for git operations you do outside of the `qstack` commands.
+These settings are not required to use `git-stacked`, but will be helpful for git operations you do outside of the `git-stacked` commands.
 
 ```
 [push]
@@ -73,7 +35,7 @@ These settings are not required to use `qstack`, but will be helpful for git ope
     updateRefs = true
 ```
 
-`qstack` makes significant use of renaming local branches, so `default = upstream` avoids errors when you try to re-push after renaming a local branch.
+`git-stacked` makes significant use of renaming local branches, so `default = upstream` avoids errors when you try to re-push after renaming a local branch.
 
 `updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
 
