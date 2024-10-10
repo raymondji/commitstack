@@ -1,19 +1,18 @@
 #!/bin/bash
 set -e
 
-source ./qstack.sh
+source ./stack.sh
 
-# Delete all branches except main
-git branch | grep -v "main" | xargs git branch -D 
+other_branches=$(git branch --list | grep -v 'main')
+if [ -n "$other_branches" ]; then
+  echo "Error: please delete all other branches before running the test script"
+  exit 1
+fi
 
-qstack create logging frontend
-qstack branch backend
-qstack push
-qstack create helm prometheus
-qstack list
-qstack switch logging
-qstack list-branches
-qstack rebase
+git checkout -b foo/1
+git-stacked stack
+git-stacked branch
+# TODO: more steps
 
 # Cleanup
 git checkout main
