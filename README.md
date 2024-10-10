@@ -1,17 +1,18 @@
-# qstack: simple stacked diffs in git
+# Git stacked
 
 A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
 ## Design goals
 
-- Works alongside the git commands you already know, does not try to replace the whole git CLI
-- Lean on built-in git functionality (like `--update-refs`) rather than implementing complex custom logic
-- No dependencies besides bash and git
-- Works with github, gitlab, or any other service provider
+- Works alongside the git CLI, does not try to replace it
+- All functionality is accomplished using standard git commands (like `--update-refs`)
+- No state stored outside of git
+- Core dependencies only include bash and git
+- Core functionality works with any git service provider
 
 ## Sample usage
 
-TODO: v2!!!!
+TODO: update with v2 changes
 
 ```
 > qstack create logging frontend
