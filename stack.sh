@@ -133,6 +133,7 @@ git-stacked-push-force() {
     fi
     
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo "Force pushing branch $BRANCH"
         git push origin "$BRANCH":"$BRANCH" --force
 
         echo "" # newline
