@@ -1,5 +1,6 @@
 #!/bin/bash
 GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
+GS_COLOR_OUTPUT=${GS_COLOR_OUTPUT:-yes}
 
 gs() {
     git-stacked "$@"
@@ -101,7 +102,11 @@ git-stacked-branch() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
-            echo "* \033[0;32m$BRANCH\033[0m (top)"
+            if [ "$GS_COLOR_OUTPUT" = "yes" ]; then
+                echo "* \033[0;32m$BRANCH\033[0m (top)" # green highlight
+            else
+                echo "* $STACK"
+            fi
         else
             echo "  $BRANCH"
         fi
@@ -129,7 +134,11 @@ git-stacked-stack() {
     for STACK in "${STACKS[@]}"; do
         # Check if this stack is the current stack
         if [ "$STACK" = "$CURRENT_BRANCH" ]; then
-            echo -e "* \033[0;32m$STACK\033[0m" # green highlight
+            if [ "$GS_COLOR_OUTPUT" = "yes" ]; then
+                echo -e "* \033[0;32m$STACK\033[0m" # green highlight
+            else
+                echo "* $STACK"
+            fi
         else
             echo "  $STACK"
         fi
