@@ -133,13 +133,7 @@ git-stacked-push() {
     fi
     
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        EXISING_REMOTE_BRANCH=$(git for-each-ref --format='%(upstream:lstrip=3)' "refs/heads/$BRANCH")
-        if [ -z "$EXISING_REMOTE_BRANCH" ]; then
-            NEW_REMOTE_BRANCH=${BRANCH%"/$QS_TIP_OF_STACK"}
-            git push origin --set-upstream "$BRANCH":"$NEW_REMOTE_BRANCH" --force
-        else
-            git push origin "$BRANCH":"$EXISING_REMOTE_BRANCH" --force
-        fi
+        git push origin "$BRANCH":"$BRANCH" --force
 
         echo "" # newline
     done
