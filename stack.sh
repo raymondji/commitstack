@@ -92,7 +92,7 @@ git-stacked-create() {
 
 git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
@@ -113,11 +113,6 @@ git-stacked-stack() {
     BRANCHES=$(git branch --format='%(refname:short)')
     STACKS=()
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        # Skip the main branch
-        if [[ "$BRANCH" == "main" ]]; then
-            continue
-        fi
-
         HAS_DESCENDENT=false
         echo "$BRANCHES" | while IFS= read -r MAYBE_DESCENDENT; do
             IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT^; echo $?)
