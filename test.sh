@@ -15,14 +15,13 @@ GS_COLOR_OUTPUT=no
 echo "Running..."
 (
     debug git-stacked create a1
-
     debug git-stacked create a2
-
     debug git-stacked branch
 
     debug git checkout main
     debug git-stacked create b1
     debug git-stacked stack
+
     debug git checkout a2
     debug git-stacked push-force
 ) > test-output.txt 2>&1
