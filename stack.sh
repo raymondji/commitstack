@@ -6,6 +6,9 @@ gs() {
 }
 
 git-stacked() {
+    set -e
+    trap 'return 1' ERR  # Trap ERR to return 1 on any command failure
+
     if [ $# -eq 0 ]; then
         echo "Must provide command"
         return 1
@@ -16,8 +19,14 @@ git-stacked() {
 
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         git-stacked-help "$@"
-    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
-        git-stacked-push "$@"
+    elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
+        if command -v glab &> /dev/null; then
+            gitlab-stacked-push-force "$@"
+        elif command -v gh &> /dev/null; then
+            github-stacked-push-force "$@"
+        else
+            git-stacked-push-force "$@"
+        fi
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
         git-stacked-pull-rebase "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
@@ -31,7 +40,9 @@ git-stacked() {
     elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
         git-stacked-reorder "$@"
     else
-       echo "Invalid command"
+        echo "Invalid command"
+        echo ""
+        git-stacked-help "$@"
     fi
 }
 
@@ -41,8 +52,8 @@ git-stacked-help() {
 
 subcommands:
 
-push
-    alias: p
+push-force
+    alias: pf
     push all branches in the current stack to remote
 
 pull-rebase
@@ -82,7 +93,7 @@ git-stacked-branch() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
-            echo "* \033[0;32m$BRANCH\033[0m (top of the stack)"
+            echo "* \033[0;32m$BRANCH\033[0m (top)"
         else
             echo "  $BRANCH"
         fi
@@ -121,53 +132,100 @@ git-stacked-stack() {
 }
 
 git-stacked-log() {
-    git log $QS_BASE_BRANCH..
+    git log $GS_BASE_BRANCH..
 }
 
-git-stacked-push() {
+git-stacked-push-force() {
     # Reverse so we push from bottom -> top
-    BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
     fi
-    
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        EXISING_REMOTE_BRANCH=$(git for-each-ref --format='%(upstream:lstrip=3)' "refs/heads/$BRANCH")
-        if [ -z "$EXISING_REMOTE_BRANCH" ]; then
-            NEW_REMOTE_BRANCH=${BRANCH%"/$QS_TIP_OF_STACK"}
-            git push origin --set-upstream "$BRANCH":"$NEW_REMOTE_BRANCH" --force
-        else
-            git push origin "$BRANCH":"$EXISING_REMOTE_BRANCH" --force
-        fi
 
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo "branch: $BRANCH"
+        echo "----------------------------"
+        git push origin "$BRANCH":"$BRANCH" --force
         echo "" # newline
     done
 }
 
+gitlab-stacked-push-force() {
+    echo "Gitlab extension not implemented yet, falling back to default behaviour."
+    echo ""
+    git-stacked-push-force
+}
+
+github-stacked-push-force() {
+    # Reverse so we push from bottom -> top
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    if [ -z "$BRANCHES" ]; then
+        echo "No branches in the current stack"
+        return 1
+    fi
+
+    local PREVIOUS_BRANCH="$GS_BASE_BRANCH"
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo "Branch: $BRANCH"
+        echo "----------------------------"
+        
+        # Clean the branch name to remove refs/heads/ if necessary
+        local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
+
+        # If PR does not exist, create one
+        if [ "$PR_EXISTS" -eq 0 ]; then
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
+            echo "Creating a new PR for branch $BRANCH..."
+            gh pr create --base "$PREVIOUS_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
+        else
+            # If a PR exists, first update the PR target to the base branch. If the branches have been re-ordered,
+            # this prevents the PRs from unintentionally getting merged.
+            local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
+            echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
+            gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
+
+            # Now it's safe to push
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
+
+            # After pushing, set the target back to the previous branch
+            if [ "$PREVIOUS_BRANCH" != "$GS_BASE_BRANCH" ]; then
+                echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
+                gh pr edit "$PR_NUMBER" --base "$PREVIOUS_BRANCH"
+            fi
+        fi
+
+        PREVIOUS_BRANCH="$BRANCH"
+        echo "" # Print a newline for readability
+    done
+}
+
 git-stacked-pull-rebase() {
-    git checkout $QS_BASE_BRANCH && \
+    git checkout $GS_BASE_BRANCH && \
     git pull && \
     git checkout - && \
-    git rebase -i $QS_BASE_BRANCH --update-refs
+    git rebase -i $GS_BASE_BRANCH --update-refs
 }
 
 git-stacked-rebase() {
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
+    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
 }
 
 git-stacked-reorder() {
-    echo "Please make sure to update target branches of all merge requests in this stack first"
-    read -p "Acknowledge with Y to continue: " input
+    echo "Before continuing, please set the target branch of all open merge requests in this stack to $GS_BASE_BRANCH"
+    echo "Done: [Y/n]"
+    read input
     if [[ "$input" == "Y" || "$input" == "y" ]]; then
        echo "Proceeding..."
     else
         echo "Exiting..."
-        exit 1
+        return 1
     fi
 
     git checkout -b tmp-reorder-branch && \
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
+    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base && \
     git checkout - && \
     git branch -D tmp-reorder-branch
 }
