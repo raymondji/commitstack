@@ -6,6 +6,9 @@ gs() {
 }
 
 git-stacked() {
+    set -e
+    trap 'return 1' ERR  # Trap ERR to return 1 on any command failure
+
     if [ $# -eq 0 ]; then
         echo "Must provide command"
         return 1
@@ -155,9 +158,44 @@ gitlab-stacked-push-force() {
 }
 
 github-stacked-push-force() {
-    echo "Github extension not implemented yet, falling back to default behaviour."
-    echo ""
-    git-stacked-push-force
+    # Reverse so we push from bottom -> top
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    if [ -z "$BRANCHES" ]; then
+        echo "No branches in the current stack"
+        return 1
+    fi
+
+    local PREVIOUS_BRANCH=""
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        echo "Branch: $BRANCH"
+        echo "----------------------------"
+        
+        # Clean the branch name to remove refs/heads/ if necessary
+        local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
+
+        # If PR does not exist, create one
+        if [ "$PR_EXISTS" -eq 0 ]; then
+            echo "Creating a new PR for branch $BRANCH..."
+            gh pr create --base "$GS_BASE_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
+        else
+            # If PR exists, temporarily update the PR target to the base branch
+            echo "Updating PR for branch $BRANCH..."
+            local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
+            echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
+            gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
+
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
+            # After pushing, set the target back to the previous branch
+            if [ -n "$PREVIOUS_BRANCH" ]; then
+                echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
+                gh pr edit "$PR_NUMBER" --base "$PREVIOUS_BRANCH"
+            fi
+        fi
+
+        PREVIOUS_BRANCH="$BRANCH"
+        echo "" # Print a newline for readability
+    done
 }
 
 git-stacked-pull-rebase() {
