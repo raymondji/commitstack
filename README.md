@@ -4,54 +4,7 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Sample usage
 
-```
-> git-stacked create a1
-
-> git-stacked create a2
-
-> git-stacked branch
-* a2 (top)
-  a1
-  main
-
-> git-stacked log
-commit ere821123 (HEAD -> a2)
-Author: ...
-Date:   ...
-
-    Start of a2
-
-commit jpo12323 (a1)
-Author: Raymond Ji <34181040+raymondji@users.noreply.github.com>
-Date:   Fri Oct 11 05:42:52 2024 -0700
-
-    Start of a1
-
-commit ka123129 (main)
-Author: ...
-Date:   ...
-
-    Hello world
-
-> git checkout main
-
-> git-stacked create b1
-
-> git-stacked stack
-* b1
-  a2
-
-> git checkout a2
-
-> git-stacked push
-Push branch: a1
-----------------
-...
-
-Push branch: a2
-----------------
-....
-```
+[View](https://github.com/raymondji/git-stacked/blob/main/test-output-golden.txt)
 
 ## Design goals
 
