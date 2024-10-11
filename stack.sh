@@ -16,7 +16,7 @@ git-stacked() {
 
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         git-stacked-help "$@"
-    elif [ "$COMMAND" = "push" ] || [ "$COMMAND" = "p" ]; then
+    elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
         git-stacked-push "$@"
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
         git-stacked-pull-rebase "$@"
@@ -41,8 +41,8 @@ git-stacked-help() {
 
 subcommands:
 
-push
-    alias: p
+push-force
+    alias: pf
     push all branches in the current stack to remote
 
 pull-rebase
@@ -124,7 +124,7 @@ git-stacked-log() {
     git log $QS_BASE_BRANCH..
 }
 
-git-stacked-push() {
+git-stacked-push-force() {
     # Reverse so we push from bottom -> top
     BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
