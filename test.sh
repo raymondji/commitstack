@@ -5,10 +5,13 @@ set -e
 debug() {
     echo "> $@"
     "$@"
+    echo ""
 }
 source ./stack.sh
+GS_COLOR_OUTPUT=no
 
 # Run
+echo "Running..."
 (
     debug git-stacked create a1
 

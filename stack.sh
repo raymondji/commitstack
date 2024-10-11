@@ -105,7 +105,7 @@ git-stacked-branch() {
             if [ "$GS_COLOR_OUTPUT" = "yes" ]; then
                 echo "* \033[0;32m$BRANCH\033[0m (top)" # green highlight
             else
-                echo "* $STACK"
+                echo "* $BRANCH"
             fi
         else
             echo "  $BRANCH"
