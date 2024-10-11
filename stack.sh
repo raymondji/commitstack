@@ -24,6 +24,8 @@ git-stacked() {
         else
             git-stacked-push-force "$@"
         fi
+    elif [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
+        git-stacked-create "$@"
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
         git-stacked-pull-rebase "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
@@ -76,6 +78,12 @@ branch
 reorder
     alias: ro
     start interactive rebase to reorder branches in the current stack'
+}
+
+git-stacked-create() {
+    BRANCH=$1
+    git checkout -b $BRANCH
+    git commit --allow-empty -m "Start of $BRANCH"
 }
 
 git-stacked-branch() {
