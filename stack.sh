@@ -6,6 +6,9 @@ gs() {
 }
 
 git-stacked() {
+    set -e
+    trap 'return 1' ERR  # Trap ERR to return 1 on any command failure
+
     if [ $# -eq 0 ]; then
         echo "Must provide command"
         return 1
@@ -162,31 +165,32 @@ github-stacked-push-force() {
         return 1
     fi
 
-    # First the base branch to $GS_BASE_BRANCH for existing MRs.
-    # If the branches have been re-ordered, this prevents unintentional merging.
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        echo "Prepare branch: $BRANCH"
-        echo "----------------------------"
-        local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
-        if [ "$PR_EXISTS" -gt 0 ]; then
-            local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
-            echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
-            gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
-        fi
-        echo "" # Print a newline for readability
-    done
-
     local PREVIOUS_BRANCH="$GS_BASE_BRANCH"
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        echo "Push branch: $BRANCH"
+        echo "Branch: $BRANCH"
         echo "----------------------------"
-        git push origin "$BRANCH:$BRANCH" --force
         
+        # Clean the branch name to remove refs/heads/ if necessary
         local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
+
+        # If PR does not exist, create one
         if [ "$PR_EXISTS" -eq 0 ]; then
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
             echo "Creating a new PR for branch $BRANCH..."
             gh pr create --base "$PREVIOUS_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
         else
+            # If a PR exists, first update the PR target to the base branch. If the branches have been re-ordered,
+            # this prevents the PRs from unintentionally getting merged.
+            local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
+            echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
+            gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
+
+            # Now it's safe to push
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
+
+            # After pushing, set the target back to the previous branch
             if [ "$PREVIOUS_BRANCH" != "$GS_BASE_BRANCH" ]; then
                 echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
                 gh pr edit "$PR_NUMBER" --base "$PREVIOUS_BRANCH"
