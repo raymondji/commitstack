@@ -82,7 +82,7 @@ git-stacked-branch() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
-            echo "* $BRANCH (top of the stack)"
+            echo "* \033[0;32m$BRANCH\033[0m (top of the stack)"
         else
             echo "  $BRANCH"
         fi
