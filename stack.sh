@@ -1,6 +1,8 @@
 #!/bin/bash
 GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
-GS_COLOR_OUTPUT=${GS_COLOR_OUTPUT:-yes}
+GS_COLOR_OUTPUT=${GS_COLOR_OUTPUT:-yes} # no to disable
+GS_ENABLE_GITLAB_EXTENSION=${GS_ENABLE_GITLAB_EXTENSION:-no} # yes to activae
+GS_ENABLE_GITHUB_EXTENSION=${GS_ENABLE_GITHUB_EXTENSION:-no} # yes to activate
 
 gs() {
     git-stacked "$@"
@@ -15,12 +17,30 @@ git-stacked() {
     COMMAND=$1
     shift
 
+    if [ "$GS_ENABLE_GITLAB_EXTENSION" = "yes" ]; then
+        if ! command -v jq &> /dev/null || ! command -v glab &> /dev/null; then
+            return 1
+        fi
+    elif [ "$GS_ENABLE_GITHUB_EXTENSION" = "yes" ]; then
+        if ! command -v jq &> /dev/null || ! command -v gh &> /dev/null; then
+            return 1
+        fi
+    fi
+
+    USE_EXTENSION=none
+    REMOTE_URL=$(git remote get-url origin)
+    if [[ "$REMOTE_URL" == *"gitlab.com"* ]] && [[ "$GS_ENABLE_GITLAB_EXTENSION" == "yes" ]]; then
+        USE_EXTENSION="gitlab"
+    elif [[ "$REMOTE_URL" == *"github.com"* ]] && [[ "$GS_ENABLE_GITHUB_EXTENSION" == "yes" ]]; then
+        USE_EXTENSION="github"
+    fi
+
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         git-stacked-help "$@"
     elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
-        if command -v glab &> /dev/null; then
+        if [ $USE_EXTENSION = "gitlab" ]; then
             gitlab-stacked-push-force "$@"
-        elif command -v gh &> /dev/null; then
+        elif [ $USE_EXTENSION = "github" ]; then
             github-stacked-push-force "$@"
         else
             git-stacked-push-force "$@"
