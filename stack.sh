@@ -152,13 +152,14 @@ git-stacked-rebase() {
 }
 
 git-stacked-reorder() {
-    echo "Please make sure to update target branches of all merge requests in this stack first"
-    read -p "Acknowledge with Y to continue: " input
+    echo "Before continuing, please set the target branch of all open merge requests in this stack to $GS_BASE_BRANCH"
+    echo "Done: [Y/n]"
+    read input
     if [[ "$input" == "Y" || "$input" == "y" ]]; then
        echo "Proceeding..."
     else
         echo "Exiting..."
-        exit 1
+        return 1
     fi
 
     git checkout -b tmp-reorder-branch && \
