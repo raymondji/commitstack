@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-set -x
+
+# Setup
 function debug_on() {
     set +x
 }
@@ -9,9 +10,10 @@ function debug_off() {
 }
 trap 'debug_on' DEBUG
 trap 'debug_off' RETURN
-
 source ./stack.sh
+set -x
 
+# Run
 git checkout main
 git-stacked create a1
 git-stacked create a2
