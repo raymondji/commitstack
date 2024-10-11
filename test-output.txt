@@ -1,10 +1,10 @@
 > git-stacked create a1
 Switched to a new branch 'a1'
-[a1 f7f50a4] Start of a1
+[a1 e565647] Start of a1
 
 > git-stacked create a2
 Switched to a new branch 'a2'
-[a2 4342cda] Start of a2
+[a2 e3d2ec3] Start of a2
 
 > git-stacked branch
 * a2
@@ -13,40 +13,45 @@ Switched to a new branch 'a2'
 
 > git checkout main
 Switched to branch 'main'
-Your branch is up to date with 'origin/main'.
+M	test-output.txt
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
 
 > git-stacked create b1
 Switched to a new branch 'b1'
-[b1 be768ef] Start of b1
+[b1 c5ad218] Start of b1
 
 > git-stacked stack
 
 > git checkout a2
 Switched to branch 'a2'
+M	test-output.txt
 
 > git-stacked push-force
 Prepare branch: a1
 ----------------------------
+Changing PR target branch to main for PR #31...
+https://github.com/raymondji/git-stacked/pull/31
 
 Prepare branch: a2
 ----------------------------
+Changing PR target branch to main for PR #32...
+https://github.com/raymondji/git-stacked/pull/32
 
 Push branch: a1
 ----------------------------
 remote: This repository moved. Please use the new location:        
 remote:   git@github.com:raymondji/git-stacked.git        
 To github.com:raymondji/gitstack.git
- + 5f2530d...f7f50a4 a1 -> a1 (forced update)
-Creating a new PR for branch a1...
-https://github.com/raymondji/git-stacked/pull/31
+ + f7f50a4...e565647 a1 -> a1 (forced update)
 
 Push branch: a2
 ----------------------------
 remote: This repository moved. Please use the new location:        
 remote:   git@github.com:raymondji/git-stacked.git        
 To github.com:raymondji/gitstack.git
- + 4345de9...4342cda a2 -> a2 (forced update)
-Creating a new PR for branch a2...
+ + 4342cda...e3d2ec3 a2 -> a2 (forced update)
+Changing PR target branch back to a1 for PR #...
 https://github.com/raymondji/git-stacked/pull/32
 
 

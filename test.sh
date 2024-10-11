@@ -8,6 +8,7 @@ debug() {
     echo ""
 }
 source ./stack.sh
+git update-index --assume-unchanged test-output.txt
 GS_COLOR_OUTPUT=no
 
 # Run
@@ -29,3 +30,4 @@ echo "Running..."
 # Cleanup
 git checkout main
 git branch -D a1 a2 b1
+git update-index --no-assume-unchanged test-output.txt
