@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
-set -x
-
+set -v
 source ./stack.sh
 
 git checkout main
