@@ -17,7 +17,7 @@ git-stacked() {
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         git-stacked-help "$@"
     elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
-        git-stacked-push "$@"
+        git-stacked-push-force "$@"
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
         git-stacked-pull-rebase "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
@@ -131,11 +131,11 @@ git-stacked-push-force() {
         echo "No branches in the current stack"
         return 1
     fi
-    
+
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         echo "Force pushing branch $BRANCH"
+        echo "----------------------------"
         git push origin "$BRANCH":"$BRANCH" --force
-
         echo "" # newline
     done
 }
