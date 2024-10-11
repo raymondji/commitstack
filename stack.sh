@@ -227,7 +227,7 @@ github-stacked-push-force() {
             gh pr create --base "$PREVIOUS_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
         else
             if [ "$PREVIOUS_BRANCH" != "$GS_BASE_BRANCH" ]; then
-                echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
+                echo "Changing PR target branch to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
                 gh pr edit "$PR_NUMBER" --base "$PREVIOUS_BRANCH"
             fi
         fi
