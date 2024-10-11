@@ -165,7 +165,7 @@ github-stacked-push-force() {
         return 1
     fi
 
-    local PREVIOUS_BRANCH=""
+    local PREVIOUS_BRANCH="$GS_BASE_BRANCH"
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         echo "Branch: $BRANCH"
         echo "----------------------------"
@@ -178,11 +178,10 @@ github-stacked-push-force() {
             echo "Force pushing branch $BRANCH"
             git push origin "$BRANCH:$BRANCH" --force
             echo "Creating a new PR for branch $BRANCH..."
-            gh pr create --base "$GS_BASE_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
+            gh pr create --base "$PREVIOUS_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
         else
-            # If PR exists, temporarily update the PR target to the base branch. If the branches were re-ordered,
+            # If a PR exists, first update the PR target to the base branch. If the branches have been re-ordered,
             # this prevents the PRs from unintentionally getting merged.
-            echo "Updating PR for branch $BRANCH..."
             local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
             echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
             gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
@@ -192,7 +191,7 @@ github-stacked-push-force() {
             git push origin "$BRANCH:$BRANCH" --force
 
             # After pushing, set the target back to the previous branch
-            if [ -n "$PREVIOUS_BRANCH" ]; then
+            if [ "$PREVIOUS_BRANCH" != "$GS_BASE_BRANCH" ]; then
                 echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
                 gh pr edit "$PR_NUMBER" --base "$PREVIOUS_BRANCH"
             fi
