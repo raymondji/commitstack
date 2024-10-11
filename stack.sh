@@ -10,7 +10,8 @@ gs() {
 
 git-stacked() {
     if [ $# -eq 0 ]; then
-        echo "Must provide command"
+        echo "Must provide subcommand"
+        git-stacked-help
         return 1
     fi
 
@@ -36,33 +37,33 @@ git-stacked() {
     fi
 
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
-        git-stacked-help "$@"
+        git-stacked-help
     elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
         if [ $USE_EXTENSION = "gitlab" ]; then
-            gitlab-stacked-push-force "$@"
+            gitlab-stacked-push-force
         elif [ $USE_EXTENSION = "github" ]; then
-            github-stacked-push-force "$@"
+            github-stacked-push-force
         else
-            git-stacked-push-force "$@"
+            git-stacked-push-force
         fi
     elif [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
         git-stacked-create "$@"
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
-        git-stacked-pull-rebase "$@"
+        git-stacked-pull-rebase
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
-        git-stacked-rebase "$@"
+        git-stacked-rebase
     elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
-        git-stacked-branch "$@"
+        git-stacked-branch
     elif [ "$COMMAND" = "stack" ] || [ "$COMMAND" = "s" ]; then
-        git-stacked-stack "$@"
+        git-stacked-stack
     elif [ "$COMMAND" = "log" ] || [ "$COMMAND" = "l" ]; then
-        git-stacked-log "$@"
+        git-stacked-log
     elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
-        git-stacked-reorder "$@"
+        git-stacked-reorder
     else
         echo "Invalid command"
         echo ""
-        git-stacked-help "$@"
+        git-stacked-help
     fi
 }
 
