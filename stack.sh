@@ -98,7 +98,6 @@ git-stacked-branch() {
         return 1
     fi
 
-    echo "Branches in the current stack:"
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
@@ -132,7 +131,6 @@ git-stacked-stack() {
         fi
     done
 
-    echo "Stacks:"
     for STACK in "${STACKS[@]}"; do
         # Check if this stack is the current stack
         if [ "$STACK" = "$CURRENT_BRANCH" ]; then
