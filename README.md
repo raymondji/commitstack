@@ -71,7 +71,7 @@ Configure your `~/.zshrc` or `~/.bashrc`:
 # Optional:
 # export GS_BASE_BRANCH="..."
 
-source ~/dev/git-stacked/git-stacked.sh
+source ~/dev/git-stacked/stack.sh
 ```
 
 ## Recommended `~/.gitconfig` settings
