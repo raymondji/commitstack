@@ -142,7 +142,7 @@ git-stacked-stack() {
 }
 
 git-stacked-log() {
-    git log $GS_BASE_BRANCH..
+    git log $GS_BASE_BRANCH~..
 }
 
 git-stacked-push-force() {
