@@ -15,14 +15,14 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Setup
 
-Install the dependencies you want to use:
-- Required: bash and git
-- Gitlab extension: glab and jq
-- Github extension: gh and jq
+Install the dependencies:
+- Required: `bash` and `git (>= 2.38)
+- (Optional) Gitlab extension: `glab` and `jq`
+- (Optional) Github extension: `gh` and `jq`
 
 Clone this repo somewhere, e.g. `~/dev/git-stacked`
 
-In your `~/.zshrc` or `~/.bashrc`:
+Configure your `~/.zshrc` or `~/.bashrc`:
 ```
 # Optional:
 # export GS_BASE_BRANCH="..."
