@@ -51,6 +51,10 @@ git-stacked-help() {
 
 subcommands:
 
+create
+    alias: c
+    create a new branch on top of the current stack
+
 push-force
     alias: pf
     push all branches in the current stack to remote
