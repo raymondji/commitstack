@@ -162,7 +162,7 @@ github-stacked-push-force() {
         return 1
     fi
 
-    # First the base branch to $GS_BASE_BRANCH for existing MRs.
+    # First reset the base branch to $GS_BASE_BRANCH for all existing MRs.
     # If the branches have been re-ordered, this prevents unintentional merging.
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         echo "Prepare branch: $BRANCH"
