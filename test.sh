@@ -3,7 +3,7 @@ set -e
 
 # Setup
 debug() {
-    echo "DEBUG: $@"
+    echo "$@"
     "$@"
 }
 source ./stack.sh
