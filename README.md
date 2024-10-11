@@ -5,10 +5,10 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 ## Design goals
 
 - Works alongside the `git` CLI (does not try to replace it)
-- Easy to understand what `git-stacked` is doing (no magic)
-    - Lean on standard git commands and built-in functionality (like `--update-refs`)
-    - Simple code is a priority
 - Stateless (only uses what's already tracked in git)
+- Lean on standard git commands and built-in functionality (like `--update-refs`)
+- Easy to understand what `git-stacked` is doing (no magic)
+- Simple code is a priority
 - Core functionality works with any git service provider
 - Optional extensions improve the experience for gitlab and github
 - Minimal dependencies to run
