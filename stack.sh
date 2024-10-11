@@ -202,15 +202,17 @@ github-stacked-push-force() {
     # First reset the base branch to $GS_BASE_BRANCH for all existing MRs.
     # If the branches have been re-ordered, this prevents unintentional merging.
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        echo "Prepare branch: $BRANCH"
-        echo "----------------------------"
         local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
         if [ "$PR_EXISTS" -gt 0 ]; then
+            echo "Prepare branch: $BRANCH"
+            echo "----------------------------"
+
             local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
             echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
             gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
+
+            echo "" # Print a newline for readability
         fi
-        echo "" # Print a newline for readability
     done
 
     local PREVIOUS_BRANCH="$GS_BASE_BRANCH"
