@@ -60,7 +60,7 @@ Push branch: a2
 ## Setup
 
 Install the dependencies:
-- Required: `bash` and `git (>= 2.38)
+- Required: `bash` and `git` (>= 2.38)
 - (Optional) Gitlab extension: `glab` and `jq`
 - (Optional) Github extension: `gh` and `jq`
 
