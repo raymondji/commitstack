@@ -83,18 +83,12 @@ source ~/dev/git-stacked/stack.sh
 
 ## Recommended `~/.gitconfig` settings
 
-These settings are not required to use `git-stacked`, but will be helpful for git operations you do outside of the `git-stacked` commands.
+These settings are not required to use `git-stacked`, but are helpful for git operations you do outside of the `git-stacked` commands.
 
 ```
-[push]
-    autoSetupRemote = true
-    default = upstream
-
 [rebase]
     updateRefs = true
 ```
-
-`git-stacked` makes significant use of renaming local branches, so `default = upstream` avoids errors when you try to re-push after renaming a local branch.
 
 `updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
 
