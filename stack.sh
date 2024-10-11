@@ -6,9 +6,6 @@ gs() {
 }
 
 git-stacked() {
-    set -e
-    trap 'return 1' ERR  # Trap ERR to return 1 on any command failure
-
     if [ $# -eq 0 ]; then
         echo "Must provide command"
         return 1
