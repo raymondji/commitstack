@@ -2,6 +2,8 @@
 set -e
 set -x
 
+source ./stack.sh
+
 git checkout main
 git-stacked create a1
 git-stacked create a2
