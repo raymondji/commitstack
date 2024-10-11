@@ -17,7 +17,13 @@ git-stacked() {
     if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
         git-stacked-help "$@"
     elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
-        git-stacked-push-force "$@"
+        if command -v glab &> /dev/null; then
+            gitlab-stacked-push-force "$@"
+        elif command -v gh &> /dev/null; then
+            github-stacked-push-force "$@"
+        else
+            git-stacked-push-force "$@"
+        fi
     elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
         git-stacked-pull-rebase "$@"
     elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
@@ -31,7 +37,9 @@ git-stacked() {
     elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
         git-stacked-reorder "$@"
     else
-       echo "Invalid command"
+        echo "Invalid command"
+        echo ""
+        git-stacked-help "$@"
     fi
 }
 
@@ -121,12 +129,12 @@ git-stacked-stack() {
 }
 
 git-stacked-log() {
-    git log $QS_BASE_BRANCH..
+    git log $GS_BASE_BRANCH..
 }
 
 git-stacked-push-force() {
     # Reverse so we push from bottom -> top
-    BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
@@ -140,15 +148,27 @@ git-stacked-push-force() {
     done
 }
 
+gitlab-stacked-push-force() {
+    echo "Gitlab extension not implemented yet, falling back to default behaviour."
+    echo ""
+    git-stacked-push-force
+}
+
+github-stacked-push-force() {
+    echo "Github extension not implemented yet, falling back to default behaviour."
+    echo ""
+    git-stacked-push-force
+}
+
 git-stacked-pull-rebase() {
-    git checkout $QS_BASE_BRANCH && \
+    git checkout $GS_BASE_BRANCH && \
     git pull && \
     git checkout - && \
-    git rebase -i $QS_BASE_BRANCH --update-refs
+    git rebase -i $GS_BASE_BRANCH --update-refs
 }
 
 git-stacked-rebase() {
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base
+    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
 }
 
 git-stacked-reorder() {
@@ -163,7 +183,7 @@ git-stacked-reorder() {
     fi
 
     git checkout -b tmp-reorder-branch && \
-    git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
+    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base && \
     git checkout - && \
     git branch -D tmp-reorder-branch
 }
