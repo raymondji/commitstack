@@ -4,13 +4,21 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Design goals
 
-- Works alongside the git CLI, does not try to replace it
-- All functionality is accomplished using standard git commands (like `--update-refs`)
-- No state stored outside of git
-- Core dependencies only include bash and git
+- Works alongside the `git` CLI (does not try to replace it)
+- Easy to understand what `git-stacked` is doing (no magic)
+    - Simple code that is easy to read for users that want to see what exactly the tool is doing
+- Stateless (only uses what's already tracked in git)
+- Lean on standard git commands and built-in functionality (like `--update-refs`)
 - Core functionality works with any git service provider
+- Optional extensions improve the experience for gitlab and github
+- Minimal dependencies to run
 
 ## Setup
+
+Install the dependencies you want to use:
+- Required: bash and git
+- Gitlab extension: glab and jq
+- Github extension: gh and jq
 
 Clone this repo somewhere, e.g. `~/dev/git-stacked`
 
@@ -20,7 +28,7 @@ In your `~/.zshrc` or `~/.bashrc`:
 # export GS_BASE_BRANCH="..."
 
 source ~/dev/git-stacked/git-stacked.sh
-``` 
+```
 
 ## Recommended `~/.gitconfig` settings
 
