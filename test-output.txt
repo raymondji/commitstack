@@ -1,0 +1,52 @@
+> git-stacked create a1
+Switched to a new branch 'a1'
+[a1 f7f50a4] Start of a1
+
+> git-stacked create a2
+Switched to a new branch 'a2'
+[a2 4342cda] Start of a2
+
+> git-stacked branch
+* a2
+  a1
+  main
+
+> git checkout main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+
+> git-stacked create b1
+Switched to a new branch 'b1'
+[b1 be768ef] Start of b1
+
+> git-stacked stack
+
+> git checkout a2
+Switched to branch 'a2'
+
+> git-stacked push-force
+Prepare branch: a1
+----------------------------
+
+Prepare branch: a2
+----------------------------
+
+Push branch: a1
+----------------------------
+remote: This repository moved. Please use the new location:        
+remote:   git@github.com:raymondji/git-stacked.git        
+To github.com:raymondji/gitstack.git
+ + 5f2530d...f7f50a4 a1 -> a1 (forced update)
+Creating a new PR for branch a1...
+https://github.com/raymondji/git-stacked/pull/31
+
+Push branch: a2
+----------------------------
+remote: This repository moved. Please use the new location:        
+remote:   git@github.com:raymondji/git-stacked.git        
+To github.com:raymondji/gitstack.git
+ + 4345de9...4342cda a2 -> a2 (forced update)
+Creating a new PR for branch a2...
+https://github.com/raymondji/git-stacked/pull/32
+
+
