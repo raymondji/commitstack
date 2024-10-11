@@ -71,6 +71,27 @@ reorder
 }
 
 git-stacked-branch() {
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
+    if [ -z "$BRANCHES" ]; then
+        echo "No branches in the current stack"
+        return 1
+    fi
+
+    # Get the currently checked-out branch
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+    echo "Branches in the current stack:"
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        # Check if this branch is the current branch
+        if [ "$BRANCH" == "$CURRENT_BRANCH" ]; then
+            echo "* $BRANCH"  # Print with an asterisk for the current branch
+        else
+            echo "  $BRANCH"  # Print normally for other branches
+        fi
+    done
+}
+
+git-stacked-branch-old() {
     BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
