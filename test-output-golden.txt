@@ -1,10 +1,10 @@
 > git-stacked create a1
 Switched to a new branch 'a1'
-[a1 017cc92] Start of a1
+[a1 b1c9b12] Start of a1
 
 > git-stacked create a2
 Switched to a new branch 'a2'
-[a2 fb2b854] Start of a2
+[a2 955b287] Start of a2
 
 > git-stacked branch
 * a2
@@ -13,12 +13,11 @@ Switched to a new branch 'a2'
 
 > git checkout main
 Switched to branch 'main'
-Your branch is ahead of 'origin/main' by 1 commit.
-  (use "git push" to publish your local commits)
+Your branch is up to date with 'origin/main'.
 
 > git-stacked create b1
 Switched to a new branch 'b1'
-[b1 a94eb57] Start of b1
+[b1 39bbd45] Start of b1
 
 > git-stacked stack
 
@@ -28,22 +27,24 @@ Switched to branch 'a2'
 > git-stacked push-force
 Prepare branch: a1
 ----------------------------
+Changing PR target branch to main for PR #36...
+https://github.com/raymondji/git-stacked/pull/36
 
 Prepare branch: a2
 ----------------------------
+Changing PR target branch to main for PR #37...
+https://github.com/raymondji/git-stacked/pull/37
 
 Push branch: a1
 ----------------------------
 To github.com:raymondji/git-stacked.git
- + 311297e...017cc92 a1 -> a1 (forced update)
-Creating a new PR for branch a1...
-https://github.com/raymondji/git-stacked/pull/36
+ + 017cc92...b1c9b12 a1 -> a1 (forced update)
 
 Push branch: a2
 ----------------------------
 To github.com:raymondji/git-stacked.git
- + 73f77ed...fb2b854 a2 -> a2 (forced update)
-Creating a new PR for branch a2...
+ + fb2b854...955b287 a2 -> a2 (forced update)
+Changing PR target branch back to a1 for PR #...
 https://github.com/raymondji/git-stacked/pull/37
 
 
