@@ -102,8 +102,12 @@ git-stacked-stack() {
     BRANCHES=$(git branch --format='%(refname:short)')
     STACKS=()
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        HAS_DESCENDENT=false
+        # Skip the main branch
+        if [[ "$BRANCH" == "main" ]]; then
+            continue
+        fi
 
+        HAS_DESCENDENT=false
         echo "$BRANCHES" | while IFS= read -r MAYBE_DESCENDENT; do
             IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT^; echo $?)
             if [[ $BRANCH != $MAYBE_DESCENDENT ]] && [[ $IS_ANCESTOR == "0" ]]; then
@@ -111,7 +115,6 @@ git-stacked-stack() {
                 break
             fi
         done
-
         if [[ $HAS_DESCENDENT == false ]]; then
             STACKS+=($BRANCH)
         fi
