@@ -71,17 +71,57 @@ reorder
 }
 
 git-stacked-branch() {
-    BRANCHES=$(git log --pretty='format:%D' $QS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
     fi
 
-    ARR=()
+    echo "Branches in the current stack:"
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        ARR+=($BRANCH)
+        # Check if this branch is the current branch
+        if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
+            echo "* \033[0;32m$BRANCH\033[0m (top of the stack)"
+        else
+            echo "  $BRANCH"
+        fi
     done
-    git branch --list $ARR[@]
+}
+
+git-stacked-stack() {
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    BRANCHES=$(git branch --format='%(refname:short)')
+    STACKS=()
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        HAS_DESCENDENT=false
+
+        echo "$BRANCHES" | while IFS= read -r MAYBE_DESCENDENT; do
+            IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT^; echo $?)
+            if [[ $BRANCH != $MAYBE_DESCENDENT ]] && [[ $IS_ANCESTOR == "0" ]]; then
+                HAS_DESCENDENT=true
+                break
+            fi
+        done
+
+        if [[ $HAS_DESCENDENT == false ]]; then
+            STACKS+=($BRANCH)
+        fi
+    done
+
+    echo "Stacks:"
+    for STACK in "${STACKS[@]}"; do
+        # Check if this stack is the current stack
+        if [ "$STACK" = "$CURRENT_BRANCH" ]; then
+            echo -e "* \033[0;32m$STACK\033[0m" # green highlight
+        else
+            echo "  $STACK"
+        fi
+    done
+}
+
+git-stacked-log() {
+    git log $QS_BASE_BRANCH..
 }
 
 git-stacked-push() {
@@ -130,29 +170,4 @@ git-stacked-reorder() {
     git rebase -i $QS_BASE_BRANCH --update-refs --keep-base && \
     git checkout - && \
     git branch -D tmp-reorder-branch
-}
-
-git-stacked-stack() {
-    BRANCHES=$(git branch --format='%(refname:short)')
-    LEAVES=()
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        HAS_DESCENDENT=false
-
-        echo "$BRANCHES" | while IFS= read -r MAYBE_DESCENDENT; do
-            IS_ANCESTOR=$(git merge-base --is-ancestor $BRANCH $MAYBE_DESCENDENT^; echo $?)
-            if [[ $BRANCH != $MAYBE_DESCENDENT ]] && [[ $IS_ANCESTOR == "0" ]]; then
-                HAS_DESCENDENT=true
-                break
-            fi
-        done
-
-        if [[ $HAS_DESCENDENT == false ]]; then
-            LEAVES+=($BRANCH)
-        fi
-    done
-    git branch --list $LEAVES[@]
-}
-
-git-stacked-log() {
-    git log $QS_BASE_BRANCH..
 }
