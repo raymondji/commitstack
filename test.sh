@@ -9,7 +9,7 @@ debug() {
 }
 source ./stack.sh
 git update-index --assume-unchanged test-output-golden.txt
-GS_COLOR_OUTPUT=no
+GS_ENABLE_COLOR_OUTPUT=no
 
 # Run
 echo "Running..."

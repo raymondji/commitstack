@@ -1,6 +1,6 @@
 #!/bin/bash
 GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
-GS_COLOR_OUTPUT=${GS_COLOR_OUTPUT:-yes} # no to disable
+GS_ENABLE_COLOR_OUTPUT=${GS_ENABLE_COLOR_OUTPUT:-yes} # no to disable
 GS_ENABLE_GITLAB_EXTENSION=${GS_ENABLE_GITLAB_EXTENSION:-no} # yes to enable
 GS_ENABLE_GITHUB_EXTENSION=${GS_ENABLE_GITHUB_EXTENSION:-no} # yes to enable
 
@@ -123,7 +123,7 @@ git-stacked-branch() {
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
-            if [ "$GS_COLOR_OUTPUT" = "yes" ]; then
+            if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo "* \033[0;32m$BRANCH\033[0m (top)" # green highlight
             else
                 echo "* $BRANCH"
@@ -155,7 +155,7 @@ git-stacked-stack() {
     for STACK in "${STACKS[@]}"; do
         # Check if this stack is the current stack
         if [ "$STACK" = "$CURRENT_BRANCH" ]; then
-            if [ "$GS_COLOR_OUTPUT" = "yes" ]; then
+            if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo -e "* \033[0;32m$STACK\033[0m" # green highlight
             else
                 echo "* $STACK"
