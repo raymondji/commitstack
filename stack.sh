@@ -175,17 +175,22 @@ github-stacked-push-force() {
 
         # If PR does not exist, create one
         if [ "$PR_EXISTS" -eq 0 ]; then
+            echo "Force pushing branch $BRANCH"
+            git push origin "$BRANCH:$BRANCH" --force
             echo "Creating a new PR for branch $BRANCH..."
             gh pr create --base "$GS_BASE_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
         else
-            # If PR exists, temporarily update the PR target to the base branch
+            # If PR exists, temporarily update the PR target to the base branch. If the branches were re-ordered,
+            # this prevents the PRs from unintentionally getting merged.
             echo "Updating PR for branch $BRANCH..."
             local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
             echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
             gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
 
+            # Now it's safe to push
             echo "Force pushing branch $BRANCH"
             git push origin "$BRANCH:$BRANCH" --force
+
             # After pushing, set the target back to the previous branch
             if [ -n "$PREVIOUS_BRANCH" ]; then
                 echo "Changing PR target branch back to $PREVIOUS_BRANCH for PR #$PR_NUMBER..."
