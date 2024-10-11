@@ -10,7 +10,7 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 - Easy to understand what `git-stacked` is doing (no magic)
 - Simple code is a priority
 - Core functionality works with any git service provider
-- Optional extensions improve the experience for gitlab and github
+- Optional, enhanced integration with gitlab and github
 - Minimal dependencies to run
 
 ## Setup
