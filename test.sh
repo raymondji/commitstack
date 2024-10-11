@@ -3,26 +3,25 @@ set -e
 set -x
 
 # Setup
-function debug_on() {
-    set +x
+debug() {
+    echo "DEBUG: $@"
+    "$@"
 }
-function debug_off() {
-    set -x
-}
-trap 'debug_on' DEBUG
-trap 'debug_off' RETURN
 source ./stack.sh
 
 # Run
-git-stacked create a1
-git-stacked create a2
-git-stacked branch
-git checkout main
-git-stacked create b1
-git-stacked stack
-git checkout a2
-git-stacked push-force
+debug git-stacked create a1
 
-set +x
+debug git-stacked create a2
+
+debug git-stacked branch
+
+debug git checkout main
+debug git-stacked create b1
+debug git-stacked stack
+debug git checkout a2
+debug git-stacked push-force
+
 # Cleanup
+git checkout main
 git branch -D a1 a2 b1
