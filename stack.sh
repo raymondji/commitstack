@@ -120,16 +120,16 @@ git-stacked-create() {
 }
 
 git-stacked-branch() {
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
     fi
-
     # is-top-of-stack returns 0 if the current branch is the tip of a stack
+
     # otherwise 1
     is-top-of-stack() {
-        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
         local DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
             return 0

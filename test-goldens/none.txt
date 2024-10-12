@@ -1,10 +1,10 @@
 > git-stacked create a1
 Switched to a new branch 'a1'
-[a1 6cf2584] Start of a1
+[a1 ae820d6] Start of a1
 
 > git-stacked create a2
 Switched to a new branch 'a2'
-[a2 def4cad] Start of a2
+[a2 51b41ea] Start of a2
 
 > git-stacked branch
   a2
@@ -16,7 +16,7 @@ Your branch is up to date with 'origin/main'.
 
 > git-stacked create b1
 Switched to a new branch 'b1'
-[b1 130efa0] Start of b1
+[b1 17905ef] Start of b1
 
 > git-stacked stack
 
