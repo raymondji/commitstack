@@ -132,14 +132,6 @@ git-stacked-branch() {
         return 1
     fi
 
-    DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
-    # Branches are always a descendent of themselves, so 1 means there are no other descendents.
-    # i.e. this branch is the tip of a stack.
-    if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
-        echo "Not currently on a stack"
-        return 0
-    fi
-
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
