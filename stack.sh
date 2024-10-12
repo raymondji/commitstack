@@ -174,7 +174,7 @@ git-stacked-stack() {
     done
 
 
-    CONTAINING_CURRENT=$(git branch --contains "$BRANCH")
+    CONTAINING_CURRENT=$(git branch --contains "$CURRENT_BRANCH")
     for STACK in "${STACKS[@]}"; do
         if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
