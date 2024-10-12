@@ -114,7 +114,7 @@ git-stacked-create() {
 
 git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "No branches in the current stack"
         return 1
@@ -140,6 +140,10 @@ git-stacked-stack() {
     STACKS=()
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        if [[ "$BRANCH" == "$GS_BASE_BRANCH" ]]; then
+            continue
+        fi
+
         DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
         # Branches are always a descendent of themselves, so 1 means there are no other descendents.
         # i.e. this branch is the tip of a stack.
@@ -163,7 +167,7 @@ git-stacked-stack() {
 }
 
 git-stacked-log() {
-    git log $GS_BASE_BRANCH~..
+    git log $GS_BASE_BRANCH..
 }
 
 git-stacked-push-force() {
