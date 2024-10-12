@@ -112,9 +112,9 @@ git-stacked-create() {
     git commit --allow-empty -m "Start of $BRANCH"
 }
 
-# is_tip_of_stack returns 0 if the current branch is the tip of a stack
+# is_top_of_stack returns 0 if the current branch is the tip of a stack
 # otherwise 1
-is_tip_of_stack() {
+is_top_of_stack() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     local DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
     if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
@@ -146,7 +146,7 @@ git-stacked-branch() {
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
-                if is_stack; then
+                if is_top_of_stack; then
                     echo " (top)"
                 else
                     echo ""
