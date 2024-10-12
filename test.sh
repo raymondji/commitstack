@@ -14,18 +14,18 @@ TEST_GITHUB_REPO="git@github.com:raymondji/git-stacked-testing.git"
 echo "TEST_ROOTDIR: $TEST_ROOTDIR"
 
 run-test() {
-    TEST_VARIANT=$1
+    TEST_EXTENSION=$1
     echo ""
-    echo "Running test variant: $TEST_VARIANT"
-    echo "====================="
+    echo "Running test variant: $TEST_EXTENSION"
+    echo "==================================="
 
-    TEST_DIR="$TEST_ROOTDIR/$TEST_VARIANT"
+    TEST_DIR="$TEST_ROOTDIR/$TEST_EXTENSION"
     mkdir -p $TEST_DIR
     cd $TEST_DIR
 
-    if [ "$TEST_VARIANT" = "gitlab" ]; then
+    if [ "$TEST_EXTENSION" = "gitlab" ]; then
         GS_ENABLE_GITLAB_EXTENSION=true
-    elif [ "$TEST_VARIANT" = "github" ]; then
+    elif [ "$TEST_EXTENSION" = "github" ]; then
         GS_ENABLE_GITHUB_EXTENSION=true
     else
         GS_ENABLE_GITLAB_EXTENSION=false
@@ -33,7 +33,7 @@ run-test() {
     fi
 
     # Set up the git repo
-    if [ "$TEST_VARIANT" = "git" ] || [ "$TEST_VARIANT" = "github" ]; then
+    if [ "$TEST_EXTENSION" = "none" ] || [ "$TEST_EXTENSION" = "github" ]; then
         git clone $TEST_GITHUB_REPO .
         REMOTE_URL=$(git config --get remote.origin.url)
         if [ "$REMOTE_URL" != "$TEST_GITHUB_REPO" ]; then
@@ -58,7 +58,7 @@ run-test() {
             branch_name=$(echo $branch | sed 's/origin\///')
             git push origin --delete $branch_name
         done
-    elif [ "$TEST_VARIANT" = "gitlab" ]; then
+    elif [ "$TEST_EXTENSION" = "gitlab" ]; then
         echo "Gitlab test not implemented yet"
         return 0
     fi
@@ -76,9 +76,9 @@ run-test() {
 
         debug git checkout a2
         debug git-stacked push-force
-    ) > "$SOURCE_DIR/test-goldens/$TEST_VARIANT.txt" 2>&1
+    ) > "$SOURCE_DIR/test-goldens/$TEST_EXTENSION.txt" 2>&1
 }
 
-run-test "git"
-run-test "gitlab"
+run-test "none"
 run-test "github"
+run-test "gitlab"
