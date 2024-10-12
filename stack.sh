@@ -270,18 +270,14 @@ git-stacked-rebase() {
 }
 
 git-stacked-reorder() {
-    echo "Before continuing, please set the target branch of all open merge requests in this stack to $GS_BASE_BRANCH"
-    echo "Done: [Y/n]"
-    read input
-    if [[ "$input" == "Y" || "$input" == "y" ]]; then
-       echo "Proceeding..."
-    else
-        echo "Exiting..."
-        return 1
-    fi
+    echo "PREVIEW: this functionality needs work"
+    read -p "Press Enter to continue"
 
     git checkout -b tmp-reorder-branch && \
     git rebase -i $GS_BASE_BRANCH --update-refs --keep-base && \
     git checkout - && \
     git branch -D tmp-reorder-branch
+}
+
+gitlab-stacked-reorder() {
 }
