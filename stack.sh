@@ -129,7 +129,7 @@ git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
-        echo "No branches in the current stack"
+        echo "Not in a stack"
         return 1
     fi
 
@@ -222,7 +222,7 @@ github-stacked-push-force() {
     # Reverse so we push from bottom -> top
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
-        echo "No branches in the current stack"
+        echo "Not in a stack"
         return 1
     fi
 
