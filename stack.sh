@@ -116,11 +116,10 @@ git-stacked-create() {
 # otherwise 1
 is_top_of_stack() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    local DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
+    local DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
     if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
         return 0
     else
-        echo "This branch is part of a stack"
         return 1
     fi
 }
