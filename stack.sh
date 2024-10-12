@@ -1,8 +1,8 @@
 #!/bin/bash
 GS_BASE_BRANCH=${GS_BASE_BRANCH:-main}
-GS_ENABLE_COLOR_OUTPUT=${GS_ENABLE_COLOR_OUTPUT:-yes} # no to disable
-GS_ENABLE_GITLAB_EXTENSION=${GS_ENABLE_GITLAB_EXTENSION:-no} # yes to enable
-GS_ENABLE_GITHUB_EXTENSION=${GS_ENABLE_GITHUB_EXTENSION:-no} # yes to enable
+GS_ENABLE_COLOR_OUTPUT=${GS_ENABLE_COLOR_OUTPUT:-true} # false to disable
+GS_ENABLE_GITLAB_EXTENSION=${GS_ENABLE_GITLAB_EXTENSION:-false} # true to enable
+GS_ENABLE_GITHUB_EXTENSION=${GS_ENABLE_GITHUB_EXTENSION:-false} # true to enable
 
 gs() {
     git-stacked "$@"
@@ -18,11 +18,11 @@ git-stacked() {
     COMMAND=$1
     shift
 
-    if [ "$GS_ENABLE_GITLAB_EXTENSION" = "yes" ]; then
+    if [ "$GS_ENABLE_GITLAB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v glab &> /dev/null; then
             return 1
         fi
-    elif [ "$GS_ENABLE_GITHUB_EXTENSION" = "yes" ]; then
+    elif [ "$GS_ENABLE_GITHUB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v gh &> /dev/null; then
             return 1
         fi
@@ -30,9 +30,9 @@ git-stacked() {
 
     USE_EXTENSION=none
     REMOTE_URL=$(git remote get-url origin)
-    if [[ "$REMOTE_URL" == *"gitlab.com"* ]] && [[ "$GS_ENABLE_GITLAB_EXTENSION" == "yes" ]]; then
+    if [[ "$REMOTE_URL" == *"gitlab.com"* ]] && [[ "$GS_ENABLE_GITLAB_EXTENSION" == "true" ]]; then
         USE_EXTENSION="gitlab"
-    elif [[ "$REMOTE_URL" == *"github.com"* ]] && [[ "$GS_ENABLE_GITHUB_EXTENSION" == "yes" ]]; then
+    elif [[ "$REMOTE_URL" == *"github.com"* ]] && [[ "$GS_ENABLE_GITHUB_EXTENSION" == "true" ]]; then
         USE_EXTENSION="github"
     fi
 
@@ -135,7 +135,7 @@ git-stacked-branch() {
         if [ "$BRANCH" != "$CURRENT_BRANCH" ]; then
             echo "  $BRANCH"
         else
-            if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
+            if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
                 echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
             else
                 echo -n "* $BRANCH"
@@ -161,7 +161,7 @@ git-stacked-stack() {
         fi
 
         DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
-        # Branches are always a descendent of themselves, so 1 means there are no other descendents.
+        # Branches are always a descendent of themselves, so 1 means there are false other descendents.
         # i.e. this branch is the tip of a stack.
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
             STACKS+=("$BRANCH")
@@ -176,7 +176,7 @@ git-stacked-stack() {
 
     for STACK in "${STACKS[@]}"; do
         if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
-            if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
+            if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
                 echo -e "* \033[0;32m$STACK\033[0m" # green highlight
             else
                 echo "* $STACK"
@@ -273,7 +273,7 @@ git-stacked-reorder() {
     echo "Press enter to continue"
     read 
     
-    # git checkout -b tmp-reorder-branch
+    git checkout -b tmp-reorder-branch
     gs create tmp-reorder-branch
     git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')

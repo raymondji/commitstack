@@ -36,6 +36,8 @@ Configure your `~/.zshrc` or `~/.bashrc`:
 ```
 # Optional:
 # export GS_BASE_BRANCH="..."
+# export GS_ENABLE_GITLAB_EXTENSION=true
+# export GS_ENABLE_GITHUB_EXTENSION=true
 
 source ~/dev/git-stacked/stack.sh
 ```
