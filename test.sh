@@ -58,7 +58,7 @@ run-test() {
             branch_name=$(echo $branch | sed 's/origin\///')
             git push origin --delete $branch_name
         done
-    elif [ "TEST_VARIANT" = "gitlab" ]; then
+    elif [ "$TEST_VARIANT" = "gitlab" ]; then
         echo "Gitlab test not implemented yet"
         return 0
     fi
