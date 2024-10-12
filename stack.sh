@@ -166,7 +166,7 @@ git-stacked-stack() {
         fi
 
         DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
-        # Branches are always a descendent of themselves, so 1 means there are false other descendents.
+        # Branches are always a descendent of themselves, so 1 means there are no other descendents.
         # i.e. this branch is the tip of a stack.
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
             STACKS+=("$BRANCH")
