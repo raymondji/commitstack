@@ -1,10 +1,10 @@
 > git-stacked create a1
 Switched to a new branch 'a1'
-[a1 4d7a2f6] Start of a1
+[a1 ac73d2f] Start of a1
 
 > git-stacked create a2
 Switched to a new branch 'a2'
-[a2 bc220df] Start of a2
+[a2 76feb53] Start of a2
 
 > git-stacked branch
   a2
@@ -16,7 +16,7 @@ Your branch is up to date with 'origin/main'.
 
 > git-stacked create b1
 Switched to a new branch 'b1'
-[b1 1a1033e] Start of b1
+[b1 6acb605] Start of b1
 
 > git-stacked stack
 
@@ -27,11 +27,11 @@ Switched to branch 'a2'
 branch: a1
 ----------------------------
 To github.com:raymondji/git-stacked-testing.git
- + 2f9da37...4d7a2f6 a1 -> a1 (forced update)
+ + 15bc39d...ac73d2f a1 -> a1 (forced update)
 
 branch: a2
 ----------------------------
 To github.com:raymondji/git-stacked-testing.git
- + 83cb7d0...bc220df a2 -> a2 (forced update)
+ + effc5c8...76feb53 a2 -> a2 (forced update)
 
 

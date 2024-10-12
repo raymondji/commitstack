@@ -12,7 +12,7 @@ GS_ENABLE_COLOR_OUTPUT=no
 
 SOURCE_DIR=$(pwd)
 TEST_ROOTDIR=(/tmp/git-stacked-test/$RANDOM)
-TEST_GIT_REPO="git@github.com:raymondji/git-stacked-testing.git"
+TEST_GITHUB_REPO="git@github.com:raymondji/git-stacked-testing.git"
 echo "TEST_ROOTDIR: $TEST_ROOTDIR"
 
 run-test() {
@@ -23,10 +23,10 @@ run-test() {
 
     # Set up the git repo
     if [ "$VARIANT" = "git" ] || [ "$VARIANT" = "github" ]; then
-        git clone $TEST_GIT_REPO .
+        git clone $TEST_GITHUB_REPO .
         rm -rf .git
         git init
-        git remote add origin $TEST_GIT_REPO
+        git remote add origin $TEST_GITHUB_REPO
         echo "This repo is used for testing git-stacked" > README.md
         git add .
         git commit -am "First commit"
