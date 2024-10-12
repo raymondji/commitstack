@@ -121,10 +121,23 @@ git-stacked-branch() {
     fi
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        IS_TOP=false
+        DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
+        # Branches are always a descendent of themselves, so 1 means there are no other descendents.
+        # i.e. this branch is the tip of a stack.
+        if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
+            IS_TOP=true
+        fi
+
         # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
-                echo "* \033[0;32m$BRANCH\033[0m (top)" # green highlight
+                echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
+                if [ "$IS_TOP" = "true" ]; then
+                    echo " (top)"
+                else
+                    echo ""
+                fi
             else
                 echo "* $BRANCH"
             fi
