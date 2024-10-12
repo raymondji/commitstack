@@ -9,21 +9,14 @@ gs() {
 }
 
 git-stacked() {
-    if [ $# -eq 0 ]; then
-        echo "Must provide subcommand"
-        git-stacked-help
-        return 1
-    fi
-
-    COMMAND=$1
-    shift
-
     if [ "$GS_ENABLE_GITLAB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v glab &> /dev/null; then
+            echo "To use the gitlab extension, please install the `gh` CLI and `jq`"
             return 1
         fi
     elif [ "$GS_ENABLE_GITHUB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v gh &> /dev/null; then
+            echo "To use the gitlab extension, please install the `glab` CLI and `jq`"
             return 1
         fi
     fi
@@ -36,9 +29,17 @@ git-stacked() {
         USE_EXTENSION="github"
     fi
 
-    if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "h" ]; then
+    if [ $# -eq 0 ]; then
+        echo "Must provide subcommand"
         git-stacked-help
-    elif [ "$COMMAND" = "push-force" ] || [ "$COMMAND" = "pf" ]; then
+        return 1
+    fi
+    SUBCOMMAND=$1
+    shift
+
+    if [ "$SUBCOMMAND" = "help" ] || [ "$SUBCOMMAND" = "h" ]; then
+        git-stacked-help
+    elif [ "$SUBCOMMAND" = "push-force" ] || [ "$SUBCOMMAND" = "pf" ]; then
         if [ $USE_EXTENSION = "gitlab" ]; then
             gitlab-stacked-push-force
         elif [ $USE_EXTENSION = "github" ]; then
@@ -46,22 +47,22 @@ git-stacked() {
         else
             git-stacked-push-force
         fi
-    elif [ "$COMMAND" = "create" ] || [ "$COMMAND" = "c" ]; then
+    elif [ "$SUBCOMMAND" = "create" ] || [ "$SUBCOMMAND" = "c" ]; then
         git-stacked-create "$@"
-    elif [ "$COMMAND" = "pull-rebase" ] || [ "$COMMAND" = "pr" ]; then
+    elif [ "$SUBCOMMAND" = "pull-rebase" ] || [ "$SUBCOMMAND" = "pr" ]; then
         git-stacked-pull-rebase
-    elif [ "$COMMAND" = "rebase" ] || [ "$COMMAND" = "r" ]; then
+    elif [ "$SUBCOMMAND" = "rebase" ] || [ "$SUBCOMMAND" = "r" ]; then
         git-stacked-rebase
-    elif [ "$COMMAND" = "branch" ] || [ "$COMMAND" = "b" ]; then
+    elif [ "$SUBCOMMAND" = "branch" ] || [ "$SUBCOMMAND" = "b" ]; then
         git-stacked-branch
-    elif [ "$COMMAND" = "stack" ] || [ "$COMMAND" = "s" ]; then
+    elif [ "$SUBCOMMAND" = "stack" ] || [ "$SUBCOMMAND" = "s" ]; then
         git-stacked-stack
-    elif [ "$COMMAND" = "log" ] || [ "$COMMAND" = "l" ]; then
+    elif [ "$SUBCOMMAND" = "log" ] || [ "$SUBCOMMAND" = "l" ]; then
         git-stacked-log
-    elif [ "$COMMAND" = "reorder" ] || [ "$COMMAND" = "ro" ]; then
+    elif [ "$SUBCOMMAND" = "reorder" ] || [ "$SUBCOMMAND" = "ro" ]; then
         git-stacked-reorder
     else
-        echo "Invalid command"
+        echo "Invalid subcommand"
         echo ""
         git-stacked-help
     fi
@@ -112,24 +113,24 @@ git-stacked-create() {
     git commit --allow-empty -m "Start of $BRANCH"
 }
 
-# is_top_of_stack returns 0 if the current branch is the tip of a stack
-# otherwise 1
-is_top_of_stack() {
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    local DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
-    if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 git-stacked-branch() {
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
     fi
+
+    # is-top-of-stack returns 0 if the current branch is the tip of a stack
+    # otherwise 1
+    is-top-of-stack() {
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        local DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
+        if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
+            return 0
+        else
+            return 1
+        fi
+    }
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         if [ "$BRANCH" != "$CURRENT_BRANCH" ]; then
@@ -141,7 +142,7 @@ git-stacked-branch() {
                 echo -n "* $BRANCH"
             fi
             
-            if is_top_of_stack; then
+            if is-top-of-stack; then
                 echo " (top)"
             else
                 echo ""
