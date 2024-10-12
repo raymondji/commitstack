@@ -133,24 +133,20 @@ git-stacked-branch() {
     fi
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
+        if [ "$BRANCH" != "$CURRENT_BRANCH" ]; then
+            echo "  $BRANCH"
+        else
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
-                if is_top_of_stack; then
-                    echo " (top)"
-                else
-                    echo ""
-                fi
             else
                 echo -n "* $BRANCH"
-                if is_top_of_stack; then
-                    echo " (top)"
-                else
-                    echo ""
-                fi
             fi
-        else
-            echo "  $BRANCH"
+            
+            if is_top_of_stack; then
+                echo " (top)"
+            else
+                echo ""
+            fi
         fi
     done
 }
