@@ -138,18 +138,13 @@ git-stacked-stack() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     BRANCHES=$(git branch --format='%(refname:short)')
     STACKS=()
-    for BRANCH in $BRANCHES; do
-        HAS_DESCENDENT=false
-        for MAYBE_DESCENDENT in $BRANCHES; do
-            IS_ANCESTOR=$(git merge-base --is-ancestor "$BRANCH" "$MAYBE_DESCENDENT^"; echo $?)
-            if [[ "$BRANCH" != "$MAYBE_DESCENDENT" ]] && [[ "$IS_ANCESTOR" == "0" ]]; then
-                HAS_DESCENDENT=true
-                break
-            fi
-        done
-        
-        if [[ "$HAS_DESCENDENT" == false ]]; then
-            STACKS+=("$BRANCH")  # Quoting to handle branches with spaces
+
+    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+        DESCENDENT_COUNT=$(git branch --contains "$BRANCH" | wc -l)
+        # Branches are always a descendent of themselves, so 1 means there are no other descendents.
+        # i.e. this branch is the tip of a stack.
+        if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
+            STACKS+=("$BRANCH")
         fi
     done
 
