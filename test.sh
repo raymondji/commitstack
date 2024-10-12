@@ -16,7 +16,6 @@ TEST_GITHUB_REPO="git@github.com:raymondji/git-stacked-testing.git"
 echo "TEST_ROOTDIR: $TEST_ROOTDIR"
 
 run-test() {
-    set -x
     TEST_VARIANT=$1
     TEST_DIR="$TEST_ROOTDIR/$TEST_VARIANT"
     mkdir -p $TEST_DIR
@@ -33,21 +32,26 @@ run-test() {
         fi
 
         git init
-        for branch in $(git branch -r | grep -v '\->'); do
-            branch_name=$(echo $branch | sed 's/origin\///')
-            git push origin --delete $branch_name
-        done
-        git checkout --orphan main
+        git checkout --orphan new-main
         git rm -rf .
         echo "This repo is used for testing git-stacked" > README.md
         git add .
         git commit -am "Reset repository to initial state"
+        git branch -d main
+        git branch -m main
         git push --force --set-upstream origin main
+        
+        # Delete all remote branches except the new main branch
+        # List branches and remove each branch
+        for branch in $(git branch -r |  grep -v 'origin/main'); do
+            branch_name=$(echo $branch | sed 's/origin\///')
+            git push origin --delete $branch_name
+        done
     elif [ "TEST_VARIANT" = "gitlab" ]; then
         echo "Gitlab test not implemented yet"
         return 1
     fi
-    set +x
+    
 
     echo "Running..."
     (

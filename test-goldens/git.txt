@@ -1,10 +1,10 @@
 > git-stacked create a1
 Switched to a new branch 'a1'
-[a1 ac73d2f] Start of a1
+[a1 b90e953] Start of a1
 
 > git-stacked create a2
 Switched to a new branch 'a2'
-[a2 76feb53] Start of a2
+[a2 437772b] Start of a2
 
 > git-stacked branch
   a2
@@ -16,7 +16,7 @@ Your branch is up to date with 'origin/main'.
 
 > git-stacked create b1
 Switched to a new branch 'b1'
-[b1 6acb605] Start of b1
+[b1 fd1441e] Start of b1
 
 > git-stacked stack
 
@@ -26,12 +26,20 @@ Switched to branch 'a2'
 > git-stacked push-force
 branch: a1
 ----------------------------
+remote: 
+remote: Create a pull request for 'a1' on GitHub by visiting:        
+remote:      https://github.com/raymondji/git-stacked-testing/pull/new/a1        
+remote: 
 To github.com:raymondji/git-stacked-testing.git
- + 15bc39d...ac73d2f a1 -> a1 (forced update)
+ * [new branch]      a1 -> a1
 
 branch: a2
 ----------------------------
+remote: 
+remote: Create a pull request for 'a2' on GitHub by visiting:        
+remote:      https://github.com/raymondji/git-stacked-testing/pull/new/a2        
+remote: 
 To github.com:raymondji/git-stacked-testing.git
- + effc5c8...76feb53 a2 -> a2 (forced update)
+ * [new branch]      a2 -> a2
 
 
