@@ -141,7 +141,6 @@ git-stacked-branch() {
     fi
 
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
-        # Check if this branch is the current branch
         if [ "$BRANCH" = "$CURRENT_BRANCH" ]; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
@@ -151,7 +150,12 @@ git-stacked-branch() {
                     echo ""
                 fi
             else
-                echo "* $BRANCH"
+                echo -n "* $BRANCH"
+                if is_top_of_stack; then
+                    echo " (top)"
+                else
+                    echo ""
+                fi
             fi
         else
             echo "  $BRANCH"
