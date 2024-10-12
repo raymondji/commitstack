@@ -273,7 +273,8 @@ git-stacked-reorder() {
     echo "Press enter to continue"
     read 
     
-    git checkout -b tmp-reorder-branch
+    # git checkout -b tmp-reorder-branch
+    gs create tmp-reorder-branch
     git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
     echo "After rebase branches: $BRANCHES"
