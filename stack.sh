@@ -273,10 +273,14 @@ git-stacked-reorder() {
     echo "WARNING: this functionality needs work!"
     echo "Press enter to continue"
     read 
-
-    git checkout -b tmp-reorder-branch && \
-    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base && \
-    git checkout - && \
+    
+    set -e
+    git checkout -b tmp-reorder-branch
+    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
+    SECOND_LAST=$(echo "$BRANCHES" | tail -n 2 | head -n 1)
+    echo "Checking out $SECOND_LAST"
+    git checkout "$SECOND_LAST"
     git branch -D tmp-reorder-branch
 }
 
