@@ -173,9 +173,10 @@ git-stacked-stack() {
         fi
     done
 
+
+    CONTAINING_CURRENT=$(git branch --contains "$BRANCH")
     for STACK in "${STACKS[@]}"; do
-        # Check if this stack is the current stack
-        if [ "$STACK" = "$CURRENT_BRANCH" ]; then
+        if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "yes" ]; then
                 echo -e "* \033[0;32m$STACK\033[0m" # green highlight
             else
