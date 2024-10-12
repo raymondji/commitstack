@@ -10,18 +10,30 @@ debug() {
 source ./stack.sh
 GS_ENABLE_COLOR_OUTPUT=no
 
-TEST_ROOTDIR=/tmp/git-stacked-test
-mkdir -p $TEST_ROOTDIR
-rm -rf "$TEST_ROOTDIR/*"
+SOURCE_DIR=$(pwd)
+TEST_ROOTDIR=(/tmp/git-stacked-test/$RANDOM)
+TEST_GIT_REPO="git@github.com:raymondji/git-stacked-testing.git"
+echo "TEST_ROOTDIR: $TEST_ROOTDIR"
 
 run-test() {
     VARIANT=$1
     TEST_DIR="$TEST_ROOTDIR/$VARIANT"
+    mkdir -p $TEST_DIR
     cd $TEST_DIR
-    git init
 
-    if [ "$VARIANT" = "github" ]; then
-        git remote add origin git@github.com:raymondji/git-stacked-testing.git
+    # Set up the git repo
+    if [ "$VARIANT" = "git" ] || [ "$VARIANT" = "github" ]; then
+        git clone $TEST_GIT_REPO .
+        rm -rf .git
+        git init
+        git remote add origin $TEST_GIT_REPO
+        echo "This repo is used for testing git-stacked" > README.md
+        git add .
+        git commit -am "First commit"
+        git push --force --set-upstream origin main
+    elif [ "VARIANT" = "gitlab" ]; then
+        echo "Gitlab test not implemented yet"
+        return 1
     fi
 
     echo "Running..."
@@ -36,22 +48,28 @@ run-test() {
 
         debug git checkout a2
         debug git-stacked push-force
-    ) > "test-goldens/$VARIANT.txt" 2>&1
+    ) > "$SOURCE_DIR/test-goldens/$VARIANT.txt" 2>&1
 }
 
 # Run basic git test
+echo ""
+echo "Running core git test"
+echo "====================="
 GS_ENABLE_GITHUB_EXTENSION=false
 GS_ENABLE_GITLAB_EXTENSION=false
 run-test "git"
 
-# Run gitlab test
-TEST_DIR="$TEST_ROOTDIR/gitlab"
-GS_ENABLE_GITHUB_EXTENSION=false
-GS_ENABLE_GITLAB_EXTENSION=true
-run-test "gitlab"
+# TODO: Run gitlab test
+# echo "Running github extension test"
+# echo "====================="
+# GS_ENABLE_GITHUB_EXTENSION=false
+# GS_ENABLE_GITLAB_EXTENSION=true
+# run-test "gitlab"
 
-# Run github test
-TEST_DIR="$TEST_ROOTDIR/github"
+# Run github test 
+echo ""
+echo "Running github extension test"
+echo "====================="
 GS_ENABLE_GITHUB_EXTENSION=true
 GS_ENABLE_GITLAB_EXTENSION=false
 run-test "github"

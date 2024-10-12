@@ -158,10 +158,8 @@ git-stacked-branch() {
 }
 
 git-stacked-stack() {
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     BRANCHES=$(git branch --format='%(refname:short)')
     STACKS=()
-
     echo "$BRANCHES" | while IFS= read -r BRANCH; do
         if [[ "$BRANCH" == "$GS_BASE_BRANCH" ]]; then
             continue
@@ -175,12 +173,11 @@ git-stacked-stack() {
         fi
     done
 
-
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     CONTAINING_CURRENT=$(git branch --contains "$CURRENT_BRANCH")
     if [[ "$CURRENT_BRANCH" == "$GS_BASE_BRANCH" ]]; then
         CONTAINING_CURRENT=""
     fi
-
     for STACK in "${STACKS[@]}"; do
         if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
@@ -283,7 +280,7 @@ git-stacked-reorder() {
     git checkout -b tmp-reorder-branch
     gs create tmp-reorder-branch
     git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     echo "After rebase branches: $BRANCHES"
     SECOND_LAST=$(echo "$BRANCHES" | tail -n 2 | head -n 1)
     # echo "Checking out $SECOND_LAST"
@@ -292,7 +289,13 @@ git-stacked-reorder() {
 }
 
 gitlab-stacked-reorder() {
+    echo "Gitlab extension not implemented yet, falling back to default behaviour."
+    echo ""
+    git-stacked-push-force
 }
 
 github-stacked-reorder() {
+    echo "Github extension not implemented yet, falling back to default behaviour."
+    echo ""
+    git-stacked-push-force
 }

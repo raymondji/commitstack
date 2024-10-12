@@ -1,0 +1,47 @@
+> git-stacked create a1
+Switched to a new branch 'a1'
+[a1 d015ff8] Start of a1
+
+> git-stacked create a2
+Switched to a new branch 'a2'
+[a2 8560b3a] Start of a2
+
+> git-stacked branch
+  a2
+  a1
+
+> git checkout main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+
+> git-stacked create b1
+Switched to a new branch 'b1'
+[b1 9587e1e] Start of b1
+
+> git-stacked stack
+
+> git checkout a2
+Switched to branch 'a2'
+
+> git-stacked push-force
+Prepare branch: a1
+----------------------------
+
+Prepare branch: a2
+----------------------------
+
+Push branch: a1
+----------------------------
+To github.com:raymondji/git-stacked-testing.git
+ + 4d7a2f6...d015ff8 a1 -> a1 (forced update)
+Creating a new PR for branch a1...
+https://github.com/raymondji/git-stacked-testing/pull/5
+
+Push branch: a2
+----------------------------
+To github.com:raymondji/git-stacked-testing.git
+ + bc220df...8560b3a a2 -> a2 (forced update)
+Creating a new PR for branch a2...
+https://github.com/raymondji/git-stacked-testing/pull/6
+
+
