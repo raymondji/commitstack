@@ -60,7 +60,13 @@ git-stacked() {
     elif [ "$SUBCOMMAND" = "log" ] || [ "$SUBCOMMAND" = "l" ]; then
         git-stacked-log
     elif [ "$SUBCOMMAND" = "reorder" ] || [ "$SUBCOMMAND" = "ro" ]; then
-        git-stacked-reorder
+        if [ $USE_EXTENSION = "gitlab" ]; then
+            gitlab-stacked-reorder
+        elif [ $USE_EXTENSION = "github" ]; then
+            github-stacked-reorder
+        else
+            git-stacked-reorder
+        fi
     else
         echo "Invalid subcommand"
         echo ""
@@ -286,4 +292,7 @@ git-stacked-reorder() {
 }
 
 gitlab-stacked-reorder() {
+}
+
+github-stacked-reorder() {
 }
