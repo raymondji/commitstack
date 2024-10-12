@@ -278,6 +278,7 @@ git-stacked-reorder() {
     git checkout -b tmp-reorder-branch
     git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
+    echo "After rebase branches: $BRANCHES"
     SECOND_LAST=$(echo "$BRANCHES" | tail -n 2 | head -n 1)
     echo "Checking out $SECOND_LAST"
     git checkout "$SECOND_LAST"
