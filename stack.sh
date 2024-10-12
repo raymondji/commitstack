@@ -125,7 +125,6 @@ is_top_of_stack() {
 }
 
 git-stacked-branch() {
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
@@ -279,9 +278,9 @@ git-stacked-reorder() {
     BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH~.. --decorate-refs=refs/heads | grep -v '^$')
     echo "After rebase branches: $BRANCHES"
     SECOND_LAST=$(echo "$BRANCHES" | tail -n 2 | head -n 1)
-    echo "Checking out $SECOND_LAST"
-    git checkout "$SECOND_LAST"
-    git branch -D tmp-reorder-branch
+    # echo "Checking out $SECOND_LAST"
+    # git checkout "$SECOND_LAST"
+    # git branch -D tmp-reorder-branch
 }
 
 gitlab-stacked-reorder() {
