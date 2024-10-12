@@ -6,6 +6,12 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 [View](https://github.com/raymondji/git-stacked/blob/main/test-output-golden.txt)
 
+# Concepts
+
+Status: WIP
+
+A "stack" is any local branch, excluding $GS_BASE_BRANCH (default: `main`), that has commits that are not reachable from any other branch.
+
 ## Design goals
 
 - Works alongside the `git` CLI (does not try to replace it)
