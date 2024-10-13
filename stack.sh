@@ -79,6 +79,10 @@ stack
     alias: s
     stack a new branch on top of the current stack
 
+all
+    alias: a
+    list all stacks
+
 push
     push all branches in the current stack to remote
 
@@ -92,10 +96,6 @@ rebase
 log
     alias: l
     log commits in the current stack
-
-all
-    alias: a
-    list all stacks
 
 branch
     alias: b

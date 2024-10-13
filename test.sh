@@ -82,6 +82,7 @@ run-test() {
         debug git commit --allow-empty -m "New changes in main"
         debug git checkout a2
         debug git-stacked pull
+        debug git-stacked push
     ) > "$SOURCE_DIR/test-goldens/$TEST_EXTENSION.txt" 2>&1
 }
 
