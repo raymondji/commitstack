@@ -11,12 +11,12 @@ gs() {
 git-stacked() {
     if [ "$GS_ENABLE_GITLAB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v glab &> /dev/null; then
-            echo "To use the gitlab extension, please install the `gh` CLI and `jq`"
+            echo "To use the gitlab extension, please install the gh CLI and jq"
             return 1
         fi
     elif [ "$GS_ENABLE_GITHUB_EXTENSION" = "true" ]; then
         if ! command -v jq &> /dev/null || ! command -v gh &> /dev/null; then
-            echo "To use the gitlab extension, please install the `glab` CLI and `jq`"
+            echo "To use the gitlab extension, please install the glab CLI and jq"
             return 1
         fi
     fi
@@ -75,7 +75,7 @@ git-stacked() {
 }
 
 git-stacked-help() {
-    echo 'usage: git-stacked ${subcommand} ...
+    echo 'usage: git-stacked <subcommand> ...
     alias: gs
 
 subcommands:
@@ -115,13 +115,13 @@ reorder
 
 git-stacked-create() {
     BRANCH=$1
-    git checkout -b $BRANCH
+    git checkout -b "$BRANCH"
     git commit --allow-empty -m "Start of $BRANCH"
 }
 
 git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
@@ -130,7 +130,7 @@ git-stacked-branch() {
 
     # otherwise 1
     is-top-of-stack() {
-        local DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
+        DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
             return 0
         else
@@ -138,12 +138,12 @@ git-stacked-branch() {
         fi
     }
 
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+    while IFS= read -r BRANCH; do
         if [ "$BRANCH" != "$CURRENT_BRANCH" ]; then
             echo "  $BRANCH"
         else
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
-                echo -n "* \033[0;32m$BRANCH\033[0m" # green highlight
+                printf "* \033[0;32m%s\033[0m" "$BRANCH" # green highlight
             else
                 echo -n "* $BRANCH"
             fi
@@ -154,13 +154,13 @@ git-stacked-branch() {
                 echo ""
             fi
         fi
-    done
+    done < <(echo "$BRANCHES")
 }
 
 git-stacked-stack() {
     BRANCHES=$(git branch --format='%(refname:short)')
-    STACKS=()
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+    STACKS=""
+    while IFS= read -r BRANCH; do
         if [[ "$BRANCH" == "$GS_BASE_BRANCH" ]]; then
             continue
         fi
@@ -169,46 +169,46 @@ git-stacked-stack() {
         # Branches are always a descendent of themselves, so 1 means there are no other descendents.
         # i.e. this branch is the tip of a stack.
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
-            STACKS+=("$BRANCH")
+            STACKS=$(printf "%s\n%s" "$BRANCH" "$STACKS")
         fi
-    done
+    done < <(echo "$BRANCHES")
 
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     CONTAINING_CURRENT=$(git branch --contains "$CURRENT_BRANCH")
     if [[ "$CURRENT_BRANCH" == "$GS_BASE_BRANCH" ]]; then
         CONTAINING_CURRENT=""
     fi
-    for STACK in "${STACKS[@]}"; do
+    while IFS= read -r STACK; do
         if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
-                echo -e "* \033[0;32m$STACK\033[0m" # green highlight
+                printf "* \033[0;32m%s\033[0m" "$STACK" # green highlight
             else
                 echo "* $STACK"
             fi
         else
             echo "  $STACK"
         fi
-    done
+    done < <(echo "$STACKS")
 }
 
 git-stacked-log() {
-    git log $GS_BASE_BRANCH..
+    git log "$GS_BASE_BRANCH.."
 }
 
 git-stacked-push-force() {
     # Reverse so we push from bottom -> top
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
     fi
 
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+    while IFS= read -r BRANCH; do
         echo "branch: $BRANCH"
         echo "----------------------------"
         git push origin "$BRANCH":"$BRANCH" --force
         echo "" # newline
-    done
+    done < <(echo "$BRANCHES")
 }
 
 gitlab-stacked-push-force() {
@@ -219,7 +219,7 @@ gitlab-stacked-push-force() {
 
 github-stacked-push-force() {
     # Reverse so we push from bottom -> top
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads --reverse | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads --reverse | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
@@ -227,25 +227,25 @@ github-stacked-push-force() {
 
     # First reset the base branch to $GS_BASE_BRANCH for all existing MRs.
     # If the branches have been re-ordered, this prevents unintentional merging.
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+    while IFS= read -r BRANCH; do
         echo "Prepare branch: $BRANCH"
         echo "----------------------------"
-        local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
+        PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
         if [ "$PR_EXISTS" -gt 0 ]; then
-            local PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
+            PR_NUMBER=$(gh pr list --head "$BRANCH" --json number | jq -r '.[0].number')
             echo "Changing PR target branch to $GS_BASE_BRANCH for PR #$PR_NUMBER..."
             gh pr edit "$PR_NUMBER" --base "$GS_BASE_BRANCH"
         fi
         echo "" # Print a newline for readability
-    done
+    done < <(echo "$BRANCHES")
 
     local PREVIOUS_BRANCH="$GS_BASE_BRANCH"
-    echo "$BRANCHES" | while IFS= read -r BRANCH; do
+    while IFS= read -r BRANCH; do
         echo "Push branch: $BRANCH"
         echo "----------------------------"
         git push origin "$BRANCH:$BRANCH" --force
         
-        local PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
+        PR_EXISTS=$(gh pr list --head "$BRANCH" --json number | jq '. | length')
         if [ "$PR_EXISTS" -eq 0 ]; then
             echo "Creating a new PR for branch $BRANCH..."
             gh pr create --base "$PREVIOUS_BRANCH" --head "$BRANCH" --title "PR for $BRANCH" --body "This PR was created automatically."
@@ -258,34 +258,34 @@ github-stacked-push-force() {
 
         PREVIOUS_BRANCH="$BRANCH"
         echo "" # Print a newline for readability
-    done
+    done < <(echo "$BRANCHES")
 }
 
 git-stacked-pull-rebase() {
-    git checkout $GS_BASE_BRANCH && \
+    git checkout "$GS_BASE_BRANCH" && \
     git pull && \
     git checkout - && \
-    git rebase -i $GS_BASE_BRANCH --update-refs
+    git rebase -i "$GS_BASE_BRANCH" --update-refs
 }
 
 git-stacked-rebase() {
-    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
+    git rebase -i "$GS_BASE_BRANCH" --update-refs --keep-base
 }
 
 git-stacked-reorder() {
     echo "WARNING: this functionality needs work!"
     echo "Press enter to continue"
-    read 
+    read -r
     
     git checkout -b tmp-reorder-branch
     gs create tmp-reorder-branch
-    git rebase -i $GS_BASE_BRANCH --update-refs --keep-base
-    BRANCHES=$(git log --pretty='format:%D' $GS_BASE_BRANCH.. --decorate-refs=refs/heads | grep -v '^$')
+    git rebase -i "$GS_BASE_BRANCH" --update-refs --keep-base
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
     echo "After rebase branches: $BRANCHES"
     SECOND_LAST=$(echo "$BRANCHES" | tail -n 2 | head -n 1)
-    # echo "Checking out $SECOND_LAST"
-    # git checkout "$SECOND_LAST"
-    # git branch -D tmp-reorder-branch
+    echo "Checking out $SECOND_LAST"
+    git checkout "$SECOND_LAST"
+    git branch -D tmp-reorder-branch
 }
 
 gitlab-stacked-reorder() {

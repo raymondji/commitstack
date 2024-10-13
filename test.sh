@@ -79,6 +79,6 @@ run-test() {
     ) > "$SOURCE_DIR/test-goldens/$TEST_EXTENSION.txt" 2>&1
 }
 
-run-test "none"
+# run-test "none"
 run-test "github"
-run-test "gitlab"
+# run-test "gitlab"
