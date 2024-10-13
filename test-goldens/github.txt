@@ -1,26 +1,26 @@
-> git-stacked create a1
+> git-stacked stack a1
 Switched to a new branch 'a1'
-[a1 27b58cc] Start of a1
+[a1 38f49b8] Start of a1
 
-> git-stacked create a2
+> git-stacked stack a2
 Switched to a new branch 'a2'
-[a2 b8567ce] Start of a2
+[a2 fea3290] Start of a2
 
 > git-stacked branch
-* a2 (top)
+* a2
   a1
 
 > git checkout main
 Switched to branch 'main'
 Your branch is up to date with 'origin/main'.
 
-> git-stacked create b1
+> git-stacked stack b1
 Switched to a new branch 'b1'
-[b1 110b347] Start of b1
+[b1 78ae92b] Start of b1
 
-> git-stacked stack
-* b1
+> git-stacked all
   a2
+* b1
 
 > git checkout a2
 Switched to branch 'a2'
@@ -41,7 +41,7 @@ remote:
 To github.com:raymondji/git-stacked-testing.git
  * [new branch]      a1 -> a1
 Creating a new PR for branch a1...
-https://github.com/raymondji/git-stacked-testing/pull/51
+https://github.com/raymondji/git-stacked-testing/pull/53
 
 Push branch: a2
 ----------------------------
@@ -52,6 +52,6 @@ remote:
 To github.com:raymondji/git-stacked-testing.git
  * [new branch]      a2 -> a2
 Creating a new PR for branch a2...
-https://github.com/raymondji/git-stacked-testing/pull/52
+https://github.com/raymondji/git-stacked-testing/pull/54
 
 
