@@ -4,7 +4,9 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Sample usage
 
-[View](https://github.com/raymondji/git-stacked/blob/main/test-output-golden.txt)
+[View sample usage](https://github.com/raymondji/git-stacked/blob/main/test-goldens/none.txt)
+[View sample usage with the github extension](https://github.com/raymondji/git-stacked/blob/main/test-goldens/github.txt)
+[View sample usage with the gitlab extension](https://github.com/raymondji/git-stacked/blob/main/test-goldens/gitlab.txt)
 
 # Concepts
 
