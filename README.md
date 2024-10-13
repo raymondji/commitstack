@@ -14,7 +14,7 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 Status: WIP
 
-A "stack" is any local branch, excluding $GS_BASE_BRANCH (default: `main`), that has 1+ commits that are not reachable from any other branch.
+A stack is a sequence of branches from $GS_BASE_BRANCH, excluding $GS_BASE_BRANCH itself (default: `main`), where the topmost branch contains 1+ commits not reachable from any oher branch.
 
 ## Design goals
 
