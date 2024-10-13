@@ -158,18 +158,13 @@ git-stacked-branch() {
         echo "Can only be run from the top of a stack"
         return 1
     fi
-
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
-    if [ -z "$BRANCHES" ]; then
-        echo "Not in a stack"
-        return 1
-    fi
     if ! is-stack-valid; then
         echo "Stack is invalid"
         return 1
     fi
 
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
     while IFS= read -r BRANCH; do
         if [ "$BRANCH" != "$CURRENT_BRANCH" ]; then
             echo "  $BRANCH"
@@ -185,8 +180,10 @@ git-stacked-branch() {
 
 git-stacked-log() {
     if ! is-top-of-stack; then
-        echo "Can only be run from the top of a stack"
-        return 1
+        echo "================================"
+        echo "Note: partial view of the stack"
+        echo "================================"
+        echo ""
     fi
 
     git log "$GS_BASE_BRANCH.."
