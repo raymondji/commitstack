@@ -121,7 +121,7 @@ git-stacked-create() {
 
 git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH..^HEAD" --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
