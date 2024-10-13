@@ -121,13 +121,13 @@ git-stacked-create() {
 
 git-stacked-branch() {
     CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH.." --decorate-refs=refs/heads | grep -v '^$')
+    BRANCHES=$(git log --pretty='format:%D' "$GS_BASE_BRANCH..^HEAD" --decorate-refs=refs/heads | grep -v '^$')
     if [ -z "$BRANCHES" ]; then
         echo "Not in a stack"
         return 1
     fi
-    # is-top-of-stack returns 0 if the current branch is the tip of a stack
 
+    # is-top-of-stack returns 0 if the current branch is the tip of a stack
     # otherwise 1
     is-top-of-stack() {
         DESCENDENT_COUNT=$(git branch --contains "$CURRENT_BRANCH" | wc -l)
@@ -159,7 +159,7 @@ git-stacked-branch() {
 
 git-stacked-stack() {
     BRANCHES=$(git branch --format='%(refname:short)')
-    STACKS=""
+    STACKS=()
     while IFS= read -r BRANCH; do
         if [[ "$BRANCH" == "$GS_BASE_BRANCH" ]]; then
             continue
@@ -169,7 +169,7 @@ git-stacked-stack() {
         # Branches are always a descendent of themselves, so 1 means there are no other descendents.
         # i.e. this branch is the tip of a stack.
         if [[ "$DESCENDENT_COUNT" -eq 1 ]]; then
-            STACKS=$(printf "%s\n%s" "$BRANCH" "$STACKS")
+            STACKS+=("$BRANCH")
         fi
     done < <(echo "$BRANCHES")
 
@@ -178,17 +178,18 @@ git-stacked-stack() {
     if [[ "$CURRENT_BRANCH" == "$GS_BASE_BRANCH" ]]; then
         CONTAINING_CURRENT=""
     fi
-    while IFS= read -r STACK; do
+    for STACK in "${STACKS[@]}"; do
         if echo "$CONTAINING_CURRENT" | grep -q "$STACK"; then
             if [ "$GS_ENABLE_COLOR_OUTPUT" = "true" ]; then
                 printf "* \033[0;32m%s\033[0m" "$STACK" # green highlight
+                echo ""
             else
                 echo "* $STACK"
             fi
         else
             echo "  $STACK"
         fi
-    done < <(echo "$STACKS")
+    done
 }
 
 git-stacked-log() {
