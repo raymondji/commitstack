@@ -14,13 +14,15 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 Status: WIP
 
-A "stack" is any local branch, excluding $GS_BASE_BRANCH (default: `main`), that has commits that are not reachable from any other branch.
+A "stack" is any local branch, excluding $GS_BASE_BRANCH (default: `main`), that has 1+ commits that are not reachable from any other branch.
 
 ## Design goals
 
+The key guiding principle: start with how someone would go about stacking using just Git. Then improve the UX by automating the aspects that are cumbersome or tricky, without enforcing a whole new way of doing things.
+
 - Works alongside the `git` CLI (does not try to replace it)
-- Stateless (only uses what's already tracked in git)
 - Lean on standard git commands and built-in functionality (like `--update-refs`)
+- Stateless (only uses what's already tracked in git)
 - Easy to understand what `git-stacked` is doing (no magic)
 - Simple code is a priority
 - Core functionality works with any git service provider
