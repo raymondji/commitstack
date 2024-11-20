@@ -1,0 +1,148 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "go": {
+        "pkg-path": "go",
+        "version": "1.23.2"
+      }
+    },
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "go",
+      "broken": false,
+      "derivation": "/nix/store/0s8bb30qlsfja1x80a2mvi6mjy1402a9-go-1.23.2.drv",
+      "description": "Go Programming language",
+      "install_id": "go",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "go-1.23.2",
+      "pname": "go",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.23.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/sc8n76lwg70fxcwnkxhqqfvfpvclqijy-go-1.23.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go",
+      "broken": false,
+      "derivation": "/nix/store/yxnsh8dgyhh99n7kfs4qayi541wyhxiy-go-1.23.2.drv",
+      "description": "Go Programming language",
+      "install_id": "go",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "go-1.23.2",
+      "pname": "go",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.23.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/hrhmssn2q67hlc2f43xxwk02h9kqbzhw-go-1.23.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go",
+      "broken": false,
+      "derivation": "/nix/store/mw0d5fpg3azwrm06crnj6qarzn2rxdr0-go-1.23.2.drv",
+      "description": "Go Programming language",
+      "install_id": "go",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "go-1.23.2",
+      "pname": "go",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.23.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/akm89yc1ysajwi50glv4jmw2k80g8xdj-go-1.23.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "go",
+      "broken": false,
+      "derivation": "/nix/store/31k62vqdfaa4zmjds0573nf3f57xyw3b-go-1.23.2.drv",
+      "description": "Go Programming language",
+      "install_id": "go",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "go-1.23.2",
+      "pname": "go",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.23.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/jyhpd4hgq672bm4m4s1r25zm1bx8vd44-go-1.23.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}
