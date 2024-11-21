@@ -106,7 +106,7 @@ var branchCmd = &cobra.Command{
 				prefix = " "
 			}
 
-			fmt.Println("%s %s %s", prefix, b.Name, suffix)
+			fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
 		}
 	},
 }
