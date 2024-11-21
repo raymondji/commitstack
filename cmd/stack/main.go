@@ -31,8 +31,8 @@ var (
 
 func main() {
 	gsBaseBranch = getEnv("GS_BASE_BRANCH", "main")
-	useGithubCli := isInstalled("gh")
-	useGitlabCli := isInstalled("glab")
+	// useGithubCli := isInstalled("gh")
+	// useGitlabCli := isInstalled("glab")
 
 	var rootCmd = &cobra.Command{
 		Use:   "stack",
@@ -113,7 +113,8 @@ var branchCmd = &cobra.Command{
 
 // readConfigFile reads the specified configuration file from the root of the Git repository.
 func readConfigFile() (string, error) {
-	gitRoot, err := git.GetRootDir()
+	g := git.Git{}
+	gitRoot, err := g.GetRootDir()
 	if err != nil {
 		return "", err
 	}
