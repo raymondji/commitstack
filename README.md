@@ -4,9 +4,9 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Goals
 
-- Make stacking in Git easier
+- Make stacking in Git easy
+- Provide first-class support for Gitlab (which most stacking tools don't suppor) and make it easy to extend to other Git providers.
 - Feel like a natural extension of using Git directly (no black magic, easy to understand how it interacts with other Git commands, tells you clearly when something else you've done in Git is incompatible with the tool)
-- Provide first-class support for Gitlab (which most stacking tools don't support) and Github, while making it easy to extend to other Git providers.
 
 ## Sample usage
 
@@ -59,17 +59,6 @@ Configure your `~/.zshrc` or `~/.bashrc`:
 
 source ~/dev/git-stacked/stack.sh
 ```
-
-## Recommended `~/.gitconfig` settings
-
-These settings are not required to use `git-stacked`, but are helpful for git operations you do outside of the `git-stacked` commands.
-
-```
-[rebase]
-    updateRefs = true
-```
-
-`updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
 
 ## Comparison with other tools
 
