@@ -2,8 +2,9 @@ package gitlib
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
+
+	"github.com/raymondji/git-stacked/exec"
 )
 
 const DEBUG = false
@@ -13,7 +14,7 @@ type Git struct{}
 // GetRootDir returns the root directory of the current Git repository.
 func (g Git) GetRootDir() (string, error) {
 	// Use the helper function to run the git command
-	output, err := runCommand("git", "rev-parse", "--show-toplevel")
+	output, err := exec.RunCommand("git", "rev-parse", "--show-toplevel")
 	if err != nil {
 		return "", fmt.Errorf("failed to get Git root dir, err: %v", err)
 	}
@@ -21,7 +22,7 @@ func (g Git) GetRootDir() (string, error) {
 }
 
 func (g Git) GetCurrentBranch() (string, error) {
-	output, err := runCommand("git", "rev-parse", "--abbrev-ref", "HEAD")
+	output, err := exec.RunCommand("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
 		return "", fmt.Errorf("failed to get current branch, err: %v", err)
 	}
@@ -29,7 +30,7 @@ func (g Git) GetCurrentBranch() (string, error) {
 }
 
 func (g *Git) ForcePush(branchName string) (string, error) {
-	res, err := runCommand("git", "push", "--force", "origin", branchName)
+	res, err := exec.RunCommand("git", "push", "--force", "origin", branchName)
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
 	}
@@ -38,7 +39,7 @@ func (g *Git) ForcePush(branchName string) (string, error) {
 }
 
 func (g *Git) Fetch() (string, error) {
-	res, err := runCommand("git", "fetch")
+	res, err := exec.RunCommand("git", "fetch")
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch, err: %v", err)
 	}
@@ -47,25 +48,23 @@ func (g *Git) Fetch() (string, error) {
 }
 
 func (g *Git) Rebase(branch string) (string, error) {
-	res, err := runCommand("git", "rebase", "--update-refs", "-i", branch)
+	res, err := exec.RunCommand("git", "rebase", "--update-refs", branch)
 	if err != nil {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}
-
 	return res, nil
 }
 
-func (g *Git) RebaseKeepBase(branch string) (string, error) {
-	res, err := runCommand("git", "rebase", "--update-refs", "--keep-base", "-i", branch)
+func (g *Git) RebaseInteractiveKeepBase(branch string) error {
+	err := exec.RunInteractiveCommand("git", "rebase", "--update-refs", "--keep-base", "-i", branch)
 	if err != nil {
-		return "", fmt.Errorf("failed to rebase, err: %v", err)
+		return fmt.Errorf("failed to rebase, err: %v", err)
 	}
-
-	return res, nil
+	return nil
 }
 
 func (g Git) CreateBranch(name string) error {
-	_, err := runCommand("git", "checkout", "-b", name)
+	_, err := exec.RunCommand("git", "checkout", "-b", name)
 	if err != nil {
 		return fmt.Errorf("failed to create branch, err: %v", err)
 	}
@@ -73,7 +72,7 @@ func (g Git) CreateBranch(name string) error {
 }
 
 func (g Git) CommitEmpty(msg string) error {
-	_, err := runCommand("git", "commit", "--allow-empty", "-m", msg)
+	_, err := exec.RunCommand("git", "commit", "--allow-empty", "-m", msg)
 	if err != nil {
 		return fmt.Errorf("failed to commit, err: %v", err)
 	}
@@ -92,7 +91,7 @@ type Commit struct {
 }
 
 func (g Git) LogAll(notReachableFrom string) (Log, error) {
-	out, err := runCommand(
+	out, err := exec.RunCommand(
 		"git", "log", `--pretty=format:%h-----%p-----%D`, "--decorate=full",
 		"--branches", fmt.Sprintf("^%s", notReachableFrom))
 	if err != nil {
@@ -129,12 +128,4 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	return Log{
 		Commits: commits,
 	}, nil
-}
-
-func runCommand(name string, args ...string) (string, error) {
-	output, err := exec.Command(name, args...).CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("error running cmd %s %s, err: %v", name, strings.Join(args, " "), err)
-	}
-	return strings.TrimSpace(string(output)), nil
 }

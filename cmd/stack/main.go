@@ -138,6 +138,23 @@ func main() {
 		},
 	}
 
+	var rebaseCmd = &cobra.Command{
+		Use:   "rebase",
+		Short: "Rebase",
+		Run: func(cmd *cobra.Command, args []string) {
+			g := gitlib.Git{}
+			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
+			if err != nil {
+				log.Fatalf("Failed to list branches, err: %v", err)
+			}
+			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name)
+
+			if err := g.RebaseInteractiveKeepBase(cfg.DefaultBranch); err != nil {
+				log.Fatal(err.Error())
+			}
+		},
+	}
+
 	var branchCmd = &cobra.Command{
 		Use:   "branch",
 		Short: "List all branches in the current stack",
@@ -166,7 +183,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, listCmd, branchCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(addCmd, rebaseCmd, listCmd, branchCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}
