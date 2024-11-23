@@ -88,7 +88,7 @@ func main() {
 
 	var pushCmd = &cobra.Command{
 		Use:   "push",
-		Short: "Force push all branches in the stack",
+		Short: "Push the stack to the remote and create merge requests.",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
 			glab := gitlab.Gitlab{}
@@ -169,7 +169,7 @@ func main() {
 
 	var pullCmd = &cobra.Command{
 		Use:   "pull",
-		Short: "Pulls the latest changes from the defaultBranch into the stack",
+		Short: "Pulls the latest changes from the default branch into the stack",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
 			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
@@ -192,9 +192,9 @@ func main() {
 		},
 	}
 
-	var rebaseCmd = &cobra.Command{
-		Use:   "rebase",
-		Short: "Rebase",
+	var editCmd = &cobra.Command{
+		Use:   "edit",
+		Short: "Edit the stack using interactive rebase",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
 			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
@@ -237,7 +237,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, rebaseCmd, listCmd, showCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}
