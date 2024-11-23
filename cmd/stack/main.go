@@ -209,9 +209,9 @@ func main() {
 		},
 	}
 
-	var branchCmd = &cobra.Command{
-		Use:   "branch",
-		Short: "List all branches in the current stack",
+	var showCmd = &cobra.Command{
+		Use:   "show",
+		Short: "Show all branches in the current stack",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
 			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
@@ -237,7 +237,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, rebaseCmd, listCmd, branchCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(addCmd, rebaseCmd, listCmd, showCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}

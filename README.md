@@ -2,6 +2,11 @@
 
 A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
+## Goals
+
+- Build a tool that makes stacking in Git easier, while staying true to how someone would do stacking manually in pure Git. No black magic.
+- Provide first-class support for Gitlab (which most stacking tools don't support) and Github, while making it easy to extend to other Git providers.
+
 ## Sample usage
 
 [View sample usage](https://github.com/raymondji/git-stacked/blob/main/test-goldens/none.txt)
