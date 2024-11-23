@@ -28,7 +28,7 @@ type DAG struct {
 	Nodes map[string]Node
 }
 
-func Build(git Git, defaultBranch string) (DAG, error) {
+func Compute(git Git, defaultBranch string) (DAG, error) {
 	log, err := git.LogAll(defaultBranch)
 	if err != nil {
 		return DAG{}, err

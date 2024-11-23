@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBuild(t *testing.T) {
+func TestCompute(t *testing.T) {
 	cases := map[string]struct {
 		log  gitlib.Log
 		want commitgraph.DAG
@@ -175,7 +175,7 @@ func TestBuild(t *testing.T) {
 				Log: c.log,
 			}
 
-			got, err := commitgraph.Build(fg, "main")
+			got, err := commitgraph.Compute(fg, "main")
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 		})

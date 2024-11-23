@@ -4,7 +4,8 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 ## Goals
 
-- Build a tool that makes stacking in Git easier, while staying true to how someone would do stacking manually in pure Git. No black magic.
+- Make stacking in Git easier
+- Feel like a natural extension of using Git directly (no black magic, easy to understand how it interacts with other Git commands, tells you clearly when something else you've done in Git is incompatible with the tool)
 - Provide first-class support for Gitlab (which most stacking tools don't support) and Github, while making it easy to extend to other Git providers.
 
 ## Sample usage
