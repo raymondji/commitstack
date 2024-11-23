@@ -97,19 +97,31 @@ func main() {
 				log.Fatalf("Failed to get current stack, err: %v", err)
 			}
 
-			// Reset the target branch on all existing MRs for safety. If any branches have been re-ordered, Gitlab can automatically
-			// consider the MRs merged.
+			wantTargets := map[string]string{}
+			for i, b := range s.LocalBranches {
+				if i == len(s.LocalBranches)-1 {
+					wantTargets[b.Name] = cfg.DefaultBranch
+				} else {
+					wantTargets[b.Name] = s.LocalBranches[i+1].Name
+				}
+			}
+
+			// For safety, reset the target branch on any existing MRs if they don't match.
+			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
 			res, err := concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
-				// TODO: use current target. If all the MRs are already pointing to the right place,
-				// no need to reset the target branch.
-				_, err := glab.GetMRTargetBranch(branch.Name)
+				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
+				currTarget, err := glab.GetMRTargetBranch(branch.Name)
 				if errors.Is(err, gitlab.ErrNoMRForBranch) {
 					return "", nil
 				} else if err != nil {
 					return "", err
 				}
 
-				return glab.SetMRTargetBranch(branch.Name, cfg.DefaultBranch)
+				if currTarget != wantTargets[branch.Name] {
+					return glab.SetMRTargetBranch(branch.Name, cfg.DefaultBranch)
+				}
+
+				return "", nil
 			})
 			if err != nil {
 				log.Fatalf("failed to force push branches, errors: %v", err.Error())
@@ -131,26 +143,20 @@ func main() {
 			}
 			fmt.Println("Done pushing branches")
 
-			// Checki
-			targetBranches := map[string]string{}
-			for i, b := range s.LocalBranches {
-				if i == len(s.LocalBranches)-1 {
-					targetBranches[b.Name] = cfg.DefaultBranch
-				} else {
-					targetBranches[b.Name] = s.LocalBranches[i+1].Name
-				}
-			}
+			// Create MRs or update exising MRs to the right target branch.
 			res, err = concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
 				currTarget, err := glab.GetMRTargetBranch(branch.Name)
 				if errors.Is(err, gitlab.ErrNoMRForBranch) {
-					return glab.CreateMR(branch.Name, targetBranches[branch.Name])
+					return glab.CreateMR(branch.Name, wantTargets[branch.Name])
 				} else if err != nil {
 					return "", err
 				}
 
-				if currTarget != targetBranches[branch.Name] {
-					return glab.SetMRTargetBranch(branch.Name, targetBranches[branch.Name])
+				if currTarget != wantTargets[branch.Name] {
+					return glab.SetMRTargetBranch(branch.Name, wantTargets[branch.Name])
 				}
+
+				return "", nil
 			})
 			if err != nil {
 				log.Fatalf("failed to create merge requests, errors: %v", err.Error())
