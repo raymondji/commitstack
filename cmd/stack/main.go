@@ -8,9 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"slices"
 
 	"github.com/raymondji/git-stacked/concurrently"
+	"github.com/raymondji/git-stacked/gitlab"
 	"github.com/raymondji/git-stacked/gitlib"
 	"github.com/raymondji/git-stacked/stack"
 	"github.com/spf13/cobra"
@@ -91,21 +91,66 @@ func main() {
 		Short: "Force push all branches in the stack",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
+			glab := gitlab.Gitlab{}
 			s, err := stack.GetCurrent(g, cfg.DefaultBranch)
 			if err != nil {
 				log.Fatalf("Failed to get current stack, err: %v", err)
 			}
 
-			// Push from earliest to latest
-			// Only push up to the current branch.
-			branches := s.LocalBranches
-			slices.Reverse(branches)
+			// Reset the target branch on all existing MRs for safety. If any branches have been re-ordered, Gitlab can automatically
+			// consider the MRs merged.
+			res, err := concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
+				has, err := glab.HasMR(branch.Name)
+				if err != nil {
+					return "", err
+				}
+				if !has {
+					return "", nil
+				}
+				return glab.SetMRTargetBranch(branch.Name, cfg.DefaultBranch)
+			})
+			if err != nil {
+				log.Fatalf("failed to force push branches, errors: %v", err.Error())
+			}
+			for _, r := range res {
+				fmt.Println(r)
+			}
+			fmt.Println("Done resetting existing MRs")
 
-			res, err := concurrently.ForEach(branches, func(branch stack.Branch) (string, error) {
+			// Push all branches.
+			res, err = concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
 				return g.ForcePush(branch.Name)
 			})
 			if err != nil {
 				log.Fatalf("failed to force push branches, errors: %v", err.Error())
+			}
+			for _, r := range res {
+				fmt.Println(r)
+			}
+			fmt.Println("Done pushing branches")
+
+			// Create MRs or update the target branch for existing MRs.
+			targetBranches := map[string]string{}
+			for i, b := range s.LocalBranches {
+				if i == len(s.LocalBranches)-1 {
+					targetBranches[b.Name] = cfg.DefaultBranch
+				} else {
+					targetBranches[b.Name] = s.LocalBranches[i+1].Name
+				}
+			}
+			res, err = concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
+				has, err := glab.HasMR(branch.Name)
+				if err != nil {
+					return "", err
+				}
+				if has {
+					return glab.SetMRTargetBranch(branch.Name, targetBranches[branch.Name])
+				} else {
+					return glab.CreateMR(branch.Name, targetBranches[branch.Name])
+				}
+			})
+			if err != nil {
+				log.Fatalf("failed to create merge requests, errors: %v", err.Error())
 			}
 			for _, r := range res {
 				fmt.Println(r)
