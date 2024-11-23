@@ -104,7 +104,6 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed to get current stack, err: %v", err)
 			}
-			// TODO: this should fail if in a stack but not at the tip
 
 			wantTargets := map[string]string{}
 			for i, b := range s.LocalBranches {
@@ -186,6 +185,7 @@ func main() {
 				log.Fatalf("Failed to list branches, err: %v", err)
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name)
+			// TODO: this should fail if not at the tip of the stack
 
 			res, err := g.Fetch()
 			if err != nil {
