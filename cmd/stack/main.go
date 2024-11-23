@@ -100,13 +100,15 @@ func main() {
 			// Reset the target branch on all existing MRs for safety. If any branches have been re-ordered, Gitlab can automatically
 			// consider the MRs merged.
 			res, err := concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
-				has, err := glab.HasMR(branch.Name)
-				if err != nil {
+				// TODO: use current target. If all the MRs are already pointing to the right place,
+				// no need to reset the target branch.
+				_, err := glab.GetMRTargetBranch(branch.Name)
+				if errors.Is(err, gitlab.ErrNoMRForBranch) {
+					return "", nil
+				} else if err != nil {
 					return "", err
 				}
-				if !has {
-					return "", nil
-				}
+
 				return glab.SetMRTargetBranch(branch.Name, cfg.DefaultBranch)
 			})
 			if err != nil {
@@ -129,7 +131,7 @@ func main() {
 			}
 			fmt.Println("Done pushing branches")
 
-			// Create MRs or update the target branch for existing MRs.
+			// Checki
 			targetBranches := map[string]string{}
 			for i, b := range s.LocalBranches {
 				if i == len(s.LocalBranches)-1 {
@@ -139,14 +141,15 @@ func main() {
 				}
 			}
 			res, err = concurrently.ForEach(s.LocalBranches, func(branch stack.Branch) (string, error) {
-				has, err := glab.HasMR(branch.Name)
-				if err != nil {
+				currTarget, err := glab.GetMRTargetBranch(branch.Name)
+				if errors.Is(err, gitlab.ErrNoMRForBranch) {
+					return glab.CreateMR(branch.Name, targetBranches[branch.Name])
+				} else if err != nil {
 					return "", err
 				}
-				if has {
+
+				if currTarget != targetBranches[branch.Name] {
 					return glab.SetMRTargetBranch(branch.Name, targetBranches[branch.Name])
-				} else {
-					return glab.CreateMR(branch.Name, targetBranches[branch.Name])
 				}
 			})
 			if err != nil {

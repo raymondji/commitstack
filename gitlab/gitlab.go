@@ -1,6 +1,8 @@
 package gitlab
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"strings"
@@ -10,21 +12,29 @@ import (
 
 type Gitlab struct{}
 
-func (g Gitlab) CreateMergeRequest() {
+var ErrNoMRForBranch = errors.New("no MR exists for the branch")
 
+type GitlabMR struct {
+	TargetBranch string `json:"target_branch"`
 }
 
-func (g Gitlab) HasMR(branchName string) (bool, error) {
-	output, err := exec.Command("glab", "mr", "view", branchName, "--output=json")
+// GetMRTargetBranch returns ErrNoMRForBranch if no MR exists for the branch
+func (g Gitlab) GetMRTargetBranch(branchName string) (string, error) {
+	output, err := exec.Command(
+		"glab", "mr", "view", branchName, "--output=json",
+	)
 	if err != nil {
 		if strings.Contains(err.Error(), "no open merge request available") {
-			return false, nil
+			return "", ErrNoMRForBranch
 		}
-
-		return false, fmt.Errorf("error checking MRs for branch %s, output: %s, err: %v", branchName, output, err)
+		return "", fmt.Errorf("error checking MRs for branch %s, output: %s, err: %v", branchName, output, err)
 	}
 
-	return true, nil
+	var mr GitlabMR
+	if err := json.Unmarshal([]byte(output), &mr); err != nil {
+		return "", err
+	}
+	return mr.TargetBranch, nil
 }
 
 func (g Gitlab) SetMRTargetBranch(sourceBranch string, targetBranch string) (string, error) {
