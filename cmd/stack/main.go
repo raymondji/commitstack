@@ -53,6 +53,14 @@ func main() {
 		Short: "A CLI tool for managing stacked Git branches.",
 	}
 
+	var versionCmd = &cobra.Command{
+		Use:   "version",
+		Short: "Print the current version",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("0.0.1")
+		},
+	}
+
 	var addCmd = &cobra.Command{
 		Use:   "add [branch_name]",
 		Short: "Start a new stack or add a new branch onto the current stack",
@@ -246,7 +254,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(versionCmd, addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}
