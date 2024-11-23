@@ -123,7 +123,18 @@ func main() {
 				log.Fatalf("Failed to list branches, err: %v", err)
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name)
-			g.Pull(cfg.DefaultBranch)
+
+			res, err := g.Fetch()
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			fmt.Println(res)
+
+			res, err = g.Rebase(cfg.DefaultBranch)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			fmt.Println(res)
 		},
 	}
 

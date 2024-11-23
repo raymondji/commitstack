@@ -37,10 +37,28 @@ func (g *Git) ForcePush(branchName string) (string, error) {
 	return fmt.Sprintf("Force pushing branch %s\n%s", branchName, res), nil
 }
 
-func (g *Git) Pull(branch string) (string, error) {
-	res, err := runCommand("git", "pull", "--rebase", "--update-refs", branch)
+func (g *Git) Fetch() (string, error) {
+	res, err := runCommand("git", "fetch")
 	if err != nil {
-		return "", fmt.Errorf("failed to pull, err: %v", err)
+		return "", fmt.Errorf("failed to fetch, err: %v", err)
+	}
+
+	return res, nil
+}
+
+func (g *Git) Rebase(branch string) (string, error) {
+	res, err := runCommand("git", "rebase", "--update-refs", "-i", branch)
+	if err != nil {
+		return "", fmt.Errorf("failed to rebase, err: %v", err)
+	}
+
+	return res, nil
+}
+
+func (g *Git) RebaseKeepBase(branch string) (string, error) {
+	res, err := runCommand("git", "rebase", "--update-refs", "--keep-base", "-i", branch)
+	if err != nil {
+		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}
 
 	return res, nil
