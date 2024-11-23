@@ -16,6 +16,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: commands that are relative to the current stack should work
+// even if some other stack is in an invalid state.
+// TODO: list should still show the valid stacks even if some are invalid,
+// but provide some notice about those invalid stacks and how to debug.
+// This could happen easily if a repo uses multiple long lived branches with merge workflows,
+// e.g. release branches.
+
 const (
 	configFileName = ".git-stacked.json"
 )
@@ -52,6 +59,7 @@ func main() {
 		Long:  "Start a new stack if not currently in one, or add a new branch onto the current stack",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			// TODO: this should fail if in a stack but not at the tip
 			branchName := args[0]
 			g := gitlib.Git{}
 			if err := g.CreateBranch(branchName); err != nil {
@@ -96,6 +104,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed to get current stack, err: %v", err)
 			}
+			// TODO: this should fail if in a stack but not at the tip
 
 			wantTargets := map[string]string{}
 			for i, b := range s.LocalBranches {
