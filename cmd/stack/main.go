@@ -35,7 +35,6 @@ func main() {
 		log.Print(err.Error())
 		return
 	}
-	fmt.Println("got cfg", cfg)
 
 	// useGithubCli := isInstalled("gh")
 	// useGitlabCli := isInstalled("glab")
@@ -56,7 +55,6 @@ func main() {
 			}
 
 			for _, s := range stacks {
-				fmt.Println("Got stack", s)
 				var prefix string
 				if s.Current {
 					prefix = "*"
