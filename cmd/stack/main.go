@@ -107,10 +107,23 @@ func main() {
 			if err != nil {
 				log.Fatalf("failed to force push branches, errors: %v", err.Error())
 			}
-			fmt.Println("Got results: ", res)
 			for _, r := range res {
 				fmt.Println(r)
 			}
+		},
+	}
+
+	var pullCmd = &cobra.Command{
+		Use:   "pull",
+		Short: "Pulls the latest changes from the defaultBranch into the stack",
+		Run: func(cmd *cobra.Command, args []string) {
+			g := gitlib.Git{}
+			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
+			if err != nil {
+				log.Fatalf("Failed to list branches, err: %v", err)
+			}
+			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name)
+			g.Pull(cfg.DefaultBranch)
 		},
 	}
 
@@ -142,7 +155,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, listCmd, branchCmd, pushCmd)
+	rootCmd.AddCommand(addCmd, listCmd, branchCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}

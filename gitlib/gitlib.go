@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const DEBUG = false
+
 type Git struct{}
 
 // GetRootDir returns the root directory of the current Git repository.
@@ -27,10 +29,18 @@ func (g Git) GetCurrentBranch() (string, error) {
 }
 
 func (g *Git) ForcePush(branchName string) (string, error) {
-	fmt.Printf("Force pushing branch %s\n", branchName)
 	res, err := runCommand("git", "push", "--force", "origin", branchName)
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
+	}
+
+	return fmt.Sprintf("Force pushing branch %s\n%s", branchName, res), nil
+}
+
+func (g *Git) Pull(branch string) (string, error) {
+	res, err := runCommand("git", "pull", "--rebase", "--update-refs", branch)
+	if err != nil {
+		return "", fmt.Errorf("failed to pull, err: %v", err)
 	}
 
 	return res, nil
@@ -70,8 +80,10 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
-	fmt.Println("DEBUG: log output")
-	fmt.Println(out)
+	if DEBUG {
+		fmt.Println("log output")
+		fmt.Println(out)
+	}
 
 	lines := strings.Split(out, "\n")
 	var commits []Commit

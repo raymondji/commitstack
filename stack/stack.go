@@ -131,6 +131,10 @@ outer:
 			}
 		case 2:
 			return Stack{}, fmt.Errorf(
+				// TODO: it's probably more useful to say something like "diverges",
+				// please reconcile. A likely occurence of this is if a user has a stack A -> B -> C,
+				// checks out B and adds some new commits. Ideally we would make it easy for them to tell they need to
+				// rebase C onto B again.
 				"invalid git commit graph, commit %s has multiple children: %v",
 				curr.Hash, curr.Children)
 		}
