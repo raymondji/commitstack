@@ -26,6 +26,32 @@ func (g Git) GetCurrentBranch() (string, error) {
 	return output, nil
 }
 
+func (g *Git) ForcePush(branchName string) (string, error) {
+	fmt.Printf("Force pushing branch %s\n", branchName)
+	res, err := runCommand("git", "push", "--force", "origin", branchName)
+	if err != nil {
+		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
+	}
+
+	return res, nil
+}
+
+func (g Git) CreateBranch(name string) error {
+	_, err := runCommand("git", "checkout", "-b", name)
+	if err != nil {
+		return fmt.Errorf("failed to create branch, err: %v", err)
+	}
+	return nil
+}
+
+func (g Git) CommitEmpty(msg string) error {
+	_, err := runCommand("git", "commit", "--allow-empty", "-m", msg)
+	if err != nil {
+		return fmt.Errorf("failed to commit, err: %v", err)
+	}
+	return nil
+}
+
 type Log struct {
 	// Commits are ordered from oldest to newest
 	Commits []Commit
@@ -40,11 +66,12 @@ type Commit struct {
 func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	out, err := runCommand(
 		"git", "log", `--pretty=format:%h-----%p-----%D`, "--decorate=full",
-		"--branches", fmt.Sprintf("^%s", notReachableFrom),
-		"--not", "--remotes")
+		"--branches", fmt.Sprintf("^%s", notReachableFrom))
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
+	fmt.Println("DEBUG: log output")
+	fmt.Println(out)
 
 	lines := strings.Split(out, "\n")
 	var commits []Commit
@@ -75,7 +102,7 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 }
 
 func runCommand(name string, args ...string) (string, error) {
-	output, err := exec.Command(name, args...).Output()
+	output, err := exec.Command(name, args...).CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("error running cmd %s %s, err: %v", name, strings.Join(args, " "), err)
 	}

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	"github.com/raymondji/git-stacked/concurrently"
 	"github.com/raymondji/git-stacked/gitlib"
 	"github.com/raymondji/git-stacked/stack"
 	"github.com/spf13/cobra"
@@ -45,6 +46,23 @@ func main() {
 		Short: "A CLI tool for managing stacked Git branches.",
 	}
 
+	var addCmd = &cobra.Command{
+		Use:   "add [branch_name]",
+		Short: "Start a new stack or add a new branch onto the current stack",
+		Long:  "Start a new stack if not currently in one, or add a new branch onto the current stack",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			branchName := args[0]
+			g := gitlib.Git{}
+			if err := g.CreateBranch(branchName); err != nil {
+				log.Fatal(err.Error())
+			}
+			if err := g.CommitEmpty(branchName); err != nil {
+				log.Fatal(err.Error())
+			}
+		},
+	}
+
 	var listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List all stacks",
@@ -70,7 +88,7 @@ func main() {
 
 	var pushCmd = &cobra.Command{
 		Use:   "push",
-		Short: "Push all branches in the stack",
+		Short: "Force push all branches in the stack",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
 			s, err := stack.GetCurrent(g, cfg.DefaultBranch)
@@ -83,17 +101,15 @@ func main() {
 			branches := s.LocalBranches
 			slices.Reverse(branches)
 
-			var toPush []stack.Branch
-			for _, b := range branches {
-				toPush = append(toPush, b)
-				if b.Current {
-					break
-				}
+			res, err := concurrently.ForEach(branches, func(branch stack.Branch) (string, error) {
+				return g.ForcePush(branch.Name)
+			})
+			if err != nil {
+				log.Fatalf("failed to force push branches, errors: %v", err.Error())
 			}
-
-			for _, b := range toPush {
-				fmt.Printf("Pushing branch: %s\n", b.Name)
-				// TODO
+			fmt.Println("Got results: ", res)
+			for _, r := range res {
+				fmt.Println(r)
 			}
 		},
 	}
@@ -126,7 +142,7 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(listCmd, branchCmd, pushCmd)
+	rootCmd.AddCommand(addCmd, listCmd, branchCmd, pushCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}
