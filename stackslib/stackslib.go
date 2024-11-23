@@ -175,12 +175,7 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 
 var ErrMultipleCurrentStacks = errors.New("multiple current stacks")
 
-func ComputeCurrent(git Git, rootBranch string) (Stack, error) {
-	stacks, err := Compute(git, rootBranch)
-	if err != nil {
-		return Stack{}, err
-	}
-
+func (stacks Stacks) GetCurrent() (Stack, error) {
 	var currStacks []Stack
 	for _, s := range stacks.Entries {
 		if s.Current() {

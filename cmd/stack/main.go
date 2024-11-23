@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"github.com/raymondji/git-stacked/concurrently"
-	"github.com/raymondji/git-stacked/gitlab"
 	"github.com/raymondji/git-stacked/gitlib"
+	"github.com/raymondji/git-stacked/gitplatform"
+	"github.com/raymondji/git-stacked/gitplatform/gitlab"
 	"github.com/raymondji/git-stacked/stackslib"
 	"github.com/spf13/cobra"
 )
@@ -101,14 +102,7 @@ func main() {
 				fmt.Printf("%s %s (%d branches, %d commits)\n", prefix, s.Name(), len(s.LocalBranches), len(s.Commits))
 			}
 
-			if len(stacks.SharingHistory) > 0 {
-				fmt.Println()
-				fmt.Println("Problems:")
-				for _, grp := range stacks.SharingHistory {
-					fmt.Printf("  %s have diverged, please reconcile (e.g. by rebasing one stack onto another)\n", strings.Join(grp, ", "))
-				}
-			}
-
+			printProblems(stacks)
 			return nil
 		},
 	}
@@ -116,12 +110,17 @@ func main() {
 	var pushCmd = &cobra.Command{
 		Use:   "push",
 		Short: "Push the stack to the remote and create merge requests.",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
-			glab := gitlab.Gitlab{}
-			s, err := stackslib.ComputeCurrent(g, cfg.DefaultBranch)
+			var platform gitplatform.GitPlatform = gitlab.Gitlab{}
+
+			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
-				log.Fatalf("Failed to get current stack, err: %v", err)
+				return err
+			}
+			s, err := stacks.GetCurrent()
+			if err != nil {
+				return err
 			}
 
 			wantTargets := map[string]string{}
@@ -133,75 +132,87 @@ func main() {
 				}
 			}
 
+			fmt.Println("Pushing stack...")
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
-			res, err := concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
+			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (gitplatform.PullRequest, error) {
 				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
-				currTarget, err := glab.GetMRTargetBranch(branch.Name)
-				if errors.Is(err, gitlab.ErrNoMRForBranch) {
-					return "", nil
+				pr, err := platform.GetPullRequest(branch.Name)
+				if errors.Is(err, gitplatform.ErrDoesNotExist) {
+					return gitplatform.PullRequest{}, nil
 				} else if err != nil {
-					return "", err
+					return gitplatform.PullRequest{}, err
 				}
 
-				if currTarget != wantTargets[branch.Name] {
-					return glab.SetMRTargetBranch(branch.Name, cfg.DefaultBranch)
+				if pr.TargetBranch != wantTargets[branch.Name] {
+					return platform.UpdatePullRequest(gitplatform.PullRequest{
+						SourceBranch: branch.Name,
+						TargetBranch: cfg.DefaultBranch,
+						Description:  pr.Description,
+					})
 				}
 
-				return "", nil
+				return gitplatform.PullRequest{}, nil
 			})
 			if err != nil {
-				log.Fatalf("failed to force push branches, errors: %v", err.Error())
+				return fmt.Errorf("failed to force push branches, errors: %v\n", err.Error())
 			}
-			for _, r := range res {
-				fmt.Println(r)
-			}
-			fmt.Println("Done resetting existing MRs")
 
 			// Push all branches.
-			res, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
+			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
 				return g.ForcePush(branch.Name)
 			})
 			if err != nil {
-				log.Fatalf("failed to force push branches, errors: %v", err.Error())
+				return fmt.Errorf("failed to force push branches, errors:", err.Error())
 			}
-			for _, r := range res {
-				fmt.Println(r)
-			}
-			fmt.Println("Done pushing branches")
 
 			// Create MRs or update exising MRs to the right target branch.
-			res, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
-				currTarget, err := glab.GetMRTargetBranch(branch.Name)
-				if errors.Is(err, gitlab.ErrNoMRForBranch) {
-					return glab.CreateMR(branch.Name, wantTargets[branch.Name])
+			prs, err := concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (gitplatform.PullRequest, error) {
+				pr, err := platform.GetPullRequest(branch.Name)
+				if errors.Is(err, gitplatform.ErrDoesNotExist) {
+					return platform.CreatePullRequest(gitplatform.PullRequest{
+						SourceBranch: branch.Name,
+						TargetBranch: wantTargets[branch.Name],
+						Description:  "sample",
+					})
 				} else if err != nil {
-					return "", err
+					return gitplatform.PullRequest{}, err
 				}
 
-				if currTarget != wantTargets[branch.Name] {
-					return glab.SetMRTargetBranch(branch.Name, wantTargets[branch.Name])
+				if pr.TargetBranch != wantTargets[branch.Name] {
+					return platform.UpdatePullRequest(gitplatform.PullRequest{
+						SourceBranch: branch.Name,
+						TargetBranch: wantTargets[branch.Name],
+						Description:  pr.Description,
+					})
 				}
 
-				return "", nil
+				return pr, nil
 			})
 			if err != nil {
-				log.Fatalf("failed to create merge requests, errors: %v", err.Error())
+				log.Fatalf("failed to create some pull requests, errors: %v", err.Error())
 			}
-			for _, r := range res {
-				fmt.Println(r)
+
+			for _, pr := range prs {
+				fmt.Printf("Pushed %s: %s\n", pr.SourceBranch, pr.WebURL)
 			}
+			fmt.Println("Done")
+			return nil
 		},
 	}
 
 	var pullCmd = &cobra.Command{
 		Use:   "pull",
 		Short: "Pulls the latest changes from the default branch into the stack",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
-			stack, err := stackslib.ComputeCurrent(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
-				log.Fatalf("Failed to list branches, err: %v", err)
+				return err
+			}
+			stack, err := stacks.GetCurrent()
+			if err != nil {
+				return err
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name())
 			// TODO: this should fail if not at the tip of the stack
@@ -217,23 +228,29 @@ func main() {
 				log.Fatal(err.Error())
 			}
 			fmt.Println(res)
+			return nil
 		},
 	}
 
 	var editCmd = &cobra.Command{
 		Use:   "edit",
 		Short: "Edit the stack using interactive rebase",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
-			stack, err := stackslib.ComputeCurrent(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
-				log.Fatalf("Failed to list branches, err: %v", err)
+				return err
+			}
+			stack, err := stacks.GetCurrent()
+			if err != nil {
+				return err
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name())
 
 			if err := g.RebaseInteractiveKeepBase(cfg.DefaultBranch); err != nil {
 				log.Fatal(err.Error())
 			}
+			return nil
 		},
 	}
 
@@ -242,21 +259,20 @@ func main() {
 		Short: "Show all branches in the current stack",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var stack stackslib.Stack
 			g := gitlib.Git{}
+			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			if err != nil {
+				return err
+			}
+
+			var stack stackslib.Stack
 			if len(args) == 0 {
-				var err error
-				stack, err = stackslib.ComputeCurrent(g, cfg.DefaultBranch)
+				stack, err = stacks.GetCurrent()
 				if err != nil {
 					return err
 				}
 			} else {
 				wantStack := args[0]
-				stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
-				if err != nil {
-					return err
-				}
-
 				var found bool
 				for _, s := range stacks.Entries {
 					if s.Name() == wantStack {
@@ -285,6 +301,9 @@ func main() {
 				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
 			}
 
+			if isSharingHistory(stacks, stack.Name()) {
+				printProblems(stacks)
+			}
 			return nil
 		},
 	}
@@ -292,6 +311,27 @@ func main() {
 	rootCmd.AddCommand(versionCmd, addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
+	}
+}
+
+func isSharingHistory(stacks stackslib.Stacks, stackName string) bool {
+	for _, grp := range stacks.SharingHistory {
+		for _, s := range grp {
+			if s == stackName {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func printProblems(stacks stackslib.Stacks) {
+	if len(stacks.SharingHistory) > 0 {
+		fmt.Println()
+		fmt.Println("Problems:")
+		for _, grp := range stacks.SharingHistory {
+			fmt.Printf("  %s have diverged, please reconcile (e.g. by rebasing one stack onto another)\n", strings.Join(grp, ", "))
+		}
 	}
 }
 
