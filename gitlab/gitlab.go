@@ -1,4 +1,4 @@
-package gitlab
+package libgitlab
 
 type Gitlab struct{}
 

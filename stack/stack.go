@@ -1,7 +1,9 @@
 package stack
 
 import (
+	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/raymondji/git-stacked/commitgraph"
 )
@@ -18,8 +20,9 @@ type Git interface {
 }
 
 type Stack struct {
+	Name          string // This is set to the top branch in the stack
 	Current       bool
-	LocalBranches []Branch
+	LocalBranches []Branch // Ordered from top to bottom
 }
 
 type Branch struct {
@@ -39,11 +42,11 @@ func GetCurrent(git Git, rootBranch string) (Stack, error) {
 		}
 	}
 
-	return Stack{}, fmt.Errorf("not currently in a stack")
+	return Stack{}, fmt.Errorf("not in a stack")
 }
 
-func GetAll(git Git, rootBranch string) ([]Stack, error) {
-	graph, err := commitgraph.NewBuilder(git).Build(rootBranch)
+func GetAll(git Git, defaultBranch string) ([]Stack, error) {
+	graph, err := commitgraph.Build(git, defaultBranch)
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +56,17 @@ func GetAll(git Git, rootBranch string) ([]Stack, error) {
 		return nil, err
 	}
 
-	root := graph.Nodes[graph.RootHash]
 	var stacks []Stack
-	for rootChild := range root.Children {
-		stack, err := buildStack(graph, graph.Nodes[rootChild], currBranch)
-		if err != nil {
+	for _, n := range graph.Nodes {
+		if !n.IsSource() {
+			continue
+		}
+
+		stack, err := buildStack(graph, n, currBranch)
+		if errors.Is(err, errNoBranchesInStack) {
+			fmt.Println(err.Error())
+			continue
+		} else if err != nil {
 			return nil, err
 		}
 		stacks = append(stacks, stack)
@@ -66,14 +75,20 @@ func GetAll(git Git, rootBranch string) ([]Stack, error) {
 	return stacks, nil
 }
 
+var errNoBranchesInStack = errors.New("no branches")
+
 func buildStack(
-	graph commitgraph.Graph, rootChild commitgraph.Node, currBranch string,
+	graph commitgraph.DAG, source commitgraph.Node, currBranch string,
 ) (Stack, error) {
 	var stack Stack
-	curr := rootChild
+	curr := source
 
 outer:
 	for {
+		if len(curr.Parents) > 1 {
+			return Stack{}, fmt.Errorf("unsupported git commit graph, commit %s has multiple parents: %v", curr.Hash, curr.Parents)
+		}
+
 		switch len(curr.LocalBranches) {
 		case 0:
 			// do nothing
@@ -106,5 +121,11 @@ outer:
 		}
 	}
 
+	if len(stack.LocalBranches) == 0 {
+		return Stack{}, fmt.Errorf("could not create stack, source node: %v, err: %w", source.Hash, errNoBranchesInStack)
+	}
+
+	slices.Reverse(stack.LocalBranches)
+	stack.Name = stack.LocalBranches[0].Name
 	return stack, nil
 }

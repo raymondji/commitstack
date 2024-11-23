@@ -1,13 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 
-	"github.com/raymondji/git-stacked/git"
+	"github.com/raymondji/git-stacked/gitlib"
 	"github.com/raymondji/git-stacked/stack"
 	"github.com/spf13/cobra"
 )
@@ -16,21 +18,25 @@ const (
 	configFileName = ".git-stacked.json"
 )
 
-type Config struct {
-	GithubIntegration bool
-	GitlabIntegration bool
+type config struct {
+	DefaultBranch string `json:"defaultBranch"`
 }
 
 var (
-	gsBaseBranch        string
-	gsEnableColorOutput bool
-	gsEnableGitLabExt   bool
-	gsEnableGitHubExt   bool
-	gsEnableDebugOutput bool
+	defaultCfg = config{
+		DefaultBranch: "main",
+	}
 )
 
 func main() {
-	gsBaseBranch = getEnv("GS_BASE_BRANCH", "main")
+	var err error
+	cfg, err := readConfigFile()
+	if err != nil {
+		log.Print(err.Error())
+		return
+	}
+	fmt.Println("got cfg", cfg)
+
 	// useGithubCli := isInstalled("gh")
 	// useGitlabCli := isInstalled("glab")
 
@@ -39,93 +45,104 @@ func main() {
 		Short: "A CLI tool for managing stacked Git branches.",
 	}
 
+	var listCmd = &cobra.Command{
+		Use:   "list",
+		Short: "List all stacks",
+		Run: func(cmd *cobra.Command, args []string) {
+			g := gitlib.Git{}
+			stacks, err := stack.GetAll(g, cfg.DefaultBranch)
+			if err != nil {
+				log.Fatalf("Failed to list stacks, err: %v", err)
+			}
+
+			for _, s := range stacks {
+				fmt.Println("Got stack", s)
+				var prefix string
+				if s.Current {
+					prefix = "*"
+				} else {
+					prefix = " "
+				}
+
+				fmt.Printf("%s %s\n", prefix, s.LocalBranches[len(s.LocalBranches)-1].Name)
+			}
+		},
+	}
+
+	var pushCmd = &cobra.Command{
+		Use:   "push",
+		Short: "Push all branches in the stack",
+		Run: func(cmd *cobra.Command, args []string) {
+			g := gitlib.Git{}
+			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
+			if err != nil {
+				log.Fatalf("Failed to get current stack, err: %v", err)
+			}
+
+			for _, b := range stack.LocalBranches {
+				fmt.Printf("Pushing branch: %s\n", b.Name)
+				// TODO
+			}
+		},
+	}
+
+	var branchCmd = &cobra.Command{
+		Use:   "branch",
+		Short: "List all branches in the current stack",
+		Run: func(cmd *cobra.Command, args []string) {
+			g := gitlib.Git{}
+			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
+			if err != nil {
+				log.Fatalf("Failed to list branches, err: %v", err)
+			}
+
+			for i, b := range stack.LocalBranches {
+				var prefix, suffix string
+				if i == 0 {
+					suffix = "(bottom)"
+				} else if i == len(stack.LocalBranches)-1 {
+					suffix = "(top)"
+				}
+				if b.Current {
+					prefix = "*"
+				} else {
+					prefix = " "
+				}
+
+				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
+			}
+		},
+	}
+
 	rootCmd.AddCommand(listCmd, branchCmd, pushCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all stacks",
-	Run: func(cmd *cobra.Command, args []string) {
-		g := git.Git{}
-		stacks, err := stack.GetAll(g, gsBaseBranch)
-		if err != nil {
-			log.Fatalf("Failed to list stacks, err: %v", err)
-		}
-
-		for _, s := range stacks {
-			var prefix string
-			if s.Current {
-				prefix = "*"
-			} else {
-				prefix = " "
-			}
-
-			fmt.Println("%s %s %s", prefix, s.LocalBranches[len(s.LocalBranches)-1])
-		}
-	},
-}
-
-var pushCmd = &cobra.Command{
-	Use:   "push",
-	Short: "Push all branches in the stack",
-	Run: func(cmd *cobra.Command, args []string) {
-		g := git.Git{}
-		stack, err := stack.GetCurrent(g, gsBaseBranch)
-		if err != nil {
-
-		}
-		for _, b := range stack.LocalBranches {
-			fmt.Printf("Pushing branch: %s\n", b.Name)
-		}
-	},
-}
-
-var branchCmd = &cobra.Command{
-	Use:   "branch",
-	Short: "List all branches in the current stack",
-	Run: func(cmd *cobra.Command, args []string) {
-		g := git.Git{}
-		stack, err := stack.GetCurrent(g, gsBaseBranch)
-		if err != nil {
-			log.Fatalf("Failed to list branches, err: %v", err)
-		}
-
-		for i, b := range stack.LocalBranches {
-			var prefix, suffix string
-			if i == 0 {
-				suffix = "(bottom)"
-			} else if i == len(stack.LocalBranches)-1 {
-				suffix = "(top)"
-			}
-			if b.Current {
-				prefix = "*"
-			} else {
-				prefix = " "
-			}
-
-			fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
-		}
-	},
-}
-
 // readConfigFile reads the specified configuration file from the root of the Git repository.
-func readConfigFile() (string, error) {
-	g := git.Git{}
-	gitRoot, err := g.GetRootDir()
+func readConfigFile() (config, error) {
+	g := gitlib.Git{}
+	dir, err := g.GetRootDir()
 	if err != nil {
-		return "", err
+		return config{}, err
 	}
 
-	configFilePath := filepath.Join(gitRoot, configFileName)
+	configFilePath := filepath.Join(dir, configFileName)
 	content, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to read config file: %w", err)
+	// Return a default configuration if the file doesn't exist
+	if errors.Is(err, os.ErrNotExist) {
+		return defaultCfg, nil
+	} else if err != nil {
+		return config{}, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	return string(content), nil
+	var cfg config
+	if err := json.Unmarshal(content, &cfg); err != nil {
+		return config{}, err
+	}
+
+	return cfg, nil
 }
 
 func isInstalled(file string) bool {

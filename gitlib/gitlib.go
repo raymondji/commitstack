@@ -1,4 +1,4 @@
-package git
+package gitlib
 
 import (
 	"fmt"
@@ -10,29 +10,20 @@ type Git struct{}
 
 // GetRootDir returns the root directory of the current Git repository.
 func (g Git) GetRootDir() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
-	output, err := cmd.Output()
+	// Use the helper function to run the git command
+	output, err := runCommand("git", "rev-parse", "--show-toplevel")
 	if err != nil {
-		return "", fmt.Errorf("failed to get Git root: %w", err)
+		return "", fmt.Errorf("failed to get Git root dir, err: %v", err)
 	}
-	return strings.TrimSpace(string(output)), nil
+	return output, nil
 }
 
 func (g Git) GetCurrentBranch() (string, error) {
-	return "", nil
-}
-
-func (g Git) GetHash(branch string) (string, error) {
-	return "", nil
-}
-
-func (g Git) GetLocalBranches() ([]string, error) {
-	out, err := runCommand("git", "branch", "--format=%(refname:short)")
+	output, err := runCommand("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("failed to get current branch, err: %v", err)
 	}
-	lines := strings.Split(out, "\n")
-	return lines, nil
+	return output, nil
 }
 
 type Log struct {
@@ -46,11 +37,10 @@ type Commit struct {
 	LocalBranches []string
 }
 
-// GetLog retrieves the git log and parses branches for each commit
-func (g Git) GetLog(rangeStart, rangeEnd string) (Log, error) {
+func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	out, err := runCommand(
 		"git", "log", `--pretty=format:"%h-----%p-----%D"`,
-		"--decorate=full", fmt.Sprintf("%s..%s", rangeStart, rangeEnd))
+		"--all", "--decorate=full", fmt.Sprintf("^%s", notReachableFrom))
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
