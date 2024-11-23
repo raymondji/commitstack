@@ -33,8 +33,6 @@ func Build(git Git, defaultBranch string) (DAG, error) {
 	if err != nil {
 		return DAG{}, err
 	}
-	fmt.Println("got log")
-	fmt.Println(log)
 
 	dag := DAG{
 		Nodes: map[string]Node{},

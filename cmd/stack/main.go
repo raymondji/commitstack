@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 
 	"github.com/raymondji/git-stacked/gitlib"
 	"github.com/raymondji/git-stacked/stack"
@@ -62,7 +63,7 @@ func main() {
 					prefix = " "
 				}
 
-				fmt.Printf("%s %s\n", prefix, s.LocalBranches[len(s.LocalBranches)-1].Name)
+				fmt.Printf("%s %s\n", prefix, s.Name)
 			}
 		},
 	}
@@ -72,12 +73,25 @@ func main() {
 		Short: "Push all branches in the stack",
 		Run: func(cmd *cobra.Command, args []string) {
 			g := gitlib.Git{}
-			stack, err := stack.GetCurrent(g, cfg.DefaultBranch)
+			s, err := stack.GetCurrent(g, cfg.DefaultBranch)
 			if err != nil {
 				log.Fatalf("Failed to get current stack, err: %v", err)
 			}
 
-			for _, b := range stack.LocalBranches {
+			// Push from earliest to latest
+			// Only push up to the current branch.
+			branches := s.LocalBranches
+			slices.Reverse(branches)
+
+			var toPush []stack.Branch
+			for _, b := range branches {
+				toPush = append(toPush, b)
+				if b.Current {
+					break
+				}
+			}
+
+			for _, b := range toPush {
 				fmt.Printf("Pushing branch: %s\n", b.Name)
 				// TODO
 			}
@@ -97,9 +111,9 @@ func main() {
 			for i, b := range stack.LocalBranches {
 				var prefix, suffix string
 				if i == 0 {
-					suffix = "(bottom)"
-				} else if i == len(stack.LocalBranches)-1 {
 					suffix = "(top)"
+				} else if i == len(stack.LocalBranches)-1 {
+					suffix = "(bot)"
 				}
 				if b.Current {
 					prefix = "*"

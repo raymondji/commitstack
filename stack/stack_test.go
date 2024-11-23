@@ -1,7 +1,6 @@
 package stack_test
 
 import (
-	"slices"
 	"testing"
 
 	"github.com/raymondji/git-stacked/gitlib"
@@ -166,15 +165,6 @@ func TestGetAll(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			slices.SortFunc(got, func(a, b stack.Stack) int {
-				if a.Name < b.Name {
-					return -1
-				} else if a.Name == b.Name {
-					return 0
-				} else {
-					return 1
-				}
-			})
 			require.Equal(t, c.want, got)
 		})
 	}

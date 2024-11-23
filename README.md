@@ -10,6 +10,12 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 [View sample usage with the gitlab extension](https://github.com/raymondji/git-stacked/blob/main/test-goldens/gitlab.txt)
 
+# Requirements
+
+1. Linear commit history in your local feature branches
+
+2. Single branch per commit
+
 # Concepts
 
 Status: WIP

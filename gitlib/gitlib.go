@@ -39,14 +39,12 @@ type Commit struct {
 
 func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	out, err := runCommand(
-		"git", "log", `--pretty=format:%h-----%p-----%D`,
-		"--branches", "--not", "--remotes",
-		"--decorate=full", fmt.Sprintf("^%s", notReachableFrom))
+		"git", "log", `--pretty=format:%h-----%p-----%D`, "--decorate=full",
+		"--branches", fmt.Sprintf("^%s", notReachableFrom),
+		"--not", "--remotes")
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
-	fmt.Println("log output")
-	fmt.Println(out)
 
 	lines := strings.Split(out, "\n")
 	var commits []Commit
@@ -79,7 +77,7 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 func runCommand(name string, args ...string) (string, error) {
 	output, err := exec.Command(name, args...).Output()
 	if err != nil {
-		return "", fmt.Errorf("error running cmd %s: %s, err: %v", name, strings.Join(args, " "), err)
+		return "", fmt.Errorf("error running cmd %s %s, err: %v", name, strings.Join(args, " "), err)
 	}
 	return strings.TrimSpace(string(output)), nil
 }

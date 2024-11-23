@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/raymondji/git-stacked/commitgraph"
 )
@@ -72,6 +73,15 @@ func GetAll(git Git, defaultBranch string) ([]Stack, error) {
 		stacks = append(stacks, stack)
 	}
 
+	slices.SortFunc(stacks, func(a, b Stack) int {
+		if a.Name < b.Name {
+			return -1
+		} else if a.Name == b.Name {
+			return 0
+		} else {
+			return 1
+		}
+	})
 	return stacks, nil
 }
 
@@ -86,7 +96,12 @@ func buildStack(
 outer:
 	for {
 		if len(curr.Parents) > 1 {
-			return Stack{}, fmt.Errorf("unsupported git commit graph, commit %s has multiple parents: %v", curr.Hash, curr.Parents)
+			var parents []string
+			for p := range curr.Parents {
+				parents = append(parents, p)
+			}
+			return Stack{}, fmt.Errorf("unsupported git commit graph, commit %s has multiple parents: %v",
+				curr.Hash, strings.Join(parents, ", "))
 		}
 
 		switch len(curr.LocalBranches) {
@@ -103,8 +118,8 @@ outer:
 			stack.LocalBranches = append(stack.LocalBranches, b)
 		default:
 			return Stack{}, fmt.Errorf(
-				"invalid git commit graph, commit %s is referenced by multiple local branches: %v",
-				curr.Hash, curr.LocalBranches)
+				"unsupported commit graph, commit %s is referenced by multiple local branches: %v",
+				curr.Hash, strings.Join(curr.LocalBranches, ", "))
 		}
 
 		switch len(curr.Children) {
@@ -122,7 +137,7 @@ outer:
 	}
 
 	if len(stack.LocalBranches) == 0 {
-		return Stack{}, fmt.Errorf("could not create stack, source node: %v, err: %w", source.Hash, errNoBranchesInStack)
+		return Stack{}, fmt.Errorf("unexpected source node, no branch tags in stack: %v, err: %w", source.Hash, errNoBranchesInStack)
 	}
 
 	slices.Reverse(stack.LocalBranches)
