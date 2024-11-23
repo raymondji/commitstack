@@ -83,11 +83,11 @@ func main() {
 	var listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List all stacks",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
 			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
-				log.Fatalf("Failed to list stacks, err: %v", err)
+				return err
 			}
 
 			for _, s := range stacks.Entries {
@@ -108,6 +108,8 @@ func main() {
 					fmt.Printf("  %s have diverged, please reconcile (e.g. by rebasing one stack onto another)\n", strings.Join(grp, ", "))
 				}
 			}
+
+			return nil
 		},
 	}
 
@@ -238,11 +240,33 @@ func main() {
 	var showCmd = &cobra.Command{
 		Use:   "show",
 		Short: "Show all branches in the current stack",
-		Run: func(cmd *cobra.Command, args []string) {
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var stack stackslib.Stack
 			g := gitlib.Git{}
-			stack, err := stackslib.ComputeCurrent(g, cfg.DefaultBranch)
-			if err != nil {
-				log.Fatalf("Failed to list branches, err: %v", err)
+			if len(args) == 0 {
+				var err error
+				stack, err = stackslib.ComputeCurrent(g, cfg.DefaultBranch)
+				if err != nil {
+					return err
+				}
+			} else {
+				wantStack := args[0]
+				stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+				if err != nil {
+					return err
+				}
+
+				var found bool
+				for _, s := range stacks.Entries {
+					if s.Name() == wantStack {
+						stack = s
+						found = true
+					}
+				}
+				if !found {
+					return fmt.Errorf("no stack named: %s", wantStack)
+				}
 			}
 
 			for i, b := range stack.LocalBranches {
@@ -260,6 +284,8 @@ func main() {
 
 				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
 			}
+
+			return nil
 		},
 	}
 

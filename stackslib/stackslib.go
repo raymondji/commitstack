@@ -168,8 +168,8 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 		return currStack, nil
 	default:
 		return Stack{}, fmt.Errorf(
-			"unsupported commit graph, commit %s is referenced by multiple local branches: %v",
-			currNode.Hash, strings.Join(currNode.LocalBranches, ", "))
+			"%v both point to the same commit %s",
+			strings.Join(currNode.LocalBranches, ", "), currNode.Hash)
 	}
 }
 
