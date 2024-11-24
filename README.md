@@ -1,4 +1,4 @@
-# Git stacked
+# Git Stack CLI
 
 A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
