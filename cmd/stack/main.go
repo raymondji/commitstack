@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/raymondji/git-stacked/concurrently"
@@ -155,7 +157,7 @@ func main() {
 				return gitplatform.PullRequest{}, nil
 			})
 			if err != nil {
-				return fmt.Errorf("failed to force push branches, errors: %v\n", err.Error())
+				return fmt.Errorf("failed to force push branches, errors: %v", err)
 			}
 
 			// Push all branches.
@@ -163,7 +165,7 @@ func main() {
 				return g.ForcePush(branch.Name)
 			})
 			if err != nil {
-				return fmt.Errorf("failed to force push branches, errors:", err.Error())
+				return fmt.Errorf("failed to force push branches, errors: %v", err.Error())
 			}
 
 			// Create MRs or update exising MRs to the right target branch.
@@ -173,24 +175,30 @@ func main() {
 					return platform.CreatePullRequest(gitplatform.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: wantTargets[branch.Name],
-						Description:  "sample",
+						Description:  "",
 					})
 				} else if err != nil {
 					return gitplatform.PullRequest{}, err
-				}
-
-				if pr.TargetBranch != wantTargets[branch.Name] {
-					return platform.UpdatePullRequest(gitplatform.PullRequest{
-						SourceBranch: branch.Name,
-						TargetBranch: wantTargets[branch.Name],
-						Description:  pr.Description,
-					})
 				}
 
 				return pr, nil
 			})
 			if err != nil {
 				log.Fatalf("failed to create some pull requests, errors: %v", err.Error())
+			}
+
+			// Update PRs with info on the stacks.
+			prs, err = concurrently.ForEach(prs, func(pr gitplatform.PullRequest) (gitplatform.PullRequest, error) {
+				desc := formatPullRequestDescription(pr, prs)
+				pr, err := platform.UpdatePullRequest(gitplatform.PullRequest{
+					SourceBranch: pr.SourceBranch,
+					TargetBranch: wantTargets[pr.SourceBranch],
+					Description:  desc,
+				})
+				return pr, err
+			})
+			if err != nil {
+				return err
 			}
 
 			for _, pr := range prs {
@@ -289,8 +297,6 @@ func main() {
 				var prefix, suffix string
 				if i == 0 {
 					suffix = "(top)"
-				} else if i == len(stack.LocalBranches)-1 {
-					suffix = "(bot)"
 				}
 				if b.Current {
 					prefix = "*"
@@ -311,6 +317,38 @@ func main() {
 	rootCmd.AddCommand(versionCmd, addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
+	}
+}
+
+func formatPullRequestDescription(
+	currPR gitplatform.PullRequest, prs []gitplatform.PullRequest,
+) string {
+	var newStackDescParts []string
+	currIndex := slices.IndexFunc(prs, func(pr gitplatform.PullRequest) bool {
+		return pr.SourceBranch == currPR.SourceBranch
+	})
+	for i, pr := range prs {
+		var prefix string
+		if i == currIndex {
+			prefix = "Current: "
+		} else if i == currIndex-1 {
+			prefix = "Next: "
+		} else if i == currIndex+1 {
+			prefix = "Prev: "
+		}
+		newStackDescParts = append(newStackDescParts, fmt.Sprintf("- %s%s", prefix, pr.MarkdownWebURL))
+	}
+	newStackDesc := strings.Join(newStackDescParts, "\n")
+
+	beginMarker := "Pull Request Stack:"
+	endMarker := "<!-- Pull Request Stack (bottom) -->"
+	newSection := fmt.Sprintf("%s\n%s\n\n%s", beginMarker, newStackDesc, endMarker)
+	sectionPattern := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(beginMarker) + `.*?` + regexp.QuoteMeta(endMarker))
+
+	if sectionPattern.MatchString(currPR.Description) {
+		return sectionPattern.ReplaceAllString(currPR.Description, newSection)
+	} else {
+		return fmt.Sprintf("%s\n\n%s", strings.TrimSpace(currPR.Description), newSection)
 	}
 }
 

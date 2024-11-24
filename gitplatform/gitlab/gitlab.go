@@ -15,10 +15,12 @@ type Gitlab struct{}
 var _ gitplatform.GitPlatform = Gitlab{}
 
 type GitlabMR struct {
+	Title        string `json:"title"`
 	TargetBranch string `json:"target_branch"`
 	SourceBranch string `json:"source_branch"`
 	Description  string `json:"description"`
 	WebURL       string `json:"web_url"`
+	IID          int    `json:"iid"`
 }
 
 func (g Gitlab) GetPullRequest(sourceBranch string) (gitplatform.PullRequest, error) {
@@ -39,10 +41,12 @@ func (g Gitlab) GetPullRequest(sourceBranch string) (gitplatform.PullRequest, er
 	}
 
 	return gitplatform.PullRequest{
-		SourceBranch: mr.SourceBranch,
-		TargetBranch: mr.TargetBranch,
-		Description:  mr.Description,
-		WebURL:       mr.WebURL,
+		SourceBranch:   mr.SourceBranch,
+		TargetBranch:   mr.TargetBranch,
+		Description:    mr.Description,
+		WebURL:         mr.WebURL,
+		MarkdownWebURL: fmt.Sprintf("%s+", mr.WebURL),
+		Title:          mr.Title,
 	}, nil
 }
 

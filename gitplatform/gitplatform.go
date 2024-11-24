@@ -5,10 +5,12 @@ import "errors"
 // PullRequest is the most popular name so using this here, but this represents an
 // umbrella including pull requests (github), merge requests (gitlab), diffs (phabricator), etc.
 type PullRequest struct {
-	Description  string
-	SourceBranch string
-	TargetBranch string
-	WebURL       string
+	Title          string
+	Description    string
+	SourceBranch   string
+	TargetBranch   string
+	WebURL         string
+	MarkdownWebURL string
 }
 
 var ErrDoesNotExist = errors.New("does not exist")
