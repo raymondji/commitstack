@@ -19,13 +19,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO: commands that are relative to the current stack should work
-// even if some other stack is in an invalid state.
-// TODO: list should still show the valid stacks even if some are invalid,
-// but provide some notice about those invalid stacks and how to debug.
-// This could happen easily if a repo uses multiple long lived branches with merge workflows,
-// e.g. release branches.
-
 const (
 	configFileName = ".git-stacked.json"
 )
@@ -48,8 +41,14 @@ func main() {
 		return
 	}
 
-	// useGithubCli := isInstalled("gh")
-	// useGitlabCli := isInstalled("glab")
+	ok, err := isInstalled("glab")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	} else if !ok {
+		fmt.Println("glab CLI must be installed")
+		return
+	}
 
 	var rootCmd = &cobra.Command{
 		Use:   "stack",
@@ -402,7 +401,14 @@ func readConfigFile() (config, error) {
 	return cfg, nil
 }
 
-func isInstalled(file string) bool {
+func isInstalled(file string) (bool, error) {
 	_, err := exec.LookPath(file)
-	return err != nil
+	var execErr *exec.Error
+	if errors.As(err, &execErr) {
+		// Generally returned when file is not a executable
+		return false, nil
+	} else if err != nil {
+		return false, fmt.Errorf("error checking if %s is installed, err: %v", file, err)
+	}
+	return true
 }
