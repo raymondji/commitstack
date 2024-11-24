@@ -2,6 +2,12 @@
 
 A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
+## Goals
+
+- Make stacking in Git easy
+- Provide first-class support for Gitlab (which most stacking tools don't suppor) and make it easy to extend to other Git providers.
+- Feel like a natural extension of using Git directly (no black magic, easy to understand how it interacts with other Git commands, tells you clearly when something else you've done in Git is incompatible with the tool)
+
 ## Sample usage
 
 [View sample usage](https://github.com/raymondji/git-stacked/blob/main/test-goldens/none.txt)
@@ -10,11 +16,17 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 [View sample usage with the gitlab extension](https://github.com/raymondji/git-stacked/blob/main/test-goldens/gitlab.txt)
 
+# Requirements
+
+1. Linear commit history in your local feature branches
+
+2. Single branch per commit
+
 # Concepts
 
 Status: WIP
 
-A "stack" is any local branch, excluding $GS_BASE_BRANCH (default: `main`), that has 1+ commits that are not reachable from any other branch.
+A stack is a sequence of branches from $GS_BASE_BRANCH, excluding $GS_BASE_BRANCH itself (default: `main`), where the topmost branch contains 1+ commits not reachable from any oher branch.
 
 ## Design goals
 
@@ -47,17 +59,6 @@ Configure your `~/.zshrc` or `~/.bashrc`:
 
 source ~/dev/git-stacked/stack.sh
 ```
-
-## Recommended `~/.gitconfig` settings
-
-These settings are not required to use `git-stacked`, but are helpful for git operations you do outside of the `git-stacked` commands.
-
-```
-[rebase]
-    updateRefs = true
-```
-
-`updateRefs = true` means that rebasing will automatically update refs, without having to specify `--update-refs`.
 
 ## Comparison with other tools
 

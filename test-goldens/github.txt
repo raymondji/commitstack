@@ -1,31 +1,31 @@
-> git-stacked create a1
+> git-stacked stack a1
 Switched to a new branch 'a1'
-[a1 27b58cc] Start of a1
+[a1 e821279] Start of a1
 
-> git-stacked create a2
+> git-stacked stack a2
 Switched to a new branch 'a2'
-[a2 b8567ce] Start of a2
+[a2 800f041] Start of a2
 
 > git-stacked branch
-* a2 (top)
+* a2
   a1
 
 > git checkout main
 Switched to branch 'main'
 Your branch is up to date with 'origin/main'.
 
-> git-stacked create b1
+> git-stacked stack b1
 Switched to a new branch 'b1'
-[b1 110b347] Start of b1
+[b1 693a7ad] Start of b1
 
-> git-stacked stack
-* b1
+> git-stacked all
   a2
+* b1
 
 > git checkout a2
 Switched to branch 'a2'
 
-> git-stacked push-force
+> git-stacked push
 Prepare branch: a1
 ----------------------------
 
@@ -41,7 +41,7 @@ remote:
 To github.com:raymondji/git-stacked-testing.git
  * [new branch]      a1 -> a1
 Creating a new PR for branch a1...
-https://github.com/raymondji/git-stacked-testing/pull/51
+https://github.com/raymondji/git-stacked-testing/pull/57
 
 Push branch: a2
 ----------------------------
@@ -52,6 +52,50 @@ remote:
 To github.com:raymondji/git-stacked-testing.git
  * [new branch]      a2 -> a2
 Creating a new PR for branch a2...
-https://github.com/raymondji/git-stacked-testing/pull/52
+https://github.com/raymondji/git-stacked-testing/pull/58
+
+
+> git checkout main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+
+> git commit --allow-empty -m New changes in main
+[main 870ed46] New changes in main
+
+> git checkout a2
+Switched to branch 'a2'
+
+> git-stacked pull
+Switched to branch 'main'
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+Already up to date.
+Switched to branch 'a2'
+Rebasing (1/4)Rebasing (2/4)Rebasing (3/4)[KSuccessfully rebased and updated refs/heads/a2.
+Updated the following refs with --update-refs:
+	refs/heads/a1
+
+> git-stacked push
+Prepare branch: a1
+----------------------------
+Changing PR target branch to main for PR #57...
+https://github.com/raymondji/git-stacked-testing/pull/57
+
+Prepare branch: a2
+----------------------------
+Changing PR target branch to main for PR #58...
+https://github.com/raymondji/git-stacked-testing/pull/58
+
+Push branch: a1
+----------------------------
+To github.com:raymondji/git-stacked-testing.git
+ + e821279...d087f26 a1 -> a1 (forced update)
+
+Push branch: a2
+----------------------------
+To github.com:raymondji/git-stacked-testing.git
+ + 800f041...505e5fc a2 -> a2 (forced update)
+Changing PR target branch back to a1 for PR #58...
+https://github.com/raymondji/git-stacked-testing/pull/58
 
 

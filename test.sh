@@ -2,14 +2,15 @@
 set -e
 
 debug() {
-    echo "> $@"
+    echo "> $*"
     "$@"
     echo ""
 }
+# shellcheck disable=SC1091
 source ./stack.sh
-GS_ENABLE_COLOR_OUTPUT=no
+export GS_ENABLE_COLOR_OUTPUT=no
 SOURCE_DIR=$(pwd)
-TEST_ROOTDIR=(/tmp/git-stacked-test/$RANDOM)
+TEST_ROOTDIR="/tmp/git-stacked-test/$RANDOM"
 TEST_GITHUB_REPO="git@github.com:raymondji/git-stacked-testing.git"
 echo "TEST_ROOTDIR: $TEST_ROOTDIR"
 
@@ -20,16 +21,16 @@ run-test() {
     echo "==================================="
 
     TEST_DIR="$TEST_ROOTDIR/$TEST_EXTENSION"
-    mkdir -p $TEST_DIR
-    cd $TEST_DIR
+    mkdir -p "$TEST_DIR"
+    cd "$TEST_DIR"
 
     if [ "$TEST_EXTENSION" = "gitlab" ]; then
-        GS_ENABLE_GITLAB_EXTENSION=true
+        export GS_ENABLE_GITLAB_EXTENSION=true
     elif [ "$TEST_EXTENSION" = "github" ]; then
-        GS_ENABLE_GITHUB_EXTENSION=true
+        export GS_ENABLE_GITHUB_EXTENSION=true
     else
-        GS_ENABLE_GITLAB_EXTENSION=false
-        GS_ENABLE_GITHUB_EXTENSION=false
+        export GS_ENABLE_GITLAB_EXTENSION=false
+        export GS_ENABLE_GITHUB_EXTENSION=false
     fi
 
     # Set up the git repo
@@ -54,9 +55,9 @@ run-test() {
         
         # Delete all remote branches except the new main branch
         # List branches and remove each branch
-        for branch in $(git branch -r |  grep -v 'origin/main'); do
-            branch_name=$(echo $branch | sed 's/origin\///')
-            git push origin --delete $branch_name
+        for BRANCH in $(git branch -r |  grep -v 'origin/main'); do
+            BRANCH_NAME=$(echo "$BRANCH" | sed 's/origin\///')
+            git push origin --delete "$BRANCH_NAME"
         done
     elif [ "$TEST_EXTENSION" = "gitlab" ]; then
         echo "Gitlab test not implemented yet"
@@ -66,16 +67,22 @@ run-test() {
 
     echo "Running..."
     (
-        debug git-stacked create a1
-        debug git-stacked create a2
+        debug git-stacked stack a1
+        debug git-stacked stack a2
         debug git-stacked branch
 
         debug git checkout main
-        debug git-stacked create b1
-        debug git-stacked stack
+        debug git-stacked stack b1
+        debug git-stacked all
 
         debug git checkout a2
-        debug git-stacked push-force
+        debug git-stacked push
+
+        debug git checkout main
+        debug git commit --allow-empty -m "New changes in main"
+        debug git checkout a2
+        debug git-stacked pull
+        debug git-stacked push
     ) > "$SOURCE_DIR/test-goldens/$TEST_EXTENSION.txt" 2>&1
 }
 
