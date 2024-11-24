@@ -341,7 +341,7 @@ func formatPullRequestDescription(
 	newStackDesc := strings.Join(newStackDescParts, "\n")
 
 	beginMarker := "Pull Request Stack:"
-	endMarker := "<!-- Pull Request Stack (bottom) -->"
+	endMarker := "<!-- End Pull Request Stack -->"
 	newSection := fmt.Sprintf("%s\n%s\n\n%s", beginMarker, newStackDesc, endMarker)
 	sectionPattern := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(beginMarker) + `.*?` + regexp.QuoteMeta(endMarker))
 
