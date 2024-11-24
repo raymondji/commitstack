@@ -62,12 +62,20 @@ source ~/dev/git-stacked/stack.sh
 
 ## Comparison with other tools
 
-Good overview of the available tools: https://stacking.dev. Find one that speaks to you!
+Status: WIP
 
-https://github.com/spacedentist/spr
-- API is based on phabricator (one commit per PR)
-- only works with Github
-- requires Github personal access token
-
-https://graphite.dev/
-- paid SaaS
+| Capabilities | [Graphite](https://graphite.dev/) | [Aviator](https://github.com/aviator-co/av) | [glab stack](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) | [Git butler](https://gitbutler.com/) | [spacedentist/spr](https://github.com/spacedentist/spr) | [git-spice](https://abhinav.github.io/git-spice/) | [ghstack](https://github.com/ezyang/ghstack) | [git-branchless](https://github.com/arxanas/git-branchless) | [ejoffe/spr](https://github.com/ejoffe/spr) | [git-town](https://www.git-town.com/) | [gitext-rs/git-stack](https://github.com/gitext-rs/git-stack) | https://git-ps.sh/ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Automates creating PRs from stack (Gitlab) | ❌ | ❌ | ✅ |  | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |  |
+| Automates creating PRs from stack (Github) | ✅ | ❌ | ❌ |  | ✅ | ❌ |  |  |  |  |  |  |
+| Commercial | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |  |
+| Open source | ❌ | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
+| Stars (as of Nov 2024) | N/A | 264 | 651* (part of glab CLI monorepo) |  | 413 |  |  |  |  |  |  |  |
+| Supports branchless workflow |  |  |  |  | ✅ | ✅ |  |  |  |  |  |  |
+| Displays stack info on PRs (Github) | ⚠️ (only on the Graphite code review tool) |  | ❌ |  | ❌ |  |  |  |  |  |  |  |
+| Displays stack info on PRs (Gitlab) | ❌ |  |  |  | ❌ |  |  |  |  |  |  |  |
+| Automates merging PRs and updating stack |  |  |  |  | ✅ |  |  |  |  |  |  |  |
+| Reorder PRs in a stack |  |  |  |  | ✅ |  |  |  |  |  |  |  |
+| Split an existing PR into two |  |  |  |  | ✅ |  |  |  |  |  |  |  |
+| Add a new PR in the middle of a stack |  |  |  |  | ✅ |  |  |  |  |  |  |  |
+| Requires storing external state |  |  |  |  |  |  |  |  |  |  |  |  |
