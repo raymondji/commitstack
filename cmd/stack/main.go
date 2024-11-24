@@ -342,7 +342,7 @@ func formatPullRequestDescription(
 
 	beginMarker := "<!-- DO NOT EDIT: PR stack section (start)-->"
 	endMarker := "<!-- DO NOT EDIT: PR stack section (end) -->"
-	newSection := fmt.Sprintf("%s\n%s\n\n%s", beginMarker, newStackDesc, endMarker)
+	newSection := fmt.Sprintf("%s\n%s\n%s", beginMarker, newStackDesc, endMarker)
 	sectionPattern := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(beginMarker) + `.*?` + regexp.QuoteMeta(endMarker))
 
 	if sectionPattern.MatchString(currPR.Description) {
