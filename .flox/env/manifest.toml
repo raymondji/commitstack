@@ -10,7 +10,7 @@ version = 1
 # the `[install]` section.
 [install]
 go.pkg-path = "go"
-go.version = "1.23.2"
+go.version = "1.18"
 # hello.pkg-path = "hello"
 # nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
 
