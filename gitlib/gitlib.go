@@ -11,6 +11,37 @@ const DEBUG = false
 
 type Git struct{}
 
+type Upstream struct {
+	Remote     string
+	BranchName string
+}
+
+func (g Git) GetUpstream(branch string) (Upstream, error) {
+	output, err := exec.Command("git", "for-each-ref", "--format=%(upstream:short)", fmt.Sprintf("refs/heads/%s", branch))
+	if err != nil {
+		return Upstream{}, fmt.Errorf("failed to get upstream, err: %v", err)
+	}
+
+	fmt.Println("DEBUG GetUpstream, got output ", output)
+
+	lines := strings.Split(output, "\n")
+	switch len(lines) {
+	case 0:
+		return Upstream{}, fmt.Errorf("branch %s does not have an upstream branch", branch)
+	case 1:
+		parts := strings.Split(lines[0], "/")
+		if len(parts) != 2 {
+			return Upstream{}, fmt.Errorf("failed to get remote for branch %s, unexpected output: %v", branch, output)
+		}
+		return Upstream{
+			Remote:     parts[0],
+			BranchName: parts[1],
+		}, nil
+	default:
+		return Upstream{}, fmt.Errorf("branch %s matched multiple upstream branches: %v", branch, lines)
+	}
+}
+
 // GetRootDir returns the root directory of the current Git repository.
 func (g Git) GetRootDir() (string, error) {
 	// Use the helper function to run the git command
@@ -38,13 +69,13 @@ func (g *Git) ForcePush(branchName string) (string, error) {
 	return fmt.Sprintf("Force pushing branch %s\n%s", branchName, res), nil
 }
 
-func (g *Git) Fetch() (string, error) {
-	res, err := exec.Command("git", "fetch")
+func (g *Git) Fetch(repo string, refspec string) error {
+	_, err := exec.Command("git", "fetch", repo, refspec)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch, err: %v", err)
+		return fmt.Errorf("failed to fetch, err: %v", err)
 	}
 
-	return res, nil
+	return nil
 }
 
 func (g *Git) Rebase(branch string) (string, error) {
