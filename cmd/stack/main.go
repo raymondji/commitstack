@@ -338,10 +338,10 @@ func formatPullRequestDescription(
 		}
 		newStackDescParts = append(newStackDescParts, fmt.Sprintf("- %s%s", prefix, pr.MarkdownWebURL))
 	}
-	newStackDesc := strings.Join(newStackDescParts, "\n")
+	newStackDesc := "Pull request stack:\n" + strings.Join(newStackDescParts, "\n")
 
-	beginMarker := "Pull request stack:"
-	endMarker := "<!-- End Pull request stack -->"
+	beginMarker := "<!-- DO NOT EDIT: PR stack section (start)-->"
+	endMarker := "<!-- DO NOT EDIT: PR stack section (end) -->"
 	newSection := fmt.Sprintf("%s\n%s\n\n%s", beginMarker, newStackDesc, endMarker)
 	sectionPattern := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(beginMarker) + `.*?` + regexp.QuoteMeta(endMarker))
 
