@@ -3,8 +3,8 @@ name: CI
 on:
   pull_request:
   push:
-    tags:
-      - "*"
+    branch:
+      - main
 
 jobs:
   test:
@@ -25,7 +25,7 @@ jobs:
   release:
     name: Build and Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
