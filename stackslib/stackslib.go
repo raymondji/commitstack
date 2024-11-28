@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/raymondji/git-stacked/commitgraph"
@@ -82,6 +83,9 @@ func Compute(git Git, defaultBranch string) (Stacks, error) {
 				names = append(names, s.Name())
 			}
 			result.SharingHistory = append(result.SharingHistory, names)
+			for _, grp := range result.SharingHistory {
+				sort.Strings(grp)
+			}
 			result.Entries = append(result.Entries, stacks...)
 		}
 	}

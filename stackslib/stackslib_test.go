@@ -260,8 +260,8 @@ func TestCompute(t *testing.T) {
 				},
 				SharingHistory: [][]string{
 					{
-						"feat/pt3",
 						"feat/pt2",
+						"feat/pt3",
 					},
 				},
 			},
