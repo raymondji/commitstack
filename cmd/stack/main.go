@@ -90,14 +90,17 @@ func main() {
 			}
 
 			for _, s := range stacks.Entries {
-				var prefix string
+				var prefix, suffix string
 				if s.Current() {
 					prefix = "*"
 				} else {
 					prefix = " "
 				}
+				if s.Error != nil {
+					suffix = ", problem!"
+				}
 
-				fmt.Printf("%s %s (%d branches, %d commits)\n", prefix, s.Name(), len(s.LocalBranches()), len(s.Commits))
+				fmt.Printf("%s %s (%d branches, %d commits%s)\n", prefix, s.Name(), len(s.LocalBranches()), len(s.Commits), suffix)
 			}
 
 			printProblems(stacks)

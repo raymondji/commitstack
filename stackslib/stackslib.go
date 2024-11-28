@@ -192,11 +192,15 @@ var _ error = MergeCommitError{}
 func (e MergeCommitError) Error() string {
 	if len(e.PartialStack.LocalBranches()) > 0 {
 		var branches []string
-		for _, b := range e.PartialStack.LocalBranches() {
-			branches = append(branches, b.Name)
+		for i, b := range e.PartialStack.LocalBranches() {
+			var suffix string
+			if i == 0 {
+				suffix = " (top)"
+			}
+			branches = append(branches, fmt.Sprintf("%s%s", b.Name, suffix))
 		}
-		return fmt.Sprintf("found merge commit %v in partial stack %v, please undo merge",
-			e.MergeCommitHash, strings.Join(branches, " -> "))
+		return fmt.Sprintf("found merge commit %v in partial stack %v, please undo merge. hint: try `git reflog show %s`",
+			e.MergeCommitHash, strings.Join(branches, " <- "), e.PartialStack.LocalBranches()[0].Name)
 	}
 	return fmt.Sprintf("found merge commit %v, please undo merge", e.MergeCommitHash)
 }
@@ -231,6 +235,7 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 	}
 
 	if len(currNode.Parents) > 1 {
+		fmt.Println("DEBUG currNode", currNode)
 		slices.Reverse(currStack.Commits)
 		return Stack{}, MergeCommitError{
 			MergeCommitHash: currNode.Hash,
