@@ -24,6 +24,7 @@ jobs:
 
   release:
     name: Build and Release
+    needs: test
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
