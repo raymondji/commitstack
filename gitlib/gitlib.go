@@ -2,12 +2,11 @@ package gitlib
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/raymondji/git-stacked/exec"
 )
-
-const DEBUG = false
 
 type Git struct{}
 
@@ -126,10 +125,7 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
-	if DEBUG {
-		fmt.Println("log output")
-		fmt.Println(out)
-	}
+	slog.Debug("git.LogAll", "output", out)
 
 	lines := strings.Split(out, "\n")
 	var commits []Commit
@@ -154,6 +150,7 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 		commits = append(commits, commit)
 	}
 
+	slog.Debug("git.LogAll", "commits", commits)
 	return Log{
 		Commits: commits,
 	}, nil

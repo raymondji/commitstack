@@ -97,7 +97,7 @@ func main() {
 					prefix = " "
 				}
 
-				fmt.Printf("%s %s (%d branches, %d commits)\n", prefix, s.Name(), len(s.LocalBranches), len(s.Commits))
+				fmt.Printf("%s %s (%d branches, %d commits)\n", prefix, s.Name(), len(s.LocalBranches()), len(s.Commits))
 			}
 
 			printProblems(stacks)
@@ -122,18 +122,19 @@ func main() {
 			}
 
 			wantTargets := map[string]string{}
-			for i, b := range s.LocalBranches {
-				if i == len(s.LocalBranches)-1 {
+			lb := s.LocalBranches()
+			for i, b := range lb {
+				if i == len(lb)-1 {
 					wantTargets[b.Name] = cfg.DefaultBranch
 				} else {
-					wantTargets[b.Name] = s.LocalBranches[i+1].Name
+					wantTargets[b.Name] = lb[i+1].Name
 				}
 			}
 
 			fmt.Println("Pushing stack...")
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
-			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
+			_, err = concurrently.ForEach(lb, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
 				pr, err := platform.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
@@ -157,7 +158,8 @@ func main() {
 			}
 
 			// Push all branches.
-			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
+			localBranches := s.LocalBranches()
+			_, err = concurrently.ForEach(localBranches, func(branch stackslib.Branch) (string, error) {
 				return g.PushForceWithLease(branch.Name)
 			})
 			if err != nil {
@@ -165,7 +167,7 @@ func main() {
 			}
 
 			// Create MRs or update exising MRs to the right target branch.
-			prs, err := concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
+			prs, err := concurrently.ForEach(localBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				pr, err := platform.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return platform.CreatePullRequest(githost.PullRequest{
@@ -282,6 +284,7 @@ func main() {
 			if len(args) == 0 {
 				stack, err = stacks.GetCurrent()
 				if err != nil {
+					printProblems(stacks)
 					return err
 				}
 			} else {
@@ -298,7 +301,7 @@ func main() {
 				}
 			}
 
-			for i, b := range stack.LocalBranches {
+			for i, b := range stack.LocalBranches() {
 				var prefix, suffix string
 				if i == 0 {
 					suffix = "(top)"
@@ -312,9 +315,7 @@ func main() {
 				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
 			}
 
-			if isSharingHistory(stacks, stack.Name()) {
-				printProblems(stacks)
-			}
+			printProblem(stack)
 			return nil
 		},
 	}
@@ -355,23 +356,20 @@ func formatPullRequestDescription(
 	}
 }
 
-func isSharingHistory(stacks stackslib.Stacks, stackName string) bool {
-	for _, grp := range stacks.SharingHistory {
-		for _, s := range grp {
-			if s == stackName {
-				return true
-			}
-		}
+func printProblem(stack stackslib.Stack) {
+	if stack.Error != nil {
+		fmt.Println()
+		fmt.Println("Problems:")
+		fmt.Printf("  %s\n", stack.Error.Error())
 	}
-	return false
 }
 
 func printProblems(stacks stackslib.Stacks) {
-	if len(stacks.SharingHistory) > 0 {
+	if len(stacks.Errors) > 0 {
 		fmt.Println()
 		fmt.Println("Problems:")
-		for _, grp := range stacks.SharingHistory {
-			fmt.Printf("  %s have diverged, please reconcile (e.g. by rebasing one stack onto another)\n", strings.Join(grp, ", "))
+		for _, err := range stacks.Errors {
+			fmt.Printf("  %s\n", err.Error())
 		}
 	}
 }

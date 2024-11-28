@@ -3,6 +3,7 @@ package stackslib
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
 	"sort"
 	"strings"
@@ -21,28 +22,38 @@ type Branch struct {
 }
 
 type Commit struct {
-	Hash          string
-	LocalBranches []string
+	Hash        string
+	LocalBranch *Branch
 }
 
 type Stacks struct {
 	Entries []Stack
-
-	// Each entry is a list of stack names that share some number of commits
-	SharingHistory [][]string
+	Errors  []error
 }
 
 type Stack struct {
-	Commits       []Commit // Ordered from top to bottom, guaranteed to not be empty
-	LocalBranches []Branch // Ordered from top to bottom, guaranteed to not be empty
+	Commits []Commit // Ordered from top to bottom, guaranteed to not be empty
+	Error   error
+}
+
+// Guaranteed to return at least one branch
+func (s Stack) LocalBranches() []Branch {
+	var branches []Branch
+	for _, c := range s.Commits {
+		if c.LocalBranch == nil {
+			continue
+		}
+		branches = append(branches, *c.LocalBranch)
+	}
+	return branches
 }
 
 func (s Stack) Name() string {
-	return s.LocalBranches[0].Name
+	return s.LocalBranches()[0].Name
 }
 
 func (s Stack) Current() bool {
-	for _, b := range s.LocalBranches {
+	for _, b := range s.LocalBranches() {
 		if b.Current {
 			return true
 		}
@@ -72,21 +83,21 @@ func Compute(git Git, defaultBranch string) (Stacks, error) {
 			fmt.Println(err.Error())
 			continue
 		} else if err != nil {
-			return Stacks{}, err
+			result.Errors = append(result.Errors, err)
+			continue
 		}
 
 		if len(stacks) == 1 {
 			result.Entries = append(result.Entries, stacks[0])
 		} else {
-			var names []string
+			err := newSharedCommitError(stacks)
+			var stacksWithErr []Stack
 			for _, s := range stacks {
-				names = append(names, s.Name())
+				s.Error = err
+				stacksWithErr = append(stacksWithErr, s)
 			}
-			result.SharingHistory = append(result.SharingHistory, names)
-			for _, grp := range result.SharingHistory {
-				sort.Strings(grp)
-			}
-			result.Entries = append(result.Entries, stacks...)
+			result.Errors = append(result.Errors, err)
+			result.Entries = append(result.Entries, stacksWithErr...)
 		}
 	}
 
@@ -110,15 +121,6 @@ var errNoBranchesInStack = errors.New("no branches")
 
 // buildStacks returns all stacks that start from currNode. This will never return an empty slice unless it's returning an error.
 func buildStacks(graph commitgraph.DAG, currBranch string, currNode commitgraph.Node, prevStack Stack) ([]Stack, error) {
-	if len(currNode.Parents) > 1 {
-		var parents []string
-		for p := range currNode.Parents {
-			parents = append(parents, p)
-		}
-		return nil, fmt.Errorf("unsupported git commit graph, commit %s has multiple parents: %v",
-			currNode.Hash, strings.Join(parents, ", "))
-	}
-
 	currStack, err := addNodeToStack(currBranch, currNode, prevStack)
 	if err != nil {
 		return nil, err
@@ -126,14 +128,13 @@ func buildStacks(graph commitgraph.DAG, currBranch string, currNode commitgraph.
 
 	// Base case
 	if len(currNode.Children) == 0 {
-		if len(currStack.LocalBranches) == 0 {
+		if len(currStack.LocalBranches()) == 0 {
 			return nil, fmt.Errorf("%w, last commit in stack has no branch tags. stack: %v",
 				errNoBranchesInStack, currStack)
 		}
 
 		// Order from top to bottom
 		slices.Reverse(currStack.Commits)
-		slices.Reverse(currStack.LocalBranches)
 		return []Stack{currStack}, nil
 	}
 
@@ -148,19 +149,70 @@ func buildStacks(graph commitgraph.DAG, currBranch string, currNode commitgraph.
 	return stacks, nil
 }
 
+type SharedCommitError struct {
+	StackNames []string
+}
+
+var _ error = SharedCommitError{}
+
+func newSharedCommitError(stacks []Stack) SharedCommitError {
+	var names []string
+	for _, s := range stacks {
+		names = append(names, s.Name())
+	}
+	sort.Strings(names)
+	return SharedCommitError{
+		StackNames: names,
+	}
+}
+
+func (e SharedCommitError) Error() string {
+	return fmt.Sprintf("stacks %s have diverged, please rebase", strings.Join(e.StackNames, ", "))
+}
+
+type DuplicateBranchesError struct {
+	Branches []string
+}
+
+var _ error = DuplicateBranchesError{}
+
+func (e DuplicateBranchesError) Error() string {
+	return fmt.Sprintf(
+		"branches %v point to the same commit, please deduplicate",
+		strings.Join(e.Branches, ", "))
+}
+
+type MergeCommitError struct {
+	MergeCommitHash string
+	PartialStack    Stack
+}
+
+var _ error = MergeCommitError{}
+
+func (e MergeCommitError) Error() string {
+	if len(e.PartialStack.LocalBranches()) > 0 {
+		var branches []string
+		for _, b := range e.PartialStack.LocalBranches() {
+			branches = append(branches, b.Name)
+		}
+		return fmt.Sprintf("found merge commit %v in partial stack %v, please undo merge",
+			e.MergeCommitHash, strings.Join(branches, " -> "))
+	}
+	return fmt.Sprintf("found merge commit %v, please undo merge", e.MergeCommitHash)
+}
+
 func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stack) (Stack, error) {
+	slog.Debug("addNodeToStack", "currBranch", currBranch, "currNode", currNode.Hash, "parents", currNode.Parents)
+
 	currStack := Stack{}
 	// Deep copy
-	currStack.LocalBranches = append(currStack.LocalBranches, prevStack.LocalBranches...)
 	currStack.Commits = append(currStack.Commits, prevStack.Commits...)
-	currStack.Commits = append(currStack.Commits, Commit{
-		Hash:          currNode.Hash,
-		LocalBranches: currNode.LocalBranches,
-	})
 
 	switch len(currNode.LocalBranches) {
 	case 0:
-		return currStack, nil
+		currStack.Commits = append(currStack.Commits, Commit{
+			Hash: currNode.Hash,
+		})
 	case 1:
 		b := Branch{
 			Name: currNode.LocalBranches[0],
@@ -168,13 +220,25 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 		if b.Name == currBranch {
 			b.Current = true
 		}
-		currStack.LocalBranches = append(currStack.LocalBranches, b)
-		return currStack, nil
+		currStack.Commits = append(currStack.Commits, Commit{
+			Hash:        currNode.Hash,
+			LocalBranch: &b,
+		})
 	default:
-		return Stack{}, fmt.Errorf(
-			"%v both point to the same commit %s",
-			strings.Join(currNode.LocalBranches, ", "), currNode.Hash)
+		return Stack{}, DuplicateBranchesError{
+			Branches: currNode.LocalBranches,
+		}
 	}
+
+	if len(currNode.Parents) > 1 {
+		slices.Reverse(currStack.Commits)
+		return Stack{}, MergeCommitError{
+			MergeCommitHash: currNode.Hash,
+			PartialStack:    currStack,
+		}
+	}
+
+	return currStack, nil
 }
 
 var ErrMultipleCurrentStacks = errors.New("multiple current stacks")

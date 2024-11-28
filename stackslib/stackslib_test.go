@@ -38,14 +38,11 @@ func TestCompute(t *testing.T) {
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c1",
-								LocalBranches: []string{"dev"},
-							},
-						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Current: true,
-								Name:    "dev",
+								Hash: "c1",
+								LocalBranch: &stackslib.Branch{
+									Name:    "dev",
+									Current: true,
+								},
 							},
 						},
 					},
@@ -73,21 +70,17 @@ func TestCompute(t *testing.T) {
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c2",
-								LocalBranches: []string{"feat/pt2"},
+								Hash: "c2",
+								LocalBranch: &stackslib.Branch{
+									Name: "feat/pt2",
+								},
 							},
 							{
-								Hash:          "c1",
-								LocalBranches: []string{"feat/pt1"},
-							},
-						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Name: "feat/pt2",
-							},
-							{
-								Current: true,
-								Name:    "feat/pt1",
+								Hash: "c1",
+								LocalBranch: &stackslib.Branch{
+									Name:    "feat/pt1",
+									Current: true,
+								},
 							},
 						},
 					},
@@ -95,6 +88,7 @@ func TestCompute(t *testing.T) {
 			},
 		},
 		"with multiple parents": {
+			currBranch: "feat/pt2",
 			log: gitlib.Log{
 				Commits: []gitlib.Commit{
 					{
@@ -114,7 +108,49 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			wantErrContains: "multiple parents",
+			want: stackslib.Stacks{
+				Errors: []error{
+					stackslib.MergeCommitError{
+						MergeCommitHash: "c3",
+						PartialStack: stackslib.Stack{
+							Commits: []stackslib.Commit{
+								{
+									Hash: "c3",
+									LocalBranch: &stackslib.Branch{
+										Name: "feat/pt3",
+									},
+								},
+								{
+									Hash: "c2",
+									LocalBranch: &stackslib.Branch{
+										Name:    "feat/pt2",
+										Current: true,
+									},
+								},
+							},
+						},
+					},
+					stackslib.MergeCommitError{
+						MergeCommitHash: "c3",
+						PartialStack: stackslib.Stack{
+							Commits: []stackslib.Commit{
+								{
+									Hash: "c3",
+									LocalBranch: &stackslib.Branch{
+										Name: "feat/pt3",
+									},
+								},
+								{
+									Hash: "c1",
+									LocalBranch: &stackslib.Branch{
+										Name: "feat/pt1",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		"multiple sources": {
 			currBranch: "featA/pt2",
@@ -147,38 +183,30 @@ func TestCompute(t *testing.T) {
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c4",
-								LocalBranches: []string{"featA/pt2"},
+								Hash: "c4",
+								LocalBranch: &stackslib.Branch{
+									Name:    "featA/pt2",
+									Current: true,
+								},
 							},
 							{
-								Hash:          "c3",
-								LocalBranches: nil,
+								Hash: "c3",
 							},
 							{
-								Hash:          "c2",
-								LocalBranches: []string{"featA/pt1"},
-							},
-						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Current: true,
-								Name:    "featA/pt2",
-							},
-							{
-								Name: "featA/pt1",
+								Hash: "c2",
+								LocalBranch: &stackslib.Branch{
+									Name: "featA/pt1",
+								},
 							},
 						},
 					},
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c1",
-								LocalBranches: []string{"featB/pt1"},
-							},
-						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Name: "featB/pt1",
+								Hash: "c1",
+								LocalBranch: &stackslib.Branch{
+									Name: "featB/pt1",
+								},
 							},
 						},
 					},
@@ -195,9 +223,8 @@ func TestCompute(t *testing.T) {
 						LocalBranches: []string{"feat/pt3"},
 					},
 					{
-						Hash:          "c3a",
-						ParentHashes:  []string{"c2"},
-						LocalBranches: nil,
+						Hash:         "c3a",
+						ParentHashes: []string{"c2"},
 					},
 					{
 						Hash:          "c3b",
@@ -216,52 +243,49 @@ func TestCompute(t *testing.T) {
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c3b",
-								LocalBranches: []string{"feat/pt2"},
+								Hash: "c3b",
+								LocalBranch: &stackslib.Branch{
+									Name:    "feat/pt2",
+									Current: true,
+								},
 							},
 							{
-								Hash:          "c2",
-								LocalBranches: []string{"feat/pt1"},
+								Hash: "c2",
+								LocalBranch: &stackslib.Branch{
+									Name: "feat/pt1",
+								},
 							},
 						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Current: true,
-								Name:    "feat/pt2",
-							},
-							{
-								Name: "feat/pt1",
-							},
+						Error: stackslib.SharedCommitError{
+							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 					{
 						Commits: []stackslib.Commit{
 							{
-								Hash:          "c4",
-								LocalBranches: []string{"feat/pt3"},
+								Hash: "c4",
+								LocalBranch: &stackslib.Branch{
+									Name: "feat/pt3",
+								},
 							},
 							{
 								Hash: "c3a",
 							},
 							{
-								Hash:          "c2",
-								LocalBranches: []string{"feat/pt1"},
+								Hash: "c2",
+								LocalBranch: &stackslib.Branch{
+									Name: "feat/pt1",
+								},
 							},
 						},
-						LocalBranches: []stackslib.Branch{
-							{
-								Name: "feat/pt3",
-							},
-							{
-								Name: "feat/pt1",
-							},
+						Error: stackslib.SharedCommitError{
+							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 				},
-				SharingHistory: [][]string{
-					{
-						"feat/pt2",
-						"feat/pt3",
+				Errors: []error{
+					stackslib.SharedCommitError{
+						StackNames: []string{"feat/pt2", "feat/pt3"},
 					},
 				},
 			},
