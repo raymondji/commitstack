@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/raymondji/git-stacked/exec"
-	"github.com/raymondji/git-stacked/gitplatform"
+	"github.com/raymondji/git-stacked/githost"
 )
 
 type Gitlab struct{}
 
-var _ gitplatform.GitPlatform = Gitlab{}
+var _ githost.GitHost = Gitlab{}
 
 type GitlabMR struct {
 	Title        string `json:"title"`
@@ -23,24 +23,24 @@ type GitlabMR struct {
 	IID          int    `json:"iid"`
 }
 
-func (g Gitlab) GetPullRequest(sourceBranch string) (gitplatform.PullRequest, error) {
+func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error) {
 	output, err := exec.Command(
 		"glab", "mr", "view", sourceBranch, "--output=json",
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "no open merge request available") {
-			return gitplatform.PullRequest{}, gitplatform.ErrDoesNotExist
+			return githost.PullRequest{}, githost.ErrDoesNotExist
 		}
-		return gitplatform.PullRequest{}, fmt.Errorf(
+		return githost.PullRequest{}, fmt.Errorf(
 			"error checking MRs for branch %s, output: %s, err: %v", sourceBranch, output, err)
 	}
 
 	var mr GitlabMR
 	if err := json.Unmarshal([]byte(output), &mr); err != nil {
-		return gitplatform.PullRequest{}, err
+		return githost.PullRequest{}, err
 	}
 
-	return gitplatform.PullRequest{
+	return githost.PullRequest{
 		SourceBranch:   mr.SourceBranch,
 		TargetBranch:   mr.TargetBranch,
 		Description:    mr.Description,
@@ -50,16 +50,16 @@ func (g Gitlab) GetPullRequest(sourceBranch string) (gitplatform.PullRequest, er
 	}, nil
 }
 
-func (g Gitlab) UpdatePullRequest(pr gitplatform.PullRequest) (gitplatform.PullRequest, error) {
+func (g Gitlab) UpdatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
 	_, err := exec.Command("glab", "mr", "update", pr.SourceBranch, "--target-branch", pr.TargetBranch, "--description", pr.Description)
 	if err != nil {
-		return gitplatform.PullRequest{}, fmt.Errorf("error updating pr: %s, err: %v", pr.SourceBranch, err)
+		return githost.PullRequest{}, fmt.Errorf("error updating pr: %s, err: %v", pr.SourceBranch, err)
 	}
 
 	return g.GetPullRequest(pr.SourceBranch)
 }
 
-func (g Gitlab) CreatePullRequest(pr gitplatform.PullRequest) (gitplatform.PullRequest, error) {
+func (g Gitlab) CreatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
 	_, err := exec.Command(
 		"glab", "mr", "create",
 		"--source-branch", pr.SourceBranch,
@@ -69,7 +69,7 @@ func (g Gitlab) CreatePullRequest(pr gitplatform.PullRequest) (gitplatform.PullR
 		"--draft",
 	)
 	if err != nil {
-		return gitplatform.PullRequest{}, fmt.Errorf("error creating merge request: %+v, err: %v", pr, err)
+		return githost.PullRequest{}, fmt.Errorf("error creating merge request: %+v, err: %v", pr, err)
 	}
 
 	return g.GetPullRequest(pr.SourceBranch)

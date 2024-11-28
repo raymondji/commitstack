@@ -22,8 +22,6 @@ func (g Git) GetUpstream(branch string) (Upstream, error) {
 		return Upstream{}, fmt.Errorf("failed to get upstream, err: %v", err)
 	}
 
-	fmt.Println("DEBUG GetUpstream, got output ", output)
-
 	lines := strings.Split(output, "\n")
 	switch len(lines) {
 	case 0:
@@ -60,8 +58,8 @@ func (g Git) GetCurrentBranch() (string, error) {
 	return output, nil
 }
 
-func (g *Git) ForcePush(branchName string) (string, error) {
-	res, err := exec.Command("git", "push", "--force", "origin", branchName)
+func (g *Git) PushForceWithLease(branchName string) (string, error) {
+	res, err := exec.Command("git", "push", "--force-with-lease", "origin", branchName)
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
 	}

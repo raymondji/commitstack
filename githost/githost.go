@@ -1,4 +1,4 @@
-package gitplatform
+package githost
 
 import "errors"
 
@@ -15,7 +15,7 @@ type PullRequest struct {
 
 var ErrDoesNotExist = errors.New("does not exist")
 
-type GitPlatform interface {
+type GitHost interface {
 	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
 	GetPullRequest(sourceBranch string) (PullRequest, error)
 	UpdatePullRequest(r PullRequest) (PullRequest, error)

@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/raymondji/git-stacked/concurrently"
+	"github.com/raymondji/git-stacked/githost"
+	"github.com/raymondji/git-stacked/githost/gitlab"
 	"github.com/raymondji/git-stacked/gitlib"
-	"github.com/raymondji/git-stacked/gitplatform"
-	"github.com/raymondji/git-stacked/gitplatform/gitlab"
 	"github.com/raymondji/git-stacked/stackslib"
 	"github.com/spf13/cobra"
 )
@@ -110,7 +110,7 @@ func main() {
 		Short: "Push the stack to the remote and create merge requests.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
-			var platform gitplatform.GitPlatform = gitlab.Gitlab{}
+			var platform githost.GitHost = gitlab.Gitlab{}
 
 			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
@@ -133,24 +133,24 @@ func main() {
 			fmt.Println("Pushing stack...")
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
-			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (gitplatform.PullRequest, error) {
+			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
 				pr, err := platform.GetPullRequest(branch.Name)
-				if errors.Is(err, gitplatform.ErrDoesNotExist) {
-					return gitplatform.PullRequest{}, nil
+				if errors.Is(err, githost.ErrDoesNotExist) {
+					return githost.PullRequest{}, nil
 				} else if err != nil {
-					return gitplatform.PullRequest{}, err
+					return githost.PullRequest{}, err
 				}
 
 				if pr.TargetBranch != wantTargets[branch.Name] {
-					return platform.UpdatePullRequest(gitplatform.PullRequest{
+					return platform.UpdatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: cfg.DefaultBranch,
 						Description:  pr.Description,
 					})
 				}
 
-				return gitplatform.PullRequest{}, nil
+				return githost.PullRequest{}, nil
 			})
 			if err != nil {
 				return fmt.Errorf("failed to force push branches, errors: %v", err)
@@ -158,23 +158,23 @@ func main() {
 
 			// Push all branches.
 			_, err = concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (string, error) {
-				return g.ForcePush(branch.Name)
+				return g.PushForceWithLease(branch.Name)
 			})
 			if err != nil {
 				return fmt.Errorf("failed to force push branches, errors: %v", err.Error())
 			}
 
 			// Create MRs or update exising MRs to the right target branch.
-			prs, err := concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (gitplatform.PullRequest, error) {
+			prs, err := concurrently.ForEach(s.LocalBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				pr, err := platform.GetPullRequest(branch.Name)
-				if errors.Is(err, gitplatform.ErrDoesNotExist) {
-					return platform.CreatePullRequest(gitplatform.PullRequest{
+				if errors.Is(err, githost.ErrDoesNotExist) {
+					return platform.CreatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: wantTargets[branch.Name],
 						Description:  "",
 					})
 				} else if err != nil {
-					return gitplatform.PullRequest{}, err
+					return githost.PullRequest{}, err
 				}
 
 				return pr, nil
@@ -184,9 +184,9 @@ func main() {
 			}
 
 			// Update PRs with info on the stacks.
-			prs, err = concurrently.ForEach(prs, func(pr gitplatform.PullRequest) (gitplatform.PullRequest, error) {
+			prs, err = concurrently.ForEach(prs, func(pr githost.PullRequest) (githost.PullRequest, error) {
 				desc := formatPullRequestDescription(pr, prs)
-				pr, err := platform.UpdatePullRequest(gitplatform.PullRequest{
+				pr, err := platform.UpdatePullRequest(githost.PullRequest{
 					SourceBranch: pr.SourceBranch,
 					TargetBranch: wantTargets[pr.SourceBranch],
 					Description:  desc,
@@ -324,10 +324,10 @@ func main() {
 }
 
 func formatPullRequestDescription(
-	currPR gitplatform.PullRequest, prs []gitplatform.PullRequest,
+	currPR githost.PullRequest, prs []githost.PullRequest,
 ) string {
 	var newStackDescParts []string
-	currIndex := slices.IndexFunc(prs, func(pr gitplatform.PullRequest) bool {
+	currIndex := slices.IndexFunc(prs, func(pr githost.PullRequest) bool {
 		return pr.SourceBranch == currPR.SourceBranch
 	})
 	for i, pr := range prs {
@@ -410,5 +410,5 @@ func isInstalled(file string) (bool, error) {
 	} else if err != nil {
 		return false, fmt.Errorf("error checking if %s is installed, err: %v", file, err)
 	}
-	return true
+	return true, nil
 }
