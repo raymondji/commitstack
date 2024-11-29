@@ -39,12 +39,19 @@ func (g Git) GetUpstream(branch string) (Upstream, error) {
 	}
 }
 
-// GetRootDir returns the root directory of the current Git repository.
 func (g Git) GetRootDir() (string, error) {
 	// Use the helper function to run the git command
 	output, err := exec.Command("git", "rev-parse", "--show-toplevel")
 	if err != nil {
 		return "", fmt.Errorf("failed to get Git root dir, err: %v", err)
+	}
+	return output, nil
+}
+
+func (g Git) CommitFixup(commitHash string) (string, error) {
+	output, err := exec.Command("git", "commit", "--fixup", commitHash)
+	if err != nil {
+		return "", fmt.Errorf("failed to get commit --fixup, err: %v", err)
 	}
 	return output, nil
 }
@@ -55,6 +62,14 @@ func (g Git) GetCurrentBranch() (string, error) {
 		return "", fmt.Errorf("failed to get current branch, err: %v", err)
 	}
 	return output, nil
+}
+
+func (g Git) GetCommitHash(branch string) (string, error) {
+	output, err := exec.Command("git", "rev-parse", branch)
+	if err != nil {
+		return "", fmt.Errorf("failed to get commit hash for branch %s, err: %v", branch, err)
+	}
+	return strings.TrimSpace(string(output)), nil
 }
 
 func (g *Git) PushForceWithLease(branchName string) (string, error) {
@@ -83,8 +98,11 @@ func (g *Git) Rebase(branch string) (string, error) {
 	return res, nil
 }
 
-func (g *Git) RebaseInteractiveKeepBase(branch string) error {
-	err := exec.InteractiveCommand("git", "rebase", "--update-refs", "--keep-base", "-i", branch)
+func (g *Git) RebaseInteractive(branch string, additionalArgs ...string) error {
+	args := []string{"rebase", "--update-refs", "-i"}
+	args = append(args, additionalArgs...)
+	args = append(args, branch)
+	err := exec.InteractiveCommand("git", args...)
 	if err != nil {
 		return fmt.Errorf("failed to rebase, err: %v", err)
 	}

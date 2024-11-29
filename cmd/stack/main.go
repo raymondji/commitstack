@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/raymondji/git-stacked/concurrently"
 	"github.com/raymondji/git-stacked/githost"
 	"github.com/raymondji/git-stacked/githost/gitlab"
@@ -265,9 +266,61 @@ func main() {
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name())
 
-			if err := g.RebaseInteractiveKeepBase(cfg.DefaultBranch); err != nil {
+			if err := g.RebaseInteractive(cfg.DefaultBranch, "--keep-base", "--autosquash"); err != nil {
 				return err
 			}
+			return nil
+		},
+	}
+
+	var fixupCmd = &cobra.Command{
+		Use:   "fixup",
+		Short: "Create a commit to fixup a branch in the stack",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			g := gitlib.Git{}
+			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			if err != nil {
+				return err
+			}
+			stack, err := stacks.GetCurrent()
+			if err != nil {
+				return err
+			}
+
+			var branchToFix string
+			if len(args) == 1 {
+				branchToFix = args[0]
+			} else {
+				var opts []huh.Option[string]
+				for _, b := range stack.LocalBranches() {
+					opts = append(opts, huh.NewOption(b.Name, b.Name))
+				}
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewSelect[string]().
+							Title("Choose which branch to fixup").
+							Options(opts...).
+							Filtering(true).
+							Value(&branchToFix),
+					),
+				)
+				err = form.Run()
+				if err != nil {
+					return err
+				}
+			}
+
+			hash, err := g.GetCommitHash(branchToFix)
+			if err != nil {
+				return err
+			}
+
+			res, err := g.CommitFixup(hash)
+			if err != nil {
+				return err
+			}
+			fmt.Println(res)
 			return nil
 		},
 	}
@@ -323,7 +376,8 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(versionCmd, addCmd, editCmd, listCmd, showCmd, pushCmd, pullCmd)
+	rootCmd.SilenceUsage = true
+	rootCmd.AddCommand(versionCmd, addCmd, editCmd, fixupCmd, listCmd, showCmd, pushCmd, pullCmd)
 	rootCmd.Execute()
 }
 
