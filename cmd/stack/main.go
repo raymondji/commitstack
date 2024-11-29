@@ -114,7 +114,7 @@ func main() {
 		Short: "Push the stack to the remote and create merge requests.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			g := gitlib.Git{}
-			var platform githost.GitHost = gitlab.Gitlab{}
+			var host githost.GitHost = gitlab.Gitlab{}
 
 			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
 			if err != nil {
@@ -138,9 +138,9 @@ func main() {
 			fmt.Println("Pushing stack...")
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
-			_, err = concurrently.ForEach(lb, func(branch stackslib.Branch) (githost.PullRequest, error) {
+			_, err = concurrently.Map(lb, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
-				pr, err := platform.GetPullRequest(branch.Name)
+				pr, err := host.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
 				} else if err != nil {
@@ -148,7 +148,7 @@ func main() {
 				}
 
 				if pr.TargetBranch != wantTargets[branch.Name] {
-					return platform.UpdatePullRequest(githost.PullRequest{
+					return host.UpdatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: cfg.DefaultBranch,
 						Description:  pr.Description,
@@ -163,7 +163,7 @@ func main() {
 
 			// Push all branches.
 			localBranches := s.LocalBranches()
-			_, err = concurrently.ForEach(localBranches, func(branch stackslib.Branch) (string, error) {
+			_, err = concurrently.Map(localBranches, func(branch stackslib.Branch) (string, error) {
 				return g.PushForceWithLease(branch.Name)
 			})
 			if err != nil {
@@ -171,10 +171,10 @@ func main() {
 			}
 
 			// Create MRs or update exising MRs to the right target branch.
-			prs, err := concurrently.ForEach(localBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
-				pr, err := platform.GetPullRequest(branch.Name)
+			prs, err := concurrently.Map(localBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
+				pr, err := host.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
-					return platform.CreatePullRequest(githost.PullRequest{
+					return host.CreatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: wantTargets[branch.Name],
 						Description:  "",
@@ -190,9 +190,9 @@ func main() {
 			}
 
 			// Update PRs with info on the stacks.
-			prs, err = concurrently.ForEach(prs, func(pr githost.PullRequest) (githost.PullRequest, error) {
+			prs, err = concurrently.Map(prs, func(pr githost.PullRequest) (githost.PullRequest, error) {
 				desc := formatPullRequestDescription(pr, prs)
-				pr, err := platform.UpdatePullRequest(githost.PullRequest{
+				pr, err := host.UpdatePullRequest(githost.PullRequest{
 					SourceBranch: pr.SourceBranch,
 					TargetBranch: wantTargets[pr.SourceBranch],
 					Description:  desc,
@@ -357,6 +357,28 @@ func main() {
 				}
 			}
 
+			var host githost.GitHost = gitlab.Gitlab{}
+			prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
+				pr, err := host.GetPullRequest(branch.Name)
+				if errors.Is(err, githost.ErrDoesNotExist) {
+					return githost.PullRequest{}, nil
+				} else if err != nil {
+					return githost.PullRequest{}, err
+				}
+
+				return pr, nil
+			})
+			if err != nil {
+				return err
+			}
+			prsBySrcBranch := map[string]githost.PullRequest{}
+			for _, pr := range prs {
+				if pr.SourceBranch == "" {
+					continue
+				}
+				prsBySrcBranch[pr.SourceBranch] = pr
+			}
+
 			for i, b := range stack.LocalBranches() {
 				var prefix, suffix string
 				if i == 0 {
@@ -369,6 +391,12 @@ func main() {
 				}
 
 				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
+				if pr, ok := prsBySrcBranch[b.Name]; ok {
+					fmt.Printf("  └── %s\n", pr.WebURL)
+					fmt.Println()
+				} else {
+					fmt.Println()
+				}
 			}
 
 			printProblem(stack)

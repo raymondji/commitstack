@@ -5,7 +5,14 @@ import (
 	"sync"
 )
 
-func ForEach[T any, Result any](values []T, f func(v T) (Result, error)) ([]Result, error) {
+func ForEach[T any, Result any](values []T, f func(v T) error) error {
+	_, err := Map(values, func(v T) (struct{}, error) {
+		return struct{}{}, f(v)
+	})
+	return err
+}
+
+func Map[T any, Result any](values []T, f func(v T) (Result, error)) ([]Result, error) {
 	var wg sync.WaitGroup
 	errs := make([]error, len(values))
 	res := make([]Result, len(values))
