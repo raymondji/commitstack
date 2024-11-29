@@ -124,6 +124,9 @@ func main() {
 			if err != nil {
 				return err
 			}
+			if s.Error != nil {
+				return fmt.Errorf("cannot push when stack has an error: %v", s.Error)
+			}
 
 			wantTargets := map[string]string{}
 			lb := s.LocalBranches()
