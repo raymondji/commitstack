@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stacked/concurrently"
 	"github.com/raymondji/git-stacked/githost"
 	"github.com/raymondji/git-stacked/githost/gitlab"
@@ -367,25 +368,35 @@ func main() {
 
 			prsBySrcBranch := map[string]githost.PullRequest{}
 			if showPRs {
-				var host githost.GitHost = gitlab.Gitlab{}
-				prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
-					pr, err := host.GetPullRequest(branch.Name)
-					if errors.Is(err, githost.ErrDoesNotExist) {
-						return githost.PullRequest{}, nil
-					} else if err != nil {
-						return githost.PullRequest{}, err
+				var actionErr error
+				action := func() {
+					var host githost.GitHost = gitlab.Gitlab{}
+					prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
+						pr, err := host.GetPullRequest(branch.Name)
+						if errors.Is(err, githost.ErrDoesNotExist) {
+							return githost.PullRequest{}, nil
+						} else if err != nil {
+							return githost.PullRequest{}, err
+						}
+						return pr, nil
+					})
+					if err != nil {
+						actionErr = err
+						return
 					}
-
-					return pr, nil
-				})
+					for _, pr := range prs {
+						if pr.SourceBranch == "" {
+							continue
+						}
+						prsBySrcBranch[pr.SourceBranch] = pr
+					}
+				}
+				err := spinner.New().Title("Fetching PRs...").Action(action).Run()
 				if err != nil {
 					return err
 				}
-				for _, pr := range prs {
-					if pr.SourceBranch == "" {
-						continue
-					}
-					prsBySrcBranch[pr.SourceBranch] = pr
+				if actionErr != nil {
+					return actionErr
 				}
 			}
 
