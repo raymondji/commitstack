@@ -357,26 +357,33 @@ func main() {
 				}
 			}
 
-			var host githost.GitHost = gitlab.Gitlab{}
-			prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(branch.Name)
-				if errors.Is(err, githost.ErrDoesNotExist) {
-					return githost.PullRequest{}, nil
-				} else if err != nil {
-					return githost.PullRequest{}, err
-				}
-
-				return pr, nil
-			})
+			showPRs, err := cmd.Flags().GetBool("prs")
 			if err != nil {
 				return err
 			}
+
 			prsBySrcBranch := map[string]githost.PullRequest{}
-			for _, pr := range prs {
-				if pr.SourceBranch == "" {
-					continue
+			if showPRs {
+				var host githost.GitHost = gitlab.Gitlab{}
+				prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
+					pr, err := host.GetPullRequest(branch.Name)
+					if errors.Is(err, githost.ErrDoesNotExist) {
+						return githost.PullRequest{}, nil
+					} else if err != nil {
+						return githost.PullRequest{}, err
+					}
+
+					return pr, nil
+				})
+				if err != nil {
+					return err
 				}
-				prsBySrcBranch[pr.SourceBranch] = pr
+				for _, pr := range prs {
+					if pr.SourceBranch == "" {
+						continue
+					}
+					prsBySrcBranch[pr.SourceBranch] = pr
+				}
 			}
 
 			for i, b := range stack.LocalBranches() {
@@ -391,11 +398,13 @@ func main() {
 				}
 
 				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
-				if pr, ok := prsBySrcBranch[b.Name]; ok {
-					fmt.Printf("  └── %s\n", pr.WebURL)
-					fmt.Println()
-				} else {
-					fmt.Println()
+				if showPRs {
+					if pr, ok := prsBySrcBranch[b.Name]; ok {
+						fmt.Printf("  └── %s\n", pr.WebURL)
+						fmt.Println()
+					} else {
+						fmt.Println()
+					}
 				}
 			}
 
@@ -403,6 +412,7 @@ func main() {
 			return nil
 		},
 	}
+	showCmd.Flags().Bool("prs", false, "Whether to show PRs for each branch")
 
 	rootCmd.SilenceUsage = true
 	rootCmd.AddCommand(versionCmd, addCmd, editCmd, fixupCmd, listCmd, showCmd, pushCmd, pullCmd)
