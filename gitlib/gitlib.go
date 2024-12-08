@@ -143,7 +143,10 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
-	slog.Debug("git.LogAll", "output", out)
+	if out == "" {
+		return Log{}, nil
+	}
+	slog.Info("git.LogAll", "output", out, "len output", len(out))
 
 	lines := strings.Split(out, "\n")
 	var commits []Commit
