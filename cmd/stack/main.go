@@ -13,16 +13,16 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/git-stacked/concurrently"
-	"github.com/raymondji/git-stacked/githost"
-	"github.com/raymondji/git-stacked/githost/gitlab"
-	"github.com/raymondji/git-stacked/gitlib"
-	"github.com/raymondji/git-stacked/stackslib"
+	"github.com/raymondji/git-stack/concurrently"
+	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/git-stack/githost/gitlab"
+	"github.com/raymondji/git-stack/gitlib"
+	"github.com/raymondji/git-stack/stackslib"
 	"github.com/spf13/cobra"
 )
 
 const (
-	configFileName = ".git-stacked.json"
+	configFileName = ".git-stack.json"
 )
 
 type config struct {

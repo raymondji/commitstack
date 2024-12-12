@@ -1,4 +1,4 @@
-module github.com/raymondji/git-stacked
+module github.com/raymondji/git-stack
 
 go 1.21
 

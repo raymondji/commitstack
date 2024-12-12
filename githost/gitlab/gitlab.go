@@ -6,8 +6,8 @@ import (
 
 	"strings"
 
-	"github.com/raymondji/git-stacked/exec"
-	"github.com/raymondji/git-stacked/githost"
+	"github.com/raymondji/git-stack/exec"
+	"github.com/raymondji/git-stack/githost"
 )
 
 type Gitlab struct{}

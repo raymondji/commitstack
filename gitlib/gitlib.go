@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/raymondji/git-stacked/exec"
+	"github.com/raymondji/git-stack/exec"
 )
 
 type Git struct{}

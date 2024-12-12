@@ -3,8 +3,8 @@ package stackslib_test
 import (
 	"testing"
 
-	"github.com/raymondji/git-stacked/gitlib"
-	"github.com/raymondji/git-stacked/stackslib"
+	"github.com/raymondji/git-stack/gitlib"
+	"github.com/raymondji/git-stack/stackslib"
 	"github.com/stretchr/testify/require"
 )
 
