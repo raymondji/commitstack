@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -21,34 +18,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	configFileName = ".git-stack.json"
-)
-
-type config struct {
-	DefaultBranch string `json:"defaultBranch"`
-}
-
-var (
-	defaultCfg = config{
-		DefaultBranch: "main",
-	}
-)
-
 func main() {
-	var err error
-	cfg, err := readConfigFile()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
 	ok, err := isInstalled("glab")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	} else if !ok {
 		fmt.Println("glab CLI must be installed")
+		return
+	}
+	git := gitlib.Git{}
+	var ghost githost.GitHost = gitlab.Gitlab{}
+	defaultBranch, err := ghost.GetDefaultBranch()
+	if err != nil {
+		fmt.Println("failed to get default branch, are you authenticated to glab?")
 		return
 	}
 
@@ -73,11 +56,10 @@ func main() {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// TODO: this should fail if in a stack but not at the tip
 			branchName := args[0]
-			g := gitlib.Git{}
-			if err := g.CreateBranch(branchName); err != nil {
+			if err := git.CreateBranch(branchName); err != nil {
 				return err
 			}
-			return g.CommitEmpty(branchName)
+			return git.CommitEmpty(branchName)
 		},
 	}
 
@@ -85,8 +67,7 @@ func main() {
 		Use:   "list",
 		Short: "List all stacks",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -114,10 +95,7 @@ func main() {
 		Use:   "push",
 		Short: "Push the stack to the remote and create merge requests.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			var host githost.GitHost = gitlab.Gitlab{}
-
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -133,7 +111,7 @@ func main() {
 			lb := s.LocalBranches()
 			for i, b := range lb {
 				if i == len(lb)-1 {
-					wantTargets[b.Name] = cfg.DefaultBranch
+					wantTargets[b.Name] = defaultBranch
 				} else {
 					wantTargets[b.Name] = lb[i+1].Name
 				}
@@ -144,7 +122,7 @@ func main() {
 			// If any branches have been re-ordered, Gitlab can automatically consider the MRs merged.
 			_, err = concurrently.Map(lb, func(branch stackslib.Branch) (githost.PullRequest, error) {
 				// TODO: I'm not sure if this scheme is 100% safe against branch reordering.
-				pr, err := host.GetPullRequest(branch.Name)
+				pr, err := ghost.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
 				} else if err != nil {
@@ -152,9 +130,9 @@ func main() {
 				}
 
 				if pr.TargetBranch != wantTargets[branch.Name] {
-					return host.UpdatePullRequest(githost.PullRequest{
+					return ghost.UpdatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
-						TargetBranch: cfg.DefaultBranch,
+						TargetBranch: defaultBranch,
 						Description:  pr.Description,
 					})
 				}
@@ -168,7 +146,7 @@ func main() {
 			// Push all branches.
 			localBranches := s.LocalBranches()
 			_, err = concurrently.Map(localBranches, func(branch stackslib.Branch) (string, error) {
-				return g.PushForceWithLease(branch.Name)
+				return git.PushForceWithLease(branch.Name)
 			})
 			if err != nil {
 				return fmt.Errorf("failed to force push branches, errors: %v", err.Error())
@@ -176,9 +154,9 @@ func main() {
 
 			// Create MRs or update exising MRs to the right target branch.
 			prs, err := concurrently.Map(localBranches, func(branch stackslib.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(branch.Name)
+				pr, err := ghost.GetPullRequest(branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
-					return host.CreatePullRequest(githost.PullRequest{
+					return ghost.CreatePullRequest(githost.PullRequest{
 						SourceBranch: branch.Name,
 						TargetBranch: wantTargets[branch.Name],
 						Description:  "",
@@ -196,7 +174,7 @@ func main() {
 			// Update PRs with info on the stacks.
 			prs, err = concurrently.Map(prs, func(pr githost.PullRequest) (githost.PullRequest, error) {
 				desc := formatPullRequestDescription(pr, prs)
-				pr, err := host.UpdatePullRequest(githost.PullRequest{
+				pr, err := ghost.UpdatePullRequest(githost.PullRequest{
 					SourceBranch: pr.SourceBranch,
 					TargetBranch: wantTargets[pr.SourceBranch],
 					Description:  desc,
@@ -219,8 +197,7 @@ func main() {
 		Use:   "pull",
 		Short: "Pulls the latest changes from the default branch into the stack",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -228,7 +205,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			currBranch, err := g.GetCurrentBranch()
+			currBranch, err := git.GetCurrentBranch()
 			if err != nil {
 				return err
 			}
@@ -237,16 +214,16 @@ func main() {
 					currBranch, stack.Name())
 			}
 
-			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name())
-			upstream, err := g.GetUpstream(cfg.DefaultBranch)
+			fmt.Printf("Pulling from %s into the current stack %s\n", defaultBranch, stack.Name())
+			upstream, err := git.GetUpstream(defaultBranch)
 			if err != nil {
 				return err
 			}
-			refspec := fmt.Sprintf("%s:%s", upstream.BranchName, cfg.DefaultBranch)
-			if err := g.Fetch(upstream.Remote, refspec); err != nil {
+			refspec := fmt.Sprintf("%s:%s", upstream.BranchName, defaultBranch)
+			if err := git.Fetch(upstream.Remote, refspec); err != nil {
 				return err
 			}
-			res, err := g.Rebase(cfg.DefaultBranch)
+			res, err := git.Rebase(defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -259,8 +236,7 @@ func main() {
 		Use:   "edit",
 		Short: "Edit the stack using interactive rebase",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -268,9 +244,9 @@ func main() {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Pulling from %s into the current stack %s\n", cfg.DefaultBranch, stack.Name())
+			fmt.Printf("Pulling from %s into the current stack %s\n", defaultBranch, stack.Name())
 
-			if err := g.RebaseInteractive(cfg.DefaultBranch, "--keep-base", "--autosquash"); err != nil {
+			if err := git.RebaseInteractive(defaultBranch, "--keep-base", "--autosquash"); err != nil {
 				return err
 			}
 			return nil
@@ -282,8 +258,7 @@ func main() {
 		Short: "Create a commit to fixup a branch in the stack",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -315,12 +290,12 @@ func main() {
 				}
 			}
 
-			hash, err := g.GetCommitHash(branchToFix)
+			hash, err := git.GetCommitHash(branchToFix)
 			if err != nil {
 				return err
 			}
 
-			res, err := g.CommitFixup(hash)
+			res, err := git.CommitFixup(hash)
 			if err != nil {
 				return err
 			}
@@ -334,8 +309,7 @@ func main() {
 		Short: "Show all branches in the current stack",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			g := gitlib.Git{}
-			stacks, err := stackslib.Compute(g, cfg.DefaultBranch)
+			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
@@ -370,9 +344,8 @@ func main() {
 			if showPRs {
 				var actionErr error
 				action := func() {
-					var host githost.GitHost = gitlab.Gitlab{}
 					prs, err := concurrently.Map(stack.LocalBranches(), func(branch stackslib.Branch) (githost.PullRequest, error) {
-						pr, err := host.GetPullRequest(branch.Name)
+						pr, err := ghost.GetPullRequest(branch.Name)
 						if errors.Is(err, githost.ErrDoesNotExist) {
 							return githost.PullRequest{}, nil
 						} else if err != nil {
@@ -481,31 +454,6 @@ func printProblems(stacks stackslib.Stacks) {
 			fmt.Printf("  %s\n", err.Error())
 		}
 	}
-}
-
-// readConfigFile reads the specified configuration file from the root of the Git repository.
-func readConfigFile() (config, error) {
-	g := gitlib.Git{}
-	dir, err := g.GetRootDir()
-	if err != nil {
-		return config{}, err
-	}
-
-	configFilePath := filepath.Join(dir, configFileName)
-	content, err := os.ReadFile(configFilePath)
-	// Return a default configuration if the file doesn't exist
-	if errors.Is(err, os.ErrNotExist) {
-		return defaultCfg, nil
-	} else if err != nil {
-		return config{}, fmt.Errorf("failed to read config file: %w", err)
-	}
-
-	var cfg config
-	if err := json.Unmarshal(content, &cfg); err != nil {
-		return config{}, err
-	}
-
-	return cfg, nil
 }
 
 func isInstalled(file string) (bool, error) {

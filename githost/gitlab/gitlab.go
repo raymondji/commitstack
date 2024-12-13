@@ -23,6 +23,26 @@ type GitlabMR struct {
 	IID          int    `json:"iid"`
 }
 
+type GitlabRepo struct {
+	DefaultBranch string `json:"default_branch"`
+}
+
+func (g Gitlab) GetDefaultBranch() (string, error) {
+	output, err := exec.Command(
+		"glab", "repo", "view", "--output=json",
+	)
+	if err != nil {
+		return "", fmt.Errorf(
+			"error getting repo info, output: %s, err: %v", output, err)
+	}
+	var repo GitlabRepo
+	if err := json.Unmarshal([]byte(output), &repo); err != nil {
+		return "", err
+	}
+
+	return repo.DefaultBranch, nil
+}
+
 func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error) {
 	output, err := exec.Command(
 		"glab", "mr", "view", sourceBranch, "--output=json",

@@ -2,8 +2,8 @@ package githost
 
 import "errors"
 
-// PullRequest is the most popular name so using this here, but this represents an
-// umbrella including pull requests (github), merge requests (gitlab), diffs (phabricator), etc.
+// Using PullRequest since it's the most widely used term, but this represents an
+// umbrella term including pull requests (github), merge requests (gitlab), diffs (phabricator), etc.
 type PullRequest struct {
 	Title          string
 	Description    string
@@ -16,6 +16,7 @@ type PullRequest struct {
 var ErrDoesNotExist = errors.New("does not exist")
 
 type GitHost interface {
+	GetDefaultBranch() (string, error)
 	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
 	GetPullRequest(sourceBranch string) (PullRequest, error)
 	UpdatePullRequest(r PullRequest) (PullRequest, error)
