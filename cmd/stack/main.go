@@ -3,10 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
@@ -16,6 +19,10 @@ import (
 	"github.com/raymondji/git-stack/gitlib"
 	"github.com/raymondji/git-stack/stackslib"
 	"github.com/spf13/cobra"
+)
+
+const (
+	cacheDuration = 14 * 24 * time.Hour // 14 days
 )
 
 func main() {
@@ -29,9 +36,9 @@ func main() {
 	}
 	git := gitlib.Git{}
 	var ghost githost.GitHost = gitlab.Gitlab{}
-	defaultBranch, err := ghost.GetDefaultBranch()
+	defaultBranch, err := getDefaultBranchCached(git, ghost)
 	if err != nil {
-		fmt.Println("failed to get default branch, are you authenticated to glab?")
+		fmt.Println("failed to get default branch, are you authenticated to glab?", err)
 		return
 	}
 
@@ -466,4 +473,43 @@ func isInstalled(file string) (bool, error) {
 		return false, fmt.Errorf("error checking if %s is installed, err: %v", file, err)
 	}
 	return true, nil
+}
+
+func getDefaultBranchCached(git gitlib.Git, ghost githost.GitHost) (string, error) {
+	rootDir, err := git.GetRootDir()
+	if err != nil {
+		return "", nil
+	}
+
+	cacheDir := path.Join("/tmp/git-stack", path.Base(rootDir))
+	err = os.MkdirAll(cacheDir, 0755)
+	if err != nil {
+		return "", fmt.Errorf("failed to create cache directory: %v", err)
+	}
+
+	// Check if cache file exists
+	cacheFilePath := path.Join(cacheDir, "defaultBranch.txt")
+	cacheInfo, err := os.Stat(cacheFilePath)
+	if err == nil {
+		if time.Since(cacheInfo.ModTime()) < cacheDuration {
+			data, err := os.ReadFile(cacheFilePath)
+			if err == nil {
+				return string(data), nil
+			}
+		}
+	}
+
+	// Fetch from GitHost
+	repo, err := ghost.GetRepo()
+	if err != nil {
+		return "", err
+	}
+
+	// Save to cache
+	err = os.WriteFile(cacheFilePath, []byte(repo.DefaultBranch), 0644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write cache file, err: %v", err)
+	}
+
+	return repo.DefaultBranch, nil
 }

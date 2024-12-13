@@ -24,23 +24,26 @@ type GitlabMR struct {
 }
 
 type GitlabRepo struct {
-	DefaultBranch string `json:"default_branch"`
+	PathWithNamespace string `json:"path_with_namespace"`
+	DefaultBranch     string `json:"default_branch"`
 }
 
-func (g Gitlab) GetDefaultBranch() (string, error) {
+func (g Gitlab) GetRepo() (githost.Repo, error) {
 	output, err := exec.Command(
 		"glab", "repo", "view", "--output=json",
 	)
 	if err != nil {
-		return "", fmt.Errorf(
+		return githost.Repo{}, fmt.Errorf(
 			"error getting repo info, output: %s, err: %v", output, err)
 	}
 	var repo GitlabRepo
 	if err := json.Unmarshal([]byte(output), &repo); err != nil {
-		return "", err
+		return githost.Repo{}, err
 	}
 
-	return repo.DefaultBranch, nil
+	return githost.Repo{
+		DefaultBranch: repo.DefaultBranch,
+	}, nil
 }
 
 func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error) {

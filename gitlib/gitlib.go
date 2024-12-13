@@ -39,6 +39,15 @@ func (g Git) GetUpstream(branch string) (Upstream, error) {
 	}
 }
 
+func (g Git) GetRootDir() (string, error) {
+	// Use the helper function to run the git command
+	output, err := exec.Command("git", "rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", fmt.Errorf("failed to get Git root dir, err: %v", err)
+	}
+	return output, nil
+}
+
 func (g Git) CommitFixup(commitHash string) (string, error) {
 	output, err := exec.Command("git", "commit", "--fixup", commitHash)
 	if err != nil {

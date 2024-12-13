@@ -13,10 +13,14 @@ type PullRequest struct {
 	MarkdownWebURL string
 }
 
+type Repo struct {
+	DefaultBranch string
+}
+
 var ErrDoesNotExist = errors.New("does not exist")
 
 type GitHost interface {
-	GetDefaultBranch() (string, error)
+	GetRepo() (Repo, error)
 	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
 	GetPullRequest(sourceBranch string) (PullRequest, error)
 	UpdatePullRequest(r PullRequest) (PullRequest, error)
