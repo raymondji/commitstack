@@ -22,6 +22,9 @@ type Branch struct {
 }
 
 type Commit struct {
+	Author      string
+	Subject     string
+	Date        string
 	Hash        string
 	LocalBranch *Branch
 }
@@ -212,11 +215,15 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 	// Deep copy
 	currStack.Commits = append(currStack.Commits, prevStack.Commits...)
 
+	c := Commit{
+		Author:  currNode.Author,
+		Date:    currNode.Date,
+		Subject: currNode.Subject,
+		Hash:    currNode.Hash,
+	}
 	switch len(currNode.LocalBranches) {
 	case 0:
-		currStack.Commits = append(currStack.Commits, Commit{
-			Hash: currNode.Hash,
-		})
+		currStack.Commits = append(currStack.Commits, c)
 	case 1:
 		b := Branch{
 			Name: currNode.LocalBranches[0],
@@ -224,10 +231,8 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 		if b.Name == currBranch {
 			b.Current = true
 		}
-		currStack.Commits = append(currStack.Commits, Commit{
-			Hash:        currNode.Hash,
-			LocalBranch: &b,
-		})
+		c.LocalBranch = &b
+		currStack.Commits = append(currStack.Commits, c)
 	default:
 		return Stack{}, DuplicateBranchesError{
 			Branches: currNode.LocalBranches,
@@ -235,7 +240,6 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 	}
 
 	if len(currNode.Parents) > 1 {
-		fmt.Println("DEBUG currNode", currNode)
 		slices.Reverse(currStack.Commits)
 		return Stack{}, MergeCommitError{
 			MergeCommitHash: currNode.Hash,

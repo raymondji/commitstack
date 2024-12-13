@@ -131,6 +131,9 @@ type Log struct {
 }
 
 type Commit struct {
+	Date          string
+	Subject       string
+	Author        string
 	Hash          string
 	ParentHashes  []string
 	LocalBranches []string
@@ -138,7 +141,7 @@ type Commit struct {
 
 func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	out, err := exec.Command(
-		"git", "log", `--pretty=format:%h-----%p-----%D`, "--decorate=full",
+		"git", "log", `--pretty=format:%h-----%p-----%D-----%an-----%ar-----%s`, "--decorate=full",
 		"--branches", fmt.Sprintf("^%s", notReachableFrom))
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
@@ -151,10 +154,16 @@ func (g Git) LogAll(notReachableFrom string) (Log, error) {
 	lines := strings.Split(out, "\n")
 	var commits []Commit
 	for _, line := range lines {
-		parts := strings.SplitN(line, "-----", 3)
+		parts := strings.Split(line, "-----")
+		if len(parts) != 6 {
+			return Log{}, fmt.Errorf("unexpected git log line: %s", line)
+		}
 		commit := Commit{
 			Hash:         parts[0],
 			ParentHashes: strings.Fields(parts[1]),
+			Author:       parts[3],
+			Date:         parts[4],
+			Subject:      parts[5],
 		}
 		branchParts := strings.Fields(parts[2])
 		for _, part := range branchParts {

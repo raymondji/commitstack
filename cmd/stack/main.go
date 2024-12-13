@@ -70,6 +70,34 @@ func main() {
 		},
 	}
 
+	var logCmd = &cobra.Command{
+		Use:   "log",
+		Short: "Log all commits in the current stack",
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			stacks, err := stackslib.Compute(git, defaultBranch)
+			if err != nil {
+				return err
+			}
+			stack, err := stacks.GetCurrent()
+			if err != nil {
+				return err
+			}
+
+			for _, c := range stack.Commits {
+				var prefix string
+				if c.LocalBranch != nil && c.LocalBranch.Current {
+					prefix = "*"
+				} else {
+					prefix = " "
+				}
+
+				fmt.Printf("%s %s - %s (%s) <%s>\n", prefix, c.Hash, c.Subject, c.Date, c.Author)
+			}
+			return nil
+		},
+	}
+
 	var listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List all stacks",
@@ -409,7 +437,7 @@ func main() {
 	showCmd.Flags().Bool("prs", false, "Whether to show PRs for each branch")
 
 	rootCmd.SilenceUsage = true
-	rootCmd.AddCommand(versionCmd, addCmd, editCmd, fixupCmd, listCmd, showCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(versionCmd, addCmd, logCmd, editCmd, fixupCmd, listCmd, showCmd, pushCmd, pullCmd)
 	rootCmd.Execute()
 }
 

@@ -11,6 +11,9 @@ type Git interface {
 }
 
 type Node struct {
+	Author        string
+	Subject       string
+	Date          string
 	Hash          string
 	LocalBranches []string
 	// Keys are hashes. All keys must be present in the DAG.
@@ -42,6 +45,9 @@ func Compute(git Git, defaultBranch string) (DAG, error) {
 			return DAG{}, fmt.Errorf("duplicate commit in log, hash: %v", commit.Hash)
 		}
 		dag.Nodes[commit.Hash] = Node{
+			Author:        commit.Author,
+			Date:          commit.Date,
+			Subject:       commit.Subject,
 			Hash:          commit.Hash,
 			LocalBranches: commit.LocalBranches,
 			Children:      map[string]struct{}{},
