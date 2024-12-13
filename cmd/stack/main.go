@@ -416,6 +416,10 @@ func main() {
 func formatPullRequestDescription(
 	currPR githost.PullRequest, prs []githost.PullRequest,
 ) string {
+	if len(prs) == 1 {
+		return currPR.Description
+	}
+
 	var newStackDescParts []string
 	currIndex := slices.IndexFunc(prs, func(pr githost.PullRequest) bool {
 		return pr.SourceBranch == currPR.SourceBranch
@@ -423,7 +427,7 @@ func formatPullRequestDescription(
 	for i, pr := range prs {
 		var prefix string
 		if i == currIndex {
-			prefix = "Current: "
+			continue
 		} else if i == currIndex-1 {
 			prefix = "Next: "
 		} else if i == currIndex+1 {
