@@ -170,7 +170,7 @@ func newSharedCommitError(stacks []Stack) SharedCommitError {
 }
 
 func (e SharedCommitError) Error() string {
-	return fmt.Sprintf("stacks %s have diverged, please rebase", strings.Join(e.StackNames, ", "))
+	return fmt.Sprintf("Stacks %s have diverged (please rebase)", strings.Join(e.StackNames, ", "))
 }
 
 type DuplicateBranchesError struct {
@@ -181,7 +181,7 @@ var _ error = DuplicateBranchesError{}
 
 func (e DuplicateBranchesError) Error() string {
 	return fmt.Sprintf(
-		"branches %v point to the same commit, please deduplicate",
+		"Branches %v point to the same commit (please deduplicate)",
 		strings.Join(e.Branches, ", "))
 }
 
@@ -202,10 +202,10 @@ func (e MergeCommitError) Error() string {
 			}
 			branches = append(branches, fmt.Sprintf("%s%s", b.Name, suffix))
 		}
-		return fmt.Sprintf("found merge commit %v in partial stack %v, please undo merge. hint: try `git reflog show %s`",
+		return fmt.Sprintf("Found merge commit %v in partial stack %v (please undo merge. hint: try `git reflog show %s`)",
 			e.MergeCommitHash, strings.Join(branches, " <- "), e.PartialStack.LocalBranches()[0].Name)
 	}
-	return fmt.Sprintf("found merge commit %v, please undo merge", e.MergeCommitHash)
+	return fmt.Sprintf("Found merge commit %v (please undo merge)", e.MergeCommitHash)
 }
 
 func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stack) (Stack, error) {
@@ -251,6 +251,7 @@ func addNodeToStack(currBranch string, currNode commitgraph.Node, prevStack Stac
 }
 
 var ErrMultipleCurrentStacks = errors.New("multiple current stacks")
+var ErrNotInAStack = errors.New("not in a stack")
 
 func (stacks Stacks) GetCurrent() (Stack, error) {
 	var currStacks []Stack
@@ -262,7 +263,7 @@ func (stacks Stacks) GetCurrent() (Stack, error) {
 
 	switch len(currStacks) {
 	case 0:
-		return Stack{}, fmt.Errorf("not in a stack")
+		return Stack{}, ErrNotInAStack
 	case 1:
 		return currStacks[0], nil
 	default:

@@ -108,17 +108,14 @@ func main() {
 			}
 
 			for _, s := range stacks.Entries {
-				var prefix, suffix string
+				var prefix string
 				if s.Current() {
 					prefix = "*"
 				} else {
 					prefix = " "
 				}
-				if s.Error != nil {
-					suffix = ", problem!"
-				}
 
-				fmt.Printf("%s %s (%d branches, %d commits%s)\n", prefix, s.Name(), len(s.LocalBranches()), len(s.Commits), suffix)
+				fmt.Printf("%s %s (%d branches)\n", prefix, s.Name(), len(s.LocalBranches()))
 			}
 
 			printProblems(stacks)
@@ -364,7 +361,11 @@ func main() {
 			var stack stackslib.Stack
 			if len(args) == 0 {
 				stack, err = stacks.GetCurrent()
-				if err != nil {
+				if errors.Is(err, stackslib.ErrNotInAStack) {
+					fmt.Println("Not in a stack")
+					printProblems(stacks)
+					return nil
+				} else if err != nil {
 					printProblems(stacks)
 					return err
 				}
@@ -420,6 +421,8 @@ func main() {
 				}
 			}
 
+			fmt.Printf("On stack %s\n", stack.Name())
+			fmt.Println("Branches in stack:")
 			for i, b := range stack.LocalBranches() {
 				var prefix, suffix string
 				if i == 0 {
@@ -492,7 +495,7 @@ func formatPullRequestDescription(
 func printProblem(stack stackslib.Stack) {
 	if stack.Error != nil {
 		fmt.Println()
-		fmt.Println("Problems:")
+		fmt.Println("Problems with your stack:")
 		fmt.Printf("  %s\n", stack.Error.Error())
 	}
 }
@@ -500,7 +503,7 @@ func printProblem(stack stackslib.Stack) {
 func printProblems(stacks stackslib.Stacks) {
 	if len(stacks.Errors) > 0 {
 		fmt.Println()
-		fmt.Println("Problems:")
+		fmt.Println("Problems with your stacks:")
 		for _, err := range stacks.Errors {
 			fmt.Printf("  %s\n", err.Error())
 		}

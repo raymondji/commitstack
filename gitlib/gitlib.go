@@ -55,7 +55,7 @@ func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
 	}
 	output, err := exec.Command("git", args...)
 	if err != nil {
-		return "", fmt.Errorf("failed to get commit --fixup, err: %v", err)
+		return "", fmt.Errorf("failed to git commit --fixup, err: %v", err)
 	}
 	return output, nil
 }
