@@ -66,22 +66,44 @@ func main() {
 			if err := git.CreateBranch(branchName); err != nil {
 				return err
 			}
+			fmt.Printf("Switched to a new branch '%s'\n", branchName)
 			return git.CommitEmpty(branchName)
 		},
 	}
 
 	var logCmd = &cobra.Command{
 		Use:   "log",
-		Short: "Log all commits in the current stack",
-		Args:  cobra.ExactArgs(0),
+		Short: "Log all commits in a stack",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
 				return err
 			}
-			stack, err := stacks.GetCurrent()
-			if err != nil {
-				return err
+
+			var stack stackslib.Stack
+			if len(args) == 0 {
+				stack, err = stacks.GetCurrent()
+				if errors.Is(err, stackslib.ErrNotInAStack) {
+					fmt.Println("Not in a stack")
+					printProblems(stacks)
+					return nil
+				} else if err != nil {
+					printProblems(stacks)
+					return err
+				}
+			} else {
+				wantStack := args[0]
+				var found bool
+				for _, s := range stacks.Entries {
+					if s.Name() == wantStack {
+						stack = s
+						found = true
+					}
+				}
+				if !found {
+					return fmt.Errorf("no stack named: %s", wantStack)
+				}
 			}
 
 			for _, c := range stack.Commits {
@@ -123,9 +145,45 @@ func main() {
 		},
 	}
 
+	var switchCmd = &cobra.Command{
+		Use:   "switch",
+		Short: "Switch to a stack",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			stacks, err := stackslib.Compute(git, defaultBranch)
+			if err != nil {
+				return err
+			}
+
+			var target string
+			var opts []huh.Option[string]
+			for _, s := range stacks.Entries {
+				opts = append(opts, huh.NewOption(s.Name(), s.Name()))
+			}
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewSelect[string]().
+						Title("Choose stack").
+						Options(opts...).
+						Filtering(true).
+						Value(&target),
+				),
+			)
+			err = form.Run()
+			if err != nil {
+				return err
+			}
+
+			if err := git.Checkout(target); err != nil {
+				return err
+			}
+			fmt.Printf("Switched to branch '%s'\n", target)
+			return nil
+		},
+	}
+
 	var pushCmd = &cobra.Command{
 		Use:   "push",
-		Short: "Push the stack to the remote and create merge requests.",
+		Short: "Push the stack to the remote and create pull requests",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
@@ -351,7 +409,7 @@ func main() {
 
 	var showCmd = &cobra.Command{
 		Use:   "show",
-		Short: "Show all branches in the current stack",
+		Short: "Show information about the current stack",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			stacks, err := stackslib.Compute(git, defaultBranch)
@@ -453,7 +511,7 @@ func main() {
 	showCmd.Flags().Bool("prs", false, "Whether to show PRs for each branch")
 
 	rootCmd.SilenceUsage = true
-	rootCmd.AddCommand(versionCmd, addCmd, logCmd, editCmd, fixupCmd, listCmd, showCmd, pushCmd, pullCmd)
+	rootCmd.AddCommand(versionCmd, addCmd, logCmd, editCmd, fixupCmd, listCmd, switchCmd, showCmd, pushCmd, pullCmd)
 	rootCmd.Execute()
 }
 

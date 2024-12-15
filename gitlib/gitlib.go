@@ -124,6 +124,14 @@ func (g Git) CreateBranch(name string) error {
 	return nil
 }
 
+func (g Git) Checkout(name string) error {
+	_, err := exec.Command("git", "checkout", name)
+	if err != nil {
+		return fmt.Errorf("failed to checkout branch, err: %v", err)
+	}
+	return nil
+}
+
 func (g Git) CommitEmpty(msg string) error {
 	_, err := exec.Command("git", "commit", "--allow-empty", "-m", msg)
 	if err != nil {
