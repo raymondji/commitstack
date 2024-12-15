@@ -288,6 +288,8 @@ func main() {
 		},
 	}
 
+	var fixupAddFlag bool
+	var fixupRebaseFlag bool
 	var fixupCmd = &cobra.Command{
 		Use:   "fixup",
 		Short: "Create a commit to fixup a branch in the stack",
@@ -330,14 +332,24 @@ func main() {
 				return err
 			}
 
-			res, err := git.CommitFixup(hash)
+			res, err := git.CommitFixup(hash, fixupAddFlag)
 			if err != nil {
 				return err
 			}
 			fmt.Println(res)
+
+			if fixupRebaseFlag {
+				res, err := git.Rebase(defaultBranch, "--keep-base", "--autosquash")
+				if err != nil {
+					return err
+				}
+				fmt.Println(res)
+			}
 			return nil
 		},
 	}
+	fixupCmd.Flags().BoolVarP(&fixupAddFlag, "add", "a", false, "Equivalent to git commit -a")
+	fixupCmd.Flags().BoolVarP(&fixupRebaseFlag, "rebase", "r", false, "Perform a git rebase after")
 
 	var showCmd = &cobra.Command{
 		Use:   "show",

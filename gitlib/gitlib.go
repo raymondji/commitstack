@@ -48,8 +48,12 @@ func (g Git) GetRootDir() (string, error) {
 	return output, nil
 }
 
-func (g Git) CommitFixup(commitHash string) (string, error) {
-	output, err := exec.Command("git", "commit", "--fixup", commitHash)
+func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
+	args := []string{"commit", "--fixup", commitHash}
+	if add {
+		args = append(args, "-a")
+	}
+	output, err := exec.Command("git", args...)
 	if err != nil {
 		return "", fmt.Errorf("failed to get commit --fixup, err: %v", err)
 	}
@@ -90,8 +94,11 @@ func (g *Git) Fetch(repo string, refspec string) error {
 	return nil
 }
 
-func (g *Git) Rebase(branch string) (string, error) {
-	res, err := exec.Command("git", "rebase", "--update-refs", branch)
+func (g *Git) Rebase(branch string, additionalArgs ...string) (string, error) {
+	args := []string{"rebase", "--update-refs"}
+	args = append(args, additionalArgs...)
+	args = append(args, branch)
+	res, err := exec.Command("git", args...)
 	if err != nil {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}
