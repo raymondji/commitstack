@@ -255,7 +255,7 @@ func main() {
 			if err := git.Fetch(upstream.Remote, refspec); err != nil {
 				return err
 			}
-			res, err := git.Rebase(defaultBranch)
+			res, err := git.Rebase(defaultBranch, nil)
 			if err != nil {
 				return err
 			}
@@ -336,7 +336,8 @@ func main() {
 			fmt.Println(res)
 
 			if fixupRebaseFlag {
-				res, err := git.Rebase(defaultBranch, "--keep-base", "--autosquash")
+				fmt.Println("Also rebasing")
+				res, err := git.Rebase(defaultBranch, []string{"GIT_SEQUENCE_EDITOR=true"}, "--keep-base", "--autosquash", "-i")
 				if err != nil {
 					return err
 				}
@@ -495,7 +496,7 @@ func formatPullRequestDescription(
 func printProblem(stack stackslib.Stack) {
 	if stack.Error != nil {
 		fmt.Println()
-		fmt.Println("Problems with your stack:")
+		fmt.Println("Problems detected:")
 		fmt.Printf("  %s\n", stack.Error.Error())
 	}
 }
@@ -503,7 +504,7 @@ func printProblem(stack stackslib.Stack) {
 func printProblems(stacks stackslib.Stacks) {
 	if len(stacks.Errors) > 0 {
 		fmt.Println()
-		fmt.Println("Problems with your stacks:")
+		fmt.Println("Problems detected:")
 		for _, err := range stacks.Errors {
 			fmt.Printf("  %s\n", err.Error())
 		}

@@ -94,11 +94,11 @@ func (g *Git) Fetch(repo string, refspec string) error {
 	return nil
 }
 
-func (g *Git) Rebase(branch string, additionalArgs ...string) (string, error) {
+func (g *Git) Rebase(branch string, env []string, additionalArgs ...string) (string, error) {
 	args := []string{"rebase", "--update-refs"}
 	args = append(args, additionalArgs...)
 	args = append(args, branch)
-	res, err := exec.Command("git", args...)
+	res, err := exec.EnvCommand(env, "git", args...)
 	if err != nil {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}

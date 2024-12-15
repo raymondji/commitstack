@@ -20,6 +20,20 @@ func Command(name string, args ...string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
+func EnvCommand(env []string, name string, args ...string) (string, error) {
+	env = append(env, os.Environ()...)
+	cmd := exec.Command(name, args...)
+	cmd.Env = env
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("error running cmd: %s %s, stderr: %s, err: %v",
+			name, strings.Join(args, " "), stderr.String(), err)
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
 func InteractiveCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = os.Stdout
