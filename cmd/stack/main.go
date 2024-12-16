@@ -183,7 +183,7 @@ func main() {
 
 	var pushCmd = &cobra.Command{
 		Use:   "push",
-		Short: "Push the stack to the remote and create pull requests",
+		Short: "Push the stack to the remote and create/update pull requests",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			stacks, err := stackslib.Compute(git, defaultBranch)
 			if err != nil {
