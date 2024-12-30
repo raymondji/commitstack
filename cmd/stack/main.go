@@ -14,6 +14,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/raymondji/git-stack/concurrent"
 	"github.com/raymondji/git-stack/githost"
 	"github.com/raymondji/git-stack/githost/gitlab"
@@ -24,6 +25,11 @@ import (
 
 const (
 	cacheDuration = 14 * 24 * time.Hour // 14 days
+)
+
+var (
+	primaryColor   = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")) // Orange
+	secondaryColor = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00")) // Green
 )
 
 func main() {
@@ -107,12 +113,6 @@ func main() {
 				}
 			}
 
-			var maxBranchNameLen int
-			for _, c := range stack.Commits {
-				if c.LocalBranch != nil && len(c.LocalBranch.Name) > maxBranchNameLen {
-					maxBranchNameLen = len(c.LocalBranch.Name)
-				}
-			}
 			for _, c := range stack.Commits {
 				var hereMarker string
 				if c.LocalBranch != nil && c.LocalBranch.Current {
@@ -122,13 +122,10 @@ func main() {
 				}
 				var branchCol string
 				if c.LocalBranch != nil {
-					branchCol = fmt.Sprintf("(%s)", c.LocalBranch.Name) + strings.Repeat(" ", maxBranchNameLen-len(c.LocalBranch.Name))
-				} else {
-					// +2 to account for the parentheses
-					branchCol = strings.Repeat(" ", maxBranchNameLen+2)
+					branchCol = fmt.Sprintf("(%s) ", secondaryColor.Render(c.LocalBranch.Name))
 				}
 
-				fmt.Printf("%s %s %s %s\n", hereMarker, c.Hash, branchCol, c.Subject)
+				fmt.Printf("%s %s %s%s\n", hereMarker, primaryColor.Render(c.Hash), branchCol, c.Subject)
 			}
 			return nil
 		},
@@ -144,14 +141,14 @@ func main() {
 			}
 
 			for _, s := range stacks.Entries {
-				var prefix string
+				var name string
 				if s.Current() {
-					prefix = "*"
+					name = "* " + primaryColor.Render(s.Name())
 				} else {
-					prefix = " "
+					name = "  " + s.Name()
 				}
 
-				fmt.Printf("%s %s (%d branches)\n", prefix, s.Name(), len(s.LocalBranches()))
+				fmt.Printf("%s (%d branches)\n", name, len(s.LocalBranches()))
 			}
 
 			printProblems(stacks)
@@ -498,17 +495,17 @@ func main() {
 			fmt.Printf("On stack %s\n", stack.Name())
 			fmt.Println("Branches in stack:")
 			for i, b := range stack.LocalBranches() {
-				var prefix, suffix string
+				var name, suffix string
 				if i == 0 {
 					suffix = "(top)"
 				}
 				if b.Current {
-					prefix = "*"
+					name = "* " + primaryColor.Render(b.Name)
 				} else {
-					prefix = " "
+					name = "  " + b.Name
 				}
 
-				fmt.Printf("%s %s %s\n", prefix, b.Name, suffix)
+				fmt.Printf("%s %s\n", name, suffix)
 				if showPRsFlag {
 					if pr, ok := prsBySrcBranch[b.Name]; ok {
 						fmt.Printf("  └── %s\n", pr.WebURL)
