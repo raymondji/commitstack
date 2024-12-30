@@ -24,20 +24,22 @@ type GitlabMR struct {
 }
 
 type GitlabRepo struct {
-	PathWithNamespace string `json:"path_with_namespace"`
-	DefaultBranch     string `json:"default_branch"`
+	DefaultBranch string `json:"default_branch"`
 }
 
 func (g Gitlab) GetRepo() (githost.Repo, error) {
-	output, err := exec.Command(
-		"glab", "repo", "view", "--output=json",
+	output, err := exec.Run(
+		"glab",
+		exec.WithArgs(
+			"repo", "view", "--output=json",
+		),
 	)
 	if err != nil {
 		return githost.Repo{}, fmt.Errorf(
-			"error getting repo info, output: %s, err: %v", output, err)
+			"error getting repo info, output: %+v, err: %v", output, err)
 	}
 	var repo GitlabRepo
-	if err := json.Unmarshal([]byte(output), &repo); err != nil {
+	if err := json.Unmarshal([]byte(output.Stdout), &repo); err != nil {
 		return githost.Repo{}, err
 	}
 
@@ -47,19 +49,22 @@ func (g Gitlab) GetRepo() (githost.Repo, error) {
 }
 
 func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error) {
-	output, err := exec.Command(
-		"glab", "mr", "view", sourceBranch, "--output=json",
+	output, err := exec.Run(
+		"glab",
+		exec.WithArgs(
+			"mr", "view", sourceBranch, "--output=json",
+		),
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "no open merge request available") {
 			return githost.PullRequest{}, githost.ErrDoesNotExist
 		}
 		return githost.PullRequest{}, fmt.Errorf(
-			"error checking MRs for branch %s, output: %s, err: %v", sourceBranch, output, err)
+			"error checking MRs for branch %s, output: %+v, err: %v", sourceBranch, output, err)
 	}
 
 	var mr GitlabMR
-	if err := json.Unmarshal([]byte(output), &mr); err != nil {
+	if err := json.Unmarshal([]byte(output.Stdout), &mr); err != nil {
 		return githost.PullRequest{}, err
 	}
 
@@ -74,7 +79,14 @@ func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error)
 }
 
 func (g Gitlab) UpdatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
-	_, err := exec.Command("glab", "mr", "update", pr.SourceBranch, "--target-branch", pr.TargetBranch, "--description", pr.Description)
+	_, err := exec.Run(
+		"glab",
+		exec.WithArgs(
+			"mr", "update", pr.SourceBranch,
+			"--target-branch", pr.TargetBranch,
+			"--description", pr.Description,
+		),
+	)
 	if err != nil {
 		return githost.PullRequest{}, fmt.Errorf("error updating pr: %s, err: %v", pr.SourceBranch, err)
 	}
@@ -83,13 +95,16 @@ func (g Gitlab) UpdatePullRequest(pr githost.PullRequest) (githost.PullRequest, 
 }
 
 func (g Gitlab) CreatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
-	_, err := exec.Command(
-		"glab", "mr", "create",
-		"--source-branch", pr.SourceBranch,
-		"--target-branch", pr.TargetBranch,
-		"--title", pr.SourceBranch,
-		"--description", pr.Description,
-		"--draft",
+	_, err := exec.Run(
+		"glab",
+		exec.WithArgs(
+			"mr", "create",
+			"--source-branch", pr.SourceBranch,
+			"--target-branch", pr.TargetBranch,
+			"--title", pr.SourceBranch,
+			"--description", pr.Description,
+			"--draft",
+		),
 	)
 	if err != nil {
 		return githost.PullRequest{}, fmt.Errorf("error creating merge request: %+v, err: %v", pr, err)

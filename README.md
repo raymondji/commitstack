@@ -16,6 +16,10 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 
 2. Single branch per commit
 
+## References
+
+https://github.com/aviator-co/av
+
 ## Setup
 
 Install the dependencies:

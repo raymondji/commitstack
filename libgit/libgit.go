@@ -1,4 +1,4 @@
-package gitlib
+package libgit
 
 import (
 	"fmt"
@@ -16,12 +16,17 @@ type Upstream struct {
 }
 
 func (g Git) GetUpstream(branch string) (Upstream, error) {
-	output, err := exec.Command("git", "for-each-ref", "--format=%(upstream:short)", fmt.Sprintf("refs/heads/%s", branch))
+	output, err := exec.Run(
+		"git",
+		exec.WithArgs(
+			"for-each-ref", "--format=%(upstream:short)", fmt.Sprintf("refs/heads/%s", branch),
+		),
+	)
 	if err != nil {
 		return Upstream{}, fmt.Errorf("failed to get upstream, err: %v", err)
 	}
 
-	lines := strings.Split(output, "\n")
+	lines := output.Lines()
 	switch len(lines) {
 	case 0:
 		return Upstream{}, fmt.Errorf("branch %s does not have an upstream branch", branch)
@@ -41,11 +46,11 @@ func (g Git) GetUpstream(branch string) (Upstream, error) {
 
 func (g Git) GetRootDir() (string, error) {
 	// Use the helper function to run the git command
-	output, err := exec.Command("git", "rev-parse", "--show-toplevel")
+	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--show-toplevel"))
 	if err != nil {
 		return "", fmt.Errorf("failed to get Git root dir, err: %v", err)
 	}
-	return output, nil
+	return output.Stdout, nil
 }
 
 func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
@@ -53,31 +58,39 @@ func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
 	if add {
 		args = append(args, "-a")
 	}
-	output, err := exec.Command("git", args...)
+	output, err := exec.Run("git", exec.WithArgs(args...))
 	if err != nil {
 		return "", fmt.Errorf("failed to git commit --fixup, err: %v", err)
 	}
-	return output, nil
+	return output.Stdout, nil
+}
+
+func (g Git) CommitEmpty(msg string) error {
+	_, err := exec.Run("git", exec.WithArgs("commit", "--allow-empty", "-m", msg))
+	if err != nil {
+		return fmt.Errorf("failed to commit, err: %v", err)
+	}
+	return nil
 }
 
 func (g Git) GetCurrentBranch() (string, error) {
-	output, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--abbrev-ref", "HEAD"))
 	if err != nil {
 		return "", fmt.Errorf("failed to get current branch, err: %v", err)
 	}
-	return output, nil
+	return output.Stdout, nil
 }
 
 func (g Git) GetCommitHash(branch string) (string, error) {
-	output, err := exec.Command("git", "rev-parse", branch)
+	output, err := exec.Run("git", exec.WithArgs("rev-parse", branch))
 	if err != nil {
 		return "", fmt.Errorf("failed to get commit hash for branch %s, err: %v", branch, err)
 	}
-	return strings.TrimSpace(string(output)), nil
+	return output.Stdout, nil
 }
 
 func (g *Git) PushForceWithLease(branchName string) (string, error) {
-	res, err := exec.Command("git", "push", "--force-with-lease", "origin", branchName)
+	res, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
 	}
@@ -86,7 +99,7 @@ func (g *Git) PushForceWithLease(branchName string) (string, error) {
 }
 
 func (g *Git) Fetch(repo string, refspec string) error {
-	_, err := exec.Command("git", "fetch", repo, refspec)
+	_, err := exec.Run("git", exec.WithArgs("fetch", repo, refspec))
 	if err != nil {
 		return fmt.Errorf("failed to fetch, err: %v", err)
 	}
@@ -94,30 +107,28 @@ func (g *Git) Fetch(repo string, refspec string) error {
 	return nil
 }
 
-func (g *Git) Rebase(branch string, env []string, additionalArgs ...string) (string, error) {
-	args := []string{"rebase", "--update-refs"}
-	args = append(args, additionalArgs...)
-	args = append(args, branch)
-	res, err := exec.EnvCommand(env, "git", args...)
+type RebaseOpts struct {
+	Interactive    bool
+	Env            []string
+	AdditionalArgs []string
+}
+
+func (g *Git) Rebase(branch string, opts RebaseOpts) (string, error) {
+	args := []string{"rebase", branch, "--update-refs"}
+	args = append(args, opts.AdditionalArgs...)
+	output, err := exec.Run(
+		"git",
+		exec.WithArgs(args...),
+		exec.WithEnv(opts.Env...),
+		exec.WithInteractive(opts.Interactive))
 	if err != nil {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}
-	return res, nil
-}
-
-func (g *Git) RebaseInteractive(branch string, additionalArgs ...string) error {
-	args := []string{"rebase", "--update-refs", "-i"}
-	args = append(args, additionalArgs...)
-	args = append(args, branch)
-	err := exec.InteractiveCommand("git", args...)
-	if err != nil {
-		return fmt.Errorf("failed to rebase, err: %v", err)
-	}
-	return nil
+	return output.Stdout, nil
 }
 
 func (g Git) CreateBranch(name string) error {
-	_, err := exec.Command("git", "checkout", "-b", name)
+	_, err := exec.Run("git", exec.WithArgs("checkout", "-b", name))
 	if err != nil {
 		return fmt.Errorf("failed to create branch, err: %v", err)
 	}
@@ -125,17 +136,9 @@ func (g Git) CreateBranch(name string) error {
 }
 
 func (g Git) Checkout(name string) error {
-	_, err := exec.Command("git", "checkout", name)
+	_, err := exec.Run("git", exec.WithArgs("checkout", name))
 	if err != nil {
 		return fmt.Errorf("failed to checkout branch, err: %v", err)
-	}
-	return nil
-}
-
-func (g Git) CommitEmpty(msg string) error {
-	_, err := exec.Command("git", "commit", "--allow-empty", "-m", msg)
-	if err != nil {
-		return fmt.Errorf("failed to commit, err: %v", err)
 	}
 	return nil
 }
@@ -155,18 +158,21 @@ type Commit struct {
 }
 
 func (g Git) LogAll(notReachableFrom string) (Log, error) {
-	out, err := exec.Command(
-		"git", "log", `--pretty=format:%h-----%p-----%D-----%an-----%ar-----%s`, "--decorate=full",
-		"--branches", fmt.Sprintf("^%s", notReachableFrom))
+	output, err := exec.Run(
+		"git",
+		exec.WithArgs(
+			"log",
+			`--pretty=format:%h-----%p-----%D-----%an-----%ar-----%s`,
+			"--decorate=full",
+			"--branches", fmt.Sprintf("^%s", notReachableFrom),
+		),
+	)
 	if err != nil {
 		return Log{}, fmt.Errorf("failed to retrieve git log: %v", err)
 	}
-	if out == "" {
-		return Log{}, nil
-	}
-	slog.Debug("git.LogAll", "output", out, "len output", len(out))
+	lines := output.Lines()
+	slog.Debug("git.LogAll", "output", lines, "len output", len(lines))
 
-	lines := strings.Split(out, "\n")
 	var commits []Commit
 	for _, line := range lines {
 		parts := strings.Split(line, "-----")

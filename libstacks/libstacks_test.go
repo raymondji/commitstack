@@ -1,31 +1,31 @@
-package stackslib_test
+package libstacks_test
 
 import (
 	"testing"
 
-	"github.com/raymondji/git-stack/gitlib"
-	"github.com/raymondji/git-stack/stackslib"
+	"github.com/raymondji/git-stack/libgit"
+	"github.com/raymondji/git-stack/libstacks"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCompute(t *testing.T) {
 	cases := map[string]struct {
 		currBranch      string
-		log             gitlib.Log
-		want            stackslib.Stacks
+		log             libgit.Log
+		want            libstacks.Stacks
 		wantErrContains string
 	}{
 		"empty": {
-			log: gitlib.Log{
+			log: libgit.Log{
 				Commits: nil,
 			},
 			currBranch: "main",
-			want:       stackslib.Stacks{},
+			want:       libstacks.Stacks{},
 		},
 		"one": {
 			currBranch: "dev",
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c1",
 						ParentHashes:  []string{"p1"},
@@ -33,13 +33,13 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: stackslib.Stacks{
-				Entries: []stackslib.Stack{
+			want: libstacks.Stacks{
+				Entries: []libstacks.Stack{
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c1",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name:    "dev",
 									Current: true,
 								},
@@ -51,8 +51,8 @@ func TestCompute(t *testing.T) {
 		},
 		"with single parent": {
 			currBranch: "feat/pt1",
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c2",
 						ParentHashes:  []string{"c1"},
@@ -65,19 +65,19 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: stackslib.Stacks{
-				Entries: []stackslib.Stack{
+			want: libstacks.Stacks{
+				Entries: []libstacks.Stack{
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c2",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "feat/pt2",
 								},
 							},
 							{
 								Hash: "c1",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name:    "feat/pt1",
 									Current: true,
 								},
@@ -89,8 +89,8 @@ func TestCompute(t *testing.T) {
 		},
 		"with multiple parents": {
 			currBranch: "feat/pt2",
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c3",
 						ParentHashes:  []string{"c2", "c1"},
@@ -108,21 +108,21 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: stackslib.Stacks{
+			want: libstacks.Stacks{
 				Errors: []error{
-					stackslib.MergeCommitError{
+					libstacks.MergeCommitError{
 						MergeCommitHash: "c3",
-						PartialStack: stackslib.Stack{
-							Commits: []stackslib.Commit{
+						PartialStack: libstacks.Stack{
+							Commits: []libstacks.Commit{
 								{
 									Hash: "c3",
-									LocalBranch: &stackslib.Branch{
+									LocalBranch: &libstacks.Branch{
 										Name: "feat/pt3",
 									},
 								},
 								{
 									Hash: "c2",
-									LocalBranch: &stackslib.Branch{
+									LocalBranch: &libstacks.Branch{
 										Name:    "feat/pt2",
 										Current: true,
 									},
@@ -130,19 +130,19 @@ func TestCompute(t *testing.T) {
 							},
 						},
 					},
-					stackslib.MergeCommitError{
+					libstacks.MergeCommitError{
 						MergeCommitHash: "c3",
-						PartialStack: stackslib.Stack{
-							Commits: []stackslib.Commit{
+						PartialStack: libstacks.Stack{
+							Commits: []libstacks.Commit{
 								{
 									Hash: "c3",
-									LocalBranch: &stackslib.Branch{
+									LocalBranch: &libstacks.Branch{
 										Name: "feat/pt3",
 									},
 								},
 								{
 									Hash: "c1",
-									LocalBranch: &stackslib.Branch{
+									LocalBranch: &libstacks.Branch{
 										Name: "feat/pt1",
 									},
 								},
@@ -154,8 +154,8 @@ func TestCompute(t *testing.T) {
 		},
 		"multiple sources": {
 			currBranch: "featA/pt2",
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c4",
 						ParentHashes:  []string{"c3"},
@@ -178,13 +178,13 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: stackslib.Stacks{
-				Entries: []stackslib.Stack{
+			want: libstacks.Stacks{
+				Entries: []libstacks.Stack{
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c4",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name:    "featA/pt2",
 									Current: true,
 								},
@@ -194,17 +194,17 @@ func TestCompute(t *testing.T) {
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "featA/pt1",
 								},
 							},
 						},
 					},
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c1",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "featB/pt1",
 								},
 							},
@@ -215,8 +215,8 @@ func TestCompute(t *testing.T) {
 		},
 		"multiple children": {
 			currBranch: "feat/pt2",
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c4",
 						ParentHashes:  []string{"c3a"},
@@ -238,33 +238,33 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: stackslib.Stacks{
-				Entries: []stackslib.Stack{
+			want: libstacks.Stacks{
+				Entries: []libstacks.Stack{
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c3b",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name:    "feat/pt2",
 									Current: true,
 								},
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "feat/pt1",
 								},
 							},
 						},
-						Error: stackslib.SharedCommitError{
+						Error: libstacks.SharedCommitError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 					{
-						Commits: []stackslib.Commit{
+						Commits: []libstacks.Commit{
 							{
 								Hash: "c4",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "feat/pt3",
 								},
 							},
@@ -273,18 +273,18 @@ func TestCompute(t *testing.T) {
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &stackslib.Branch{
+								LocalBranch: &libstacks.Branch{
 									Name: "feat/pt1",
 								},
 							},
 						},
-						Error: stackslib.SharedCommitError{
+						Error: libstacks.SharedCommitError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 				},
 				Errors: []error{
-					stackslib.SharedCommitError{
+					libstacks.SharedCommitError{
 						StackNames: []string{"feat/pt2", "feat/pt3"},
 					},
 				},
@@ -299,7 +299,7 @@ func TestCompute(t *testing.T) {
 				CurrentBranch: c.currBranch,
 			}
 
-			got, err := stackslib.Compute(fg, "main")
+			got, err := libstacks.Compute(fg, "main")
 			if c.wantErrContains != "" {
 				require.ErrorContains(t, err, c.wantErrContains)
 				return
@@ -311,11 +311,11 @@ func TestCompute(t *testing.T) {
 }
 
 type FakeGit struct {
-	Log           gitlib.Log
+	Log           libgit.Log
 	CurrentBranch string
 }
 
-func (fg *FakeGit) LogAll(notReachableFrom string) (gitlib.Log, error) {
+func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
 	return fg.Log, nil
 }
 

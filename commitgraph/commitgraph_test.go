@@ -4,24 +4,24 @@ import (
 	"testing"
 
 	"github.com/raymondji/git-stack/commitgraph"
-	"github.com/raymondji/git-stack/gitlib"
+	"github.com/raymondji/git-stack/libgit"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCompute(t *testing.T) {
 	cases := map[string]struct {
-		log  gitlib.Log
+		log  libgit.Log
 		want commitgraph.DAG
 	}{
 		"empty": {
-			log: gitlib.Log{
+			log: libgit.Log{
 				Commits: nil,
 			},
 			want: toDAG(),
 		},
 		"one": {
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c1",
 						ParentHashes:  []string{"p1"},
@@ -38,8 +38,8 @@ func TestCompute(t *testing.T) {
 				}),
 		},
 		"with single parent": {
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c1",
 						ParentHashes:  []string{"p1"},
@@ -72,8 +72,8 @@ func TestCompute(t *testing.T) {
 			),
 		},
 		"with multiple parents": {
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c3",
 						ParentHashes:  []string{"c2", "c1"},
@@ -123,8 +123,8 @@ func TestCompute(t *testing.T) {
 			),
 		},
 		"multiple sources": {
-			log: gitlib.Log{
-				Commits: []gitlib.Commit{
+			log: libgit.Log{
+				Commits: []libgit.Commit{
 					{
 						Hash:          "c3",
 						ParentHashes:  []string{"c2"},
@@ -193,9 +193,9 @@ func toDAG(nodes ...commitgraph.Node) commitgraph.DAG {
 }
 
 type FakeGit struct {
-	Log gitlib.Log
+	Log libgit.Log
 }
 
-func (fg *FakeGit) LogAll(notReachableFrom string) (gitlib.Log, error) {
+func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
 	return fg.Log, nil
 }

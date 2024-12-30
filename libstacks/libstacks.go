@@ -1,4 +1,4 @@
-package stackslib
+package libstacks
 
 import (
 	"errors"

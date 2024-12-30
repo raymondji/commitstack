@@ -3,11 +3,11 @@ package commitgraph
 import (
 	"fmt"
 
-	"github.com/raymondji/git-stack/gitlib"
+	"github.com/raymondji/git-stack/libgit"
 )
 
 type Git interface {
-	LogAll(notReachableFrom string) (gitlib.Log, error)
+	LogAll(notReachableFrom string) (libgit.Log, error)
 }
 
 type Node struct {
