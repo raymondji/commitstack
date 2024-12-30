@@ -114,8 +114,12 @@ func main() {
 				} else {
 					prefix = " "
 				}
+				var branchCol string
+				if c.LocalBranch != nil {
+					branchCol = fmt.Sprintf("(%s) ", c.LocalBranch.Name)
+				}
 
-				fmt.Printf("%s %s - %s (%s) <%s>\n", prefix, c.Hash, c.Subject, c.Date, c.Author)
+				fmt.Printf("%s %s %s%s\n", prefix, c.Hash, branchCol, c.Subject)
 			}
 			return nil
 		},
@@ -209,60 +213,69 @@ func main() {
 				}
 			}
 
-			fmt.Println("Pushing stack...")
-			// Create any missing pull requests.
-			// For safety, also reset the target branch on any existing MRs if they don't match.
-			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
-			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch libstacks.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(branch.Name)
-				if errors.Is(err, githost.ErrDoesNotExist) {
-					return host.CreatePullRequest(githost.PullRequest{
-						SourceBranch: branch.Name,
-						TargetBranch: wantTargets[branch.Name],
-						Description:  "",
-					})
-				} else if err != nil {
-					return githost.PullRequest{}, err
-				}
+			pushStack := func() ([]githost.PullRequest, error) {
+				// Create any missing pull requests.
+				// For safety, also reset the target branch on any existing MRs if they don't match.
+				// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
+				prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch libstacks.Branch) (githost.PullRequest, error) {
+					pr, err := host.GetPullRequest(branch.Name)
+					if errors.Is(err, githost.ErrDoesNotExist) {
+						return host.CreatePullRequest(githost.PullRequest{
+							SourceBranch: branch.Name,
+							TargetBranch: wantTargets[branch.Name],
+							Description:  "",
+						})
+					} else if err != nil {
+						return githost.PullRequest{}, err
+					}
 
-				if pr.TargetBranch != wantTargets[branch.Name] {
-					return host.UpdatePullRequest(githost.PullRequest{
-						SourceBranch: branch.Name,
-						TargetBranch: defaultBranch,
-						Description:  pr.Description,
-					})
-				}
+					if pr.TargetBranch != wantTargets[branch.Name] {
+						return host.UpdatePullRequest(githost.PullRequest{
+							SourceBranch: branch.Name,
+							TargetBranch: defaultBranch,
+							Description:  pr.Description,
+						})
+					}
 
-				return pr, nil
-			})
-			if err != nil {
-				return fmt.Errorf("failed to force push branches, errors: %v", err)
-			}
-
-			// Push all branches.
-			localBranches := s.LocalBranches()
-			err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch libstacks.Branch) error {
-				_, err := git.PushForceWithLease(branch.Name)
-				return err
-			})
-			if err != nil {
-				return fmt.Errorf("failed to force push branches, errors: %v", err.Error())
-			}
-
-			// Update PRs with correct target branches and stack info.
-			prs, err = concurrent.Map(ctx, prs, func(ctx context.Context, pr githost.PullRequest) (githost.PullRequest, error) {
-				desc := formatPullRequestDescription(pr, prs)
-				pr, err := host.UpdatePullRequest(githost.PullRequest{
-					SourceBranch: pr.SourceBranch,
-					TargetBranch: wantTargets[pr.SourceBranch],
-					Description:  desc,
+					return pr, nil
 				})
-				return pr, err
-			})
-			if err != nil {
-				return err
+				if err != nil {
+					return nil, fmt.Errorf("failed to force push branches, errors: %v", err)
+				}
+
+				// Push all branches.
+				localBranches := s.LocalBranches()
+				err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch libstacks.Branch) error {
+					_, err := git.PushForceWithLease(branch.Name)
+					return err
+				})
+				if err != nil {
+					return nil, fmt.Errorf("failed to force push branches, errors: %v", err.Error())
+				}
+
+				// Update PRs with correct target branches and stack info.
+				return concurrent.Map(ctx, prs, func(ctx context.Context, pr githost.PullRequest) (githost.PullRequest, error) {
+					desc := formatPullRequestDescription(pr, prs)
+					pr, err := host.UpdatePullRequest(githost.PullRequest{
+						SourceBranch: pr.SourceBranch,
+						TargetBranch: wantTargets[pr.SourceBranch],
+						Description:  desc,
+					})
+					return pr, err
+				})
 			}
 
+			var prs []githost.PullRequest
+			var actionErr error
+			action := func() {
+				prs, actionErr = pushStack()
+			}
+			if err = spinner.New().Title("Pushing stack...").Action(action).Run(); err != nil {
+				return err
+			}
+			if actionErr != nil {
+				return actionErr
+			}
 			for _, pr := range prs {
 				fmt.Printf("Pushed %s: %s\n", pr.SourceBranch, pr.WebURL)
 			}
@@ -300,7 +313,7 @@ func main() {
 			if err := git.Fetch(upstream.Remote, refspec); err != nil {
 				return err
 			}
-			res, err := git.Rebase(defaultBranch, nil)
+			res, err := git.Rebase(defaultBranch, libgit.RebaseOpts{})
 			if err != nil {
 				return err
 			}
@@ -323,7 +336,10 @@ func main() {
 			}
 			fmt.Printf("Pulling from %s into the current stack %s\n", defaultBranch, stack.Name())
 
-			if err := git.RebaseInteractive(defaultBranch, "--keep-base", "--autosquash"); err != nil {
+			if _, err := git.Rebase(defaultBranch, libgit.RebaseOpts{
+				Interactive:    true,
+				AdditionalArgs: []string{"--keep-base", "--autosquash"},
+			}); err != nil {
 				return err
 			}
 			return nil
@@ -383,7 +399,11 @@ func main() {
 			if fixupRebaseFlag {
 				// Hack(raymond): --autosquash only works with interactive rebase, so use
 				// GIT_SEQUENCE_EDITOR=true to accept the changes automatically.
-				res, err := git.Rebase(defaultBranch, []string{"GIT_SEQUENCE_EDITOR=true"}, "--keep-base", "--autosquash", "-i")
+				res, err := git.Rebase(defaultBranch, libgit.RebaseOpts{
+					Env:            []string{"GIT_SEQUENCE_EDITOR=true"},
+					AdditionalArgs: []string{"--keep-base", "--autosquash"},
+					Interactive:    true,
+				})
 				if err != nil {
 					return err
 				}

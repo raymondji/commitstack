@@ -116,6 +116,9 @@ type RebaseOpts struct {
 func (g *Git) Rebase(branch string, opts RebaseOpts) (string, error) {
 	args := []string{"rebase", branch, "--update-refs"}
 	args = append(args, opts.AdditionalArgs...)
+	if opts.Interactive {
+		args = append(args, "-i")
+	}
 	output, err := exec.Run(
 		"git",
 		exec.WithArgs(args...),
