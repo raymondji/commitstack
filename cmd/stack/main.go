@@ -107,19 +107,28 @@ func main() {
 				}
 			}
 
+			var maxBranchNameLen int
 			for _, c := range stack.Commits {
-				var prefix string
+				if c.LocalBranch != nil && len(c.LocalBranch.Name) > maxBranchNameLen {
+					maxBranchNameLen = len(c.LocalBranch.Name)
+				}
+			}
+			for _, c := range stack.Commits {
+				var hereMarker string
 				if c.LocalBranch != nil && c.LocalBranch.Current {
-					prefix = "*"
+					hereMarker = "*"
 				} else {
-					prefix = " "
+					hereMarker = " "
 				}
 				var branchCol string
 				if c.LocalBranch != nil {
-					branchCol = fmt.Sprintf("(%s) ", c.LocalBranch.Name)
+					branchCol = fmt.Sprintf("(%s)", c.LocalBranch.Name) + strings.Repeat(" ", maxBranchNameLen-len(c.LocalBranch.Name))
+				} else {
+					// +2 to account for the parentheses
+					branchCol = strings.Repeat(" ", maxBranchNameLen+2)
 				}
 
-				fmt.Printf("%s %s %s%s\n", prefix, c.Hash, branchCol, c.Subject)
+				fmt.Printf("%s %s %s %s\n", hereMarker, c.Hash, branchCol, c.Subject)
 			}
 			return nil
 		},
