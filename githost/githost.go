@@ -19,10 +19,16 @@ type Repo struct {
 
 var ErrDoesNotExist = errors.New("does not exist")
 
-type GitHost interface {
+type Host interface {
 	GetRepo() (Repo, error)
 	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
 	GetPullRequest(sourceBranch string) (PullRequest, error)
 	UpdatePullRequest(r PullRequest) (PullRequest, error)
 	CreatePullRequest(r PullRequest) (PullRequest, error)
 }
+
+type Kind string
+
+const (
+	Gitlab Kind = "GITLAB"
+)

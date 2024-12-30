@@ -1,4 +1,4 @@
-package libstacks
+package commitstack
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/raymondji/git-stack/commitgraph"
+	"github.com/raymondji/git-stack/commitstack/commitgraph"
 )
 
 type Git interface {
@@ -48,6 +48,7 @@ func (s Stack) LocalBranches() []Branch {
 		}
 		branches = append(branches, *c.LocalBranch)
 	}
+	assert(len(branches) > 0, "commitstack must contain at least one branch")
 	return branches
 }
 
@@ -64,7 +65,7 @@ func (s Stack) Current() bool {
 	return false
 }
 
-func Compute(git Git, defaultBranch string) (Stacks, error) {
+func ComputeAll(git Git, defaultBranch string) (Stacks, error) {
 	graph, err := commitgraph.Compute(git, defaultBranch)
 	if err != nil {
 		return Stacks{}, err
@@ -273,5 +274,11 @@ func (stacks Stacks) GetCurrent() (Stack, error) {
 		}
 		return Stack{}, fmt.Errorf("%w, currently within multiple stacks, %s",
 			ErrMultipleCurrentStacks, strings.Join(names, ", "))
+	}
+}
+
+func assert(condition bool, msg string) {
+	if !condition {
+		panic(fmt.Sprintf("Invariant violated: %s", msg))
 	}
 }

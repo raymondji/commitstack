@@ -7,7 +7,7 @@ A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in g
 ## Goals
 
 1. Make stacking PRs in Git easier.
-2. Provide first-class support for Gitlab (which most stacking tools don't suppor) and make it easy to extend to other Git providers.
+2. Provide first-class support for Gitlab (which most stacking tools don't support) and make it easy to extend to other Git providers.
 3. Feel like a natural extension of using Git directly (no black magic, easy to understand how it interacts with other Git commands, tells you clearly when something else you've done in Git is incompatible with the tool, no additional state)
 
 # How to use

@@ -12,7 +12,7 @@ import (
 
 type Gitlab struct{}
 
-var _ githost.GitHost = Gitlab{}
+var _ githost.Host = Gitlab{}
 
 type GitlabMR struct {
 	Title        string `json:"title"`

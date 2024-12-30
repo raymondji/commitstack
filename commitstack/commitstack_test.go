@@ -1,10 +1,10 @@
-package libstacks_test
+package commitstack_test
 
 import (
 	"testing"
 
+	"github.com/raymondji/git-stack/commitstack"
 	"github.com/raymondji/git-stack/libgit"
-	"github.com/raymondji/git-stack/libstacks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -12,7 +12,7 @@ func TestCompute(t *testing.T) {
 	cases := map[string]struct {
 		currBranch      string
 		log             libgit.Log
-		want            libstacks.Stacks
+		want            commitstack.Stacks
 		wantErrContains string
 	}{
 		"empty": {
@@ -20,7 +20,7 @@ func TestCompute(t *testing.T) {
 				Commits: nil,
 			},
 			currBranch: "main",
-			want:       libstacks.Stacks{},
+			want:       commitstack.Stacks{},
 		},
 		"one": {
 			currBranch: "dev",
@@ -33,13 +33,13 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: libstacks.Stacks{
-				Entries: []libstacks.Stack{
+			want: commitstack.Stacks{
+				Entries: []commitstack.Stack{
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c1",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name:    "dev",
 									Current: true,
 								},
@@ -65,19 +65,19 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: libstacks.Stacks{
-				Entries: []libstacks.Stack{
+			want: commitstack.Stacks{
+				Entries: []commitstack.Stack{
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c2",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "feat/pt2",
 								},
 							},
 							{
 								Hash: "c1",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name:    "feat/pt1",
 									Current: true,
 								},
@@ -108,21 +108,21 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: libstacks.Stacks{
+			want: commitstack.Stacks{
 				Errors: []error{
-					libstacks.MergeCommitError{
+					commitstack.MergeCommitError{
 						MergeCommitHash: "c3",
-						PartialStack: libstacks.Stack{
-							Commits: []libstacks.Commit{
+						PartialStack: commitstack.Stack{
+							Commits: []commitstack.Commit{
 								{
 									Hash: "c3",
-									LocalBranch: &libstacks.Branch{
+									LocalBranch: &commitstack.Branch{
 										Name: "feat/pt3",
 									},
 								},
 								{
 									Hash: "c2",
-									LocalBranch: &libstacks.Branch{
+									LocalBranch: &commitstack.Branch{
 										Name:    "feat/pt2",
 										Current: true,
 									},
@@ -130,19 +130,19 @@ func TestCompute(t *testing.T) {
 							},
 						},
 					},
-					libstacks.MergeCommitError{
+					commitstack.MergeCommitError{
 						MergeCommitHash: "c3",
-						PartialStack: libstacks.Stack{
-							Commits: []libstacks.Commit{
+						PartialStack: commitstack.Stack{
+							Commits: []commitstack.Commit{
 								{
 									Hash: "c3",
-									LocalBranch: &libstacks.Branch{
+									LocalBranch: &commitstack.Branch{
 										Name: "feat/pt3",
 									},
 								},
 								{
 									Hash: "c1",
-									LocalBranch: &libstacks.Branch{
+									LocalBranch: &commitstack.Branch{
 										Name: "feat/pt1",
 									},
 								},
@@ -178,13 +178,13 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: libstacks.Stacks{
-				Entries: []libstacks.Stack{
+			want: commitstack.Stacks{
+				Entries: []commitstack.Stack{
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c4",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name:    "featA/pt2",
 									Current: true,
 								},
@@ -194,17 +194,17 @@ func TestCompute(t *testing.T) {
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "featA/pt1",
 								},
 							},
 						},
 					},
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c1",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "featB/pt1",
 								},
 							},
@@ -238,33 +238,33 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: libstacks.Stacks{
-				Entries: []libstacks.Stack{
+			want: commitstack.Stacks{
+				Entries: []commitstack.Stack{
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c3b",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name:    "feat/pt2",
 									Current: true,
 								},
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "feat/pt1",
 								},
 							},
 						},
-						Error: libstacks.SharedCommitError{
+						Error: commitstack.SharedCommitError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 					{
-						Commits: []libstacks.Commit{
+						Commits: []commitstack.Commit{
 							{
 								Hash: "c4",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "feat/pt3",
 								},
 							},
@@ -273,18 +273,18 @@ func TestCompute(t *testing.T) {
 							},
 							{
 								Hash: "c2",
-								LocalBranch: &libstacks.Branch{
+								LocalBranch: &commitstack.Branch{
 									Name: "feat/pt1",
 								},
 							},
 						},
-						Error: libstacks.SharedCommitError{
+						Error: commitstack.SharedCommitError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 				},
 				Errors: []error{
-					libstacks.SharedCommitError{
+					commitstack.SharedCommitError{
 						StackNames: []string{"feat/pt2", "feat/pt3"},
 					},
 				},
@@ -299,7 +299,7 @@ func TestCompute(t *testing.T) {
 				CurrentBranch: c.currBranch,
 			}
 
-			got, err := libstacks.Compute(fg, "main")
+			got, err := commitstack.ComputeAll(fg, "main")
 			if c.wantErrContains != "" {
 				require.ErrorContains(t, err, c.wantErrContains)
 				return
