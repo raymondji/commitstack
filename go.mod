@@ -1,6 +1,6 @@
 module github.com/raymondji/git-stack
 
-go 1.23.4
+go 1.22
 
 require (
 	github.com/charmbracelet/huh v0.6.0

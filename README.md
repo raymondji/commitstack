@@ -12,9 +12,9 @@ Thus, Commitstack was born. Originally a simple set of bash functions/aliases, i
 
 ## Goals
 
-Stacking workflows in Git can be cumbersome both because of your interactions with Git itself (e.g. keeping track of stacks, pushing multiple branches), and because of your interactions with Gitlab/Github/etc (e.g. setting target branches on PRs). Commitstack aims to make both of these aspects less cumbersome.
+Stacking workflows in Git can be cumbersome both because of your interactions with Git itself (e.g. keeping track of stacks, pushing multiple branches), and because of your interactions with Gitlab/Github/etc (e.g. setting target branches on PRs). Commitstack aims to make both of these aspects easier.
 
-In addition, Commitstack aims to provide a user experience that feels like a natural extension of using Git. Git already has all the basic building blocks needed to do stacking workflows, and many people use stacking workflows without any extra tools. Rather than try to introduce whole new paradigms, Commitstack aims to feel familiar if you're used to stacking with plain Git - just easier.
+In addition, Commitstack aims to provide a user experience that feels like a natural extension of using Git. Git already has all the basic building blocks needed to do stacking workflows, and many people use stacking workflows without any extra tools. Rather than introduce entirely new paradigms, Commitstack aims to feel familiar if you're used to stacking with plain Git - just with the annoying parts automated.
 
 ## References
 
