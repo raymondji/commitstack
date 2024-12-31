@@ -126,8 +126,8 @@ github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-gitlab.com/gitlab-org/api/client-go v0.118.0 h1:qHIEw+XHt+2xuk4iZGW8fc6t+gTLAGEmTA5Bzp/brxs=
-gitlab.com/gitlab-org/api/client-go v0.118.0/go.mod h1:E+X2dndIYDuUfKVP0C3jhkWvTSE00BkLbCsXTY3edDo=
+gitlab.com/gitlab-org/api/client-go v0.116.0 h1:Dy534gtZPMrnm3fAcmQRMadrcoUyFO4FQ4rXlSAdHAw=
+gitlab.com/gitlab-org/api/client-go v0.116.0/go.mod h1:B29OfnZklmaoiR7uHANh9jTyfWEgmXvZLVEnosw2Dx0=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=
 go.uber.org/atomic v1.9.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
 go.uber.org/multierr v1.9.0 h1:7fIwc/ZtS0q++VgcfqFDxSBZVv/Xo49/SYnDFupUwlI=
