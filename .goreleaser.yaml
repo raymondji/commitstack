@@ -16,7 +16,7 @@ before:
     - go generate ./...
 
 builds:
-  - dir: "./cmd/stack"
+  - dir: "./cmd/git-stack"
     env:
       - CGO_ENABLED=0
     goos:
