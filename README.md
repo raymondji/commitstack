@@ -1,28 +1,21 @@
-# Git stack
+# Commitstack
 
-A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
+CLI to facilitate [stacking workflows](https://www.stacking.dev/) in git. Support for Gitlab (!) and Github.
+
+## Why another stacking tool?
+
+There's a plethora of stacking tools that work great with Github (I thoroughly enjoyed using https://github.com/spacedentist/spr), but after I started working at a company that uses Gitlab, I was surprised to find almost no options.
+
+The only one I came across is the experimental `glab stack` CLI command, but it's still missing a few features I personally want and has the opposite problem: it's Gitlab only. I ideally wanted a single tool once that could work with both.
+
+Thus, Commitstack was born. Originally a simple set of bash functions/aliases, it's now morphed into a more robust Go CLI with full support for Gitlab and Github. It should also (hopefully) be easily exensible to other Git hosting providers.
 
 ## Goals
 
-1. Make stacking PRs in Git easier.
-2. Provide first-class support for Gitlab (which most stacking tools don't support) and make it easy to extend to other Git providers.
-3. Feel like a natural extension of using Git directly (no black magic, easy to understand how it interacts with other Git commands, tells you clearly when something else you've done in Git is incompatible with the tool, no additional state)
+Stacking workflows in Git can be cumbersome both because of your interactions with Git itself (rebasing, pushing multiple branches, keeping track of stacks), and because of your interactions with Gitlab/Github/etc (setting target branches on PRs, merging PRs). Commitstack aims to make both of these aspects less cumbersome.
 
-# How to use
-
-1. Linear commit history in your local feature branches
-
-2. Single branch per commit
+In addition, Commitstack aims to provide a user experience that feels like a natural extension of using Git. Git already has all the basic building blocks needed to do stacking workflows, and many people use stacking workflows without any extra tools. Rather than try to introduce whole new paradigms, Commitstack aims to feel familiar if you're used to stacking with plain Git - just easier.
 
 ## References
 
-https://github.com/aviator-co/av
-
-## Setup
-
-Install the dependencies:
-- Required: `git` (>= 2.38)
-- (Optional) Gitlab extension: `glab`
-- (Optional) Github extension: `gh`
-
-Clone this repo somewhere, e.g. `~/dev/git-stack`
+`exec.go` is heavily inspired by https://github.com/aviator-co/av (MIT license)
