@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stack/commitstack"
 	"github.com/raymondji/git-stack/concurrent"
 	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/git-stack/slices"
 	"github.com/spf13/cobra"
 )
 
@@ -49,18 +49,12 @@ var pushCmd = &cobra.Command{
 		}
 
 		pushStack := func() ([]githost.PullRequest, error) {
-			// Create any missing pull requests.
-			// For safety, also reset the target branch on any existing MRs if they don't match.
+			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
 			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
 				pr, err := host.GetPullRequest(deps.remote.RepoPath, branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
-					return host.CreatePullRequest(deps.remote.RepoPath, githost.PullRequest{
-						Title:        branch.Name,
-						Description:  "",
-						SourceBranch: branch.Name,
-						TargetBranch: wantTargets[branch.Name],
-					})
+					return githost.PullRequest{}, nil
 				} else if err != nil {
 					return githost.PullRequest{}, err
 				}
@@ -78,8 +72,14 @@ var pushCmd = &cobra.Command{
 				return pr, nil
 			})
 			if err != nil {
-				return nil, fmt.Errorf("failed to force push branches, errors: %v", err)
+				return nil, fmt.Errorf("failed to reset target branches on existing MRs, errors: %v", err)
 			}
+			prs = slices.Filter(prs, func(pr githost.PullRequest) bool {
+				return pr.ID != 0
+			})
+			prsBySourceBranch := slices.ToMap(prs, func(pr githost.PullRequest) string {
+				return pr.SourceBranch
+			})
 
 			// Push all branches.
 			localBranches := s.LocalBranches()
@@ -89,6 +89,25 @@ var pushCmd = &cobra.Command{
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to force push branches, errors: %v", err.Error())
+			}
+
+			// Create any new PRs
+			prs, err = concurrent.Map(
+				ctx,
+				localBranches,
+				func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
+					if pr, ok := prsBySourceBranch[branch.Name]; ok {
+						return pr, nil
+					}
+
+					return host.CreatePullRequest(deps.remote.RepoPath, githost.PullRequest{
+						Title:        branch.Name,
+						SourceBranch: branch.Name,
+						TargetBranch: wantTargets[branch.Name],
+					})
+				})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create new PRs, errors: %v", err.Error())
 			}
 
 			// Update PRs with correct target branches and stack info.

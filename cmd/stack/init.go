@@ -61,7 +61,7 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			r, err := host.GetRepo(remote.RepoPath)
+			repo, err := host.GetRepo(remote.RepoPath)
 			if err != nil {
 				return err
 			}
@@ -70,35 +70,54 @@ var initCmd = &cobra.Command{
 				Gitlab: config.GitlabConfig{
 					PersonalAccessToken: personalAccessToken,
 				},
-				DefaultBranch: r.DefaultBranch,
+				DefaultBranch: repo.DefaultBranch,
 			}
 		case githost.Github:
-			fmt.Print("Enter your Github personal access token: ")
+			fmt.Println("Git stack requires a Github personal access token in order to manage pull requests on your behalf.")
+			fmt.Println("You can create a personal access token at https://github.com/settings/personal-access-tokens/new.")
+			fmt.Println("At minimum, the following fine grained permissions are required:")
+			fmt.Println("- Repository permissions (Pull Requests): Read and write ")
+			fmt.Println("- Repository permissions (Contents): Read-only")
+			fmt.Println("- Repository permissions (Metadata): Read-only")
+			fmt.Print("To continue, enter your Github personal access token: ")
 			personalAccessToken, err := promptUserInput()
 			if err != nil {
 				return err
 			}
 
-			host, err := github.New(personalAccessToken)
+			fmt.Print("Enter your Github username:")
+			username, err := promptUserInput()
 			if err != nil {
 				return err
 			}
-			r, err := host.GetRepo(remote.RepoPath)
+
+			host, err := github.New(username, personalAccessToken)
+			if err != nil {
+				return err
+			}
+
+			repo, err := host.GetRepo(remote.RepoPath)
 			if err != nil {
 				return err
 			}
 
 			cfg.Repositories[remote.RepoPath] = config.RepoConfig{
 				Github: config.GithubConfig{
+					Username:            username,
 					PersonalAccessToken: personalAccessToken,
 				},
-				DefaultBranch: r.DefaultBranch,
+				DefaultBranch: repo.DefaultBranch,
 			}
 		default:
 			return fmt.Errorf("Unsupported git host %s", remote.Kind)
 		}
 
-		return config.Save(cfg)
+		cfgPath, err := config.Save(cfg)
+		if err != nil {
+			return err
+		}
+		fmt.Println("Config saved to", cfgPath)
+		return nil
 	},
 }
 

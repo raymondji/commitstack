@@ -33,6 +33,7 @@ type GitlabConfig struct {
 }
 
 type GithubConfig struct {
+	Username            string
 	PersonalAccessToken string `json:"personalAccessToken"`
 }
 
@@ -62,24 +63,25 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
-func Save(cfg *Config) error {
+// Save returns (config file path, error)
+func Save(cfg *Config) (string, error) {
 	configFilePath, err := getConfigFilePath()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Marshal the config struct into JSON format.
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal config: %w", err)
+		return "", fmt.Errorf("failed to marshal config: %w", err)
 	}
 
 	// Write the JSON data to the configuration file.
 	if err := os.WriteFile(configFilePath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write config file: %w", err)
+		return "", fmt.Errorf("failed to write config file: %w", err)
 	}
 
-	return nil
+	return configFilePath, nil
 }
 
 // getConfigFilePath constructs the config file path in the user's home directory.

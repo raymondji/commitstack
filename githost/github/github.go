@@ -10,13 +10,15 @@ import (
 )
 
 type githubClient struct {
-	client *github.Client
+	client   *github.Client
+	username string
 }
 
-func New(personalAccessToken string) (githost.Host, error) {
+func New(username string, personalAccessToken string) (githost.Host, error) {
 	client := github.NewClient(nil).WithAuthToken(personalAccessToken)
 	return &githubClient{
-		client: client,
+		client:   client,
+		username: username,
 	}, nil
 }
 
@@ -45,7 +47,7 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (git
 
 	opts := &github.PullRequestListOptions{
 		State: "open",
-		Head:  sourceBranch,
+		Head:  fmt.Sprintf("%s:%s", g.username, sourceBranch),
 	}
 	prs, _, err := g.client.PullRequests.List(context.Background(), owner, repo, opts)
 	if err != nil {
@@ -56,10 +58,13 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (git
 	case 0:
 		return githost.PullRequest{}, fmt.Errorf("%w, source branch: %s", githost.ErrDoesNotExist, sourceBranch)
 	case 1:
-		pr := prs[0]
-		return convertPR(pr), nil
+		return convertPR(prs[0]), nil
 	default:
-		return githost.PullRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s", sourceBranch)
+		var urls []string
+		for _, pr := range prs {
+			urls = append(urls, *pr.HTMLURL)
+		}
+		return githost.PullRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s, urls: %v", sourceBranch, urls)
 	}
 }
 
@@ -73,17 +78,18 @@ func (g *githubClient) CreatePullRequest(repoPath string, pr githost.PullRequest
 		return githost.PullRequest{}, err
 	}
 
+	// TODO: add optional support for draft PRs, not supported in every repo
 	newPR := &github.NewPullRequest{
 		Title: github.Ptr(pr.Title),
 		Head:  github.Ptr(pr.SourceBranch),
 		Base:  github.Ptr(pr.TargetBranch),
 		Body:  github.Ptr(pr.Description),
-		Draft: github.Ptr(true),
 	}
 
 	createdPR, _, err := g.client.PullRequests.Create(context.Background(), owner, repo, newPR)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("failed to create pull request: %w", err)
+		return githost.PullRequest{}, fmt.Errorf(
+			"failed to create pull request: %w, contents: %+v", err, pr)
 	}
 
 	return convertPR(createdPR), nil
@@ -119,15 +125,18 @@ func (g *githubClient) UpdatePullRequest(repoPath string, pr githost.PullRequest
 }
 
 func convertPR(pr *github.PullRequest) githost.PullRequest {
-	return githost.PullRequest{
+	out := githost.PullRequest{
 		ID:             *pr.Number,
 		SourceBranch:   *pr.Head.Ref,
 		TargetBranch:   *pr.Base.Ref,
-		Description:    *pr.Body,
+		Title:          *pr.Title,
 		WebURL:         *pr.HTMLURL,
 		MarkdownWebURL: fmt.Sprintf("%s+", *pr.HTMLURL),
-		Title:          *pr.Title,
 	}
+	if pr.Body != nil {
+		out.Description = *pr.Body
+	}
+	return out
 }
 
 // parseRepoPath returns (owner, name, error)
