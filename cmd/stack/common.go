@@ -6,6 +6,7 @@ import (
 	"github.com/raymondji/git-stack/commitstack"
 	"github.com/raymondji/git-stack/config"
 	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/git-stack/githost/github"
 	"github.com/raymondji/git-stack/githost/gitlab"
 	"github.com/raymondji/git-stack/libgit"
 )
@@ -47,6 +48,11 @@ func initDeps() (deps, error) {
 		host, err = gitlab.New(repoCfg.Gitlab.PersonalAccessToken)
 		if err != nil {
 			return deps{}, fmt.Errorf("failed to init gitlab client, err: %v", err)
+		}
+	case githost.Github:
+		host, err = github.New(repoCfg.Github.PersonalAccessToken)
+		if err != nil {
+			return deps{}, fmt.Errorf("failed to init github client, err: %v", err)
 		}
 	default:
 		return deps{}, fmt.Errorf("Unsupported git host %s", remote.Kind)

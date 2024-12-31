@@ -122,6 +122,8 @@ func (g git) GetRemote() (Remote, error) {
 	switch {
 	case strings.Contains(output.Stdout, "gitlab.com"):
 		kind = githost.Gitlab
+	case strings.Contains(output.Stdout, "github.com"):
+		kind = githost.Github
 	default:
 		return Remote{}, errors.New(fmt.Sprintf("unsupported git host: %s", output.Stdout))
 	}

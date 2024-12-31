@@ -25,9 +25,14 @@ type ThemeConfig struct {
 type RepoConfig struct {
 	DefaultBranch string       `json:"defaultBranch"`
 	Gitlab        GitlabConfig `json:"gitlab"`
+	Github        GithubConfig `json:"github"`
 }
 
 type GitlabConfig struct {
+	PersonalAccessToken string `json:"personalAccessToken"`
+}
+
+type GithubConfig struct {
 	PersonalAccessToken string `json:"personalAccessToken"`
 }
 

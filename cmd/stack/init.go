@@ -8,6 +8,7 @@ import (
 
 	"github.com/raymondji/git-stack/config"
 	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/git-stack/githost/github"
 	"github.com/raymondji/git-stack/githost/gitlab"
 	"github.com/raymondji/git-stack/libgit"
 	"github.com/spf13/cobra"
@@ -71,6 +72,30 @@ var initCmd = &cobra.Command{
 				},
 				DefaultBranch: r.DefaultBranch,
 			}
+		case githost.Github:
+			fmt.Print("Enter your Github personal access token: ")
+			personalAccessToken, err := promptUserInput()
+			if err != nil {
+				return err
+			}
+
+			host, err := github.New(personalAccessToken)
+			if err != nil {
+				return err
+			}
+			r, err := host.GetRepo(remote.RepoPath)
+			if err != nil {
+				return err
+			}
+
+			cfg.Repositories[remote.RepoPath] = config.RepoConfig{
+				Github: config.GithubConfig{
+					PersonalAccessToken: personalAccessToken,
+				},
+				DefaultBranch: r.DefaultBranch,
+			}
+		default:
+			return fmt.Errorf("Unsupported git host %s", remote.Kind)
 		}
 
 		return config.Save(cfg)

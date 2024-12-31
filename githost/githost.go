@@ -32,4 +32,5 @@ type Kind string
 
 const (
 	Gitlab Kind = "GITLAB"
+	Github Kind = "GITHUB"
 )

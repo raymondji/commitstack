@@ -4,26 +4,26 @@ import (
 	"fmt"
 
 	"github.com/raymondji/git-stack/githost"
-	gitlabSDK "gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
-type gitlab struct {
-	client *gitlabSDK.Client
+type gitlabClient struct {
+	client *gitlab.Client
 }
 
 func New(personalAccessToken string) (githost.Host, error) {
-	client, err := gitlabSDK.NewClient(personalAccessToken)
+	client, err := gitlab.NewClient(personalAccessToken)
 	if err != nil {
-		return gitlab{}, fmt.Errorf("Failed to create client: %v", err)
+		return gitlabClient{}, fmt.Errorf("Failed to create client: %v", err)
 	}
-	return gitlab{
+	return gitlabClient{
 		client: client,
 	}, nil
 }
 
 // e.g. for https://gitlab.com/raymondji/git-stacked-gitlab-test, the path is raymondji/git-stacked-gitlab-test
-func (g gitlab) GetRepo(repoPath string) (githost.Repo, error) {
-	project, _, err := g.client.Projects.GetProject(repoPath, &gitlabSDK.GetProjectOptions{})
+func (g gitlabClient) GetRepo(repoPath string) (githost.Repo, error) {
+	project, _, err := g.client.Projects.GetProject(repoPath, &gitlab.GetProjectOptions{})
 	if err != nil {
 		return githost.Repo{}, err
 	}
@@ -33,8 +33,8 @@ func (g gitlab) GetRepo(repoPath string) (githost.Repo, error) {
 	}, nil
 }
 
-func (g gitlab) GetPullRequest(repoPath string, sourceBranch string) (githost.PullRequest, error) {
-	opts := &gitlabSDK.ListProjectMergeRequestsOptions{
+func (g gitlabClient) GetPullRequest(repoPath string, sourceBranch string) (githost.PullRequest, error) {
+	opts := &gitlab.ListProjectMergeRequestsOptions{
 		SourceBranch: &sourceBranch,
 	}
 	mergeRequests, _, err := g.client.MergeRequests.ListProjectMergeRequests(repoPath, opts)
@@ -52,13 +52,13 @@ func (g gitlab) GetPullRequest(repoPath string, sourceBranch string) (githost.Pu
 	}
 }
 
-func (g gitlab) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+func (g gitlabClient) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
 	if pr.Title == "" {
 		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	// TODO: make it a draft
-	opts := &gitlabSDK.CreateMergeRequestOptions{
+	opts := &gitlab.CreateMergeRequestOptions{
 		Title:        &pr.Title,
 		Description:  &pr.Description,
 		SourceBranch: &pr.SourceBranch,
@@ -73,7 +73,7 @@ func (g gitlab) CreatePullRequest(repoPath string, pr githost.PullRequest) (gith
 	return convertMR(mr), nil
 }
 
-func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+func (g gitlabClient) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
 	if pr.ID == 0 {
 		return githost.PullRequest{}, fmt.Errorf("pull request ID must be set")
 	}
@@ -81,7 +81,7 @@ func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (gith
 		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
-	opts := &gitlabSDK.UpdateMergeRequestOptions{
+	opts := &gitlab.UpdateMergeRequestOptions{
 		Title:        &pr.Title,
 		Description:  &pr.Description,
 		TargetBranch: &pr.TargetBranch,
@@ -95,7 +95,7 @@ func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (gith
 	return convertMR(mr), nil
 }
 
-func convertMR(mr *gitlabSDK.MergeRequest) githost.PullRequest {
+func convertMR(mr *gitlab.MergeRequest) githost.PullRequest {
 	return githost.PullRequest{
 		ID:             mr.IID,
 		SourceBranch:   mr.SourceBranch,
