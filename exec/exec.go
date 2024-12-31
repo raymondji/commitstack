@@ -99,3 +99,11 @@ func Run(name string, fOpts ...runOpt) (*Output, error) {
 		Stderr:    strings.TrimSpace(stderr.String()),
 	}, nil
 }
+
+func InPath(name string) (bool, error) {
+	_, err := exec.LookPath(name)
+	if err != nil {
+		return false, errors.New("not installed or not in PATH")
+	}
+	return true, nil
+}

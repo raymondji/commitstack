@@ -1,21 +1,153 @@
 package libgit
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/raymondji/git-stack/exec"
+	"github.com/raymondji/git-stack/githost"
 )
 
-type Git struct{}
+// When --update-refs was introduced
+var minGitVersion = version{major: 2, minor: 38}
+
+type Git interface {
+	GetRemote() (Remote, error)
+	GetUpstream(branch string) (Upstream, error)
+	GetRootDir() (string, error)
+	CommitFixup(commitHash string, add bool) (string, error)
+	CommitEmpty(msg string) error
+	GetCurrentBranch() (string, error)
+	GetCommitHash(branch string) (string, error)
+	PushForceWithLease(branchName string) (string, error)
+	Fetch(repo string, refspec string) error
+	Rebase(branch string, opts RebaseOpts) (string, error)
+	CreateBranch(name string) error
+	Checkout(name string) error
+	LogAll(notReachableFrom string) (Log, error)
+}
+
+type git struct{}
+
+func New() (Git, error) {
+	ok, err := exec.InPath("git")
+	if err != nil {
+		return git{}, err
+	}
+	if !ok {
+		return git{}, fmt.Errorf("git is not installed")
+	}
+
+	g := git{}
+	v, err := g.getVersion()
+	if err != nil {
+		return git{}, fmt.Errorf("failed to get git version")
+	}
+	if v.lessThan(minGitVersion) {
+		return git{}, fmt.Errorf("the minimum supported git version is %s, yours is %s", minGitVersion, v)
+	}
+	return g, nil
+}
 
 type Upstream struct {
 	Remote     string
 	BranchName string
 }
 
-func (g Git) GetUpstream(branch string) (Upstream, error) {
+type version struct {
+	major int
+	minor int
+}
+
+func (v version) lessThan(other version) bool {
+	return v.major < other.major || (v.major == other.major && v.minor < other.minor)
+}
+
+func (v version) String() string {
+	return fmt.Sprintf("%d.%d.0", v.major, v.minor)
+}
+
+func (g git) getVersion() (version, error) {
+	output, err := exec.Run(
+		"git", exec.WithArgs("-v"),
+	)
+	if err != nil {
+		return version{}, fmt.Errorf("failed to get upstream, err: %v", err)
+	}
+
+	fields := strings.Fields(output.Stdout)
+	if len(fields) < 3 {
+		return version{}, fmt.Errorf("unexpected git -v output: %v", output.Stdout)
+	}
+
+	vParts := strings.Split(fields[2], ".")
+	if len(vParts) != 3 {
+		return version{}, fmt.Errorf("unexpected git version string: %v", fields[2])
+	}
+	major, err := strconv.Atoi(vParts[0])
+	if err != nil {
+		return version{}, err
+	}
+	minor, err := strconv.Atoi(vParts[1])
+	if err != nil {
+		return version{}, err
+	}
+
+	return version{
+		major: major,
+		minor: minor,
+	}, nil
+}
+
+type Remote struct {
+	Kind     githost.Kind
+	RepoPath string
+}
+
+func (g git) GetRemote() (Remote, error) {
+	output, err := exec.Run(
+		"git",
+		exec.WithArgs(
+			"remote", "get-url", "origin",
+		),
+	)
+	if err != nil {
+		return Remote{}, fmt.Errorf("failed to get upstream, err: %v", err)
+	}
+
+	var kind githost.Kind
+	switch {
+	case strings.Contains(output.Stdout, "gitlab.com"):
+		kind = githost.Gitlab
+	default:
+		return Remote{}, errors.New(fmt.Sprintf("unsupported git host: %s", output.Stdout))
+	}
+
+	// Extract the repository name
+	path, err := parseRepoPathFromRemoteURL(output.Stdout)
+	if err != nil {
+		return Remote{}, err
+	}
+	return Remote{
+		RepoPath: path,
+		Kind:     kind,
+	}, nil
+}
+
+func parseRepoPathFromRemoteURL(url string) (string, error) {
+	url = strings.TrimSuffix(url, ".git")
+	parts := strings.Split(url, ":")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("failed to parse repo path from url: %s", url)
+	}
+
+	return parts[1], nil
+}
+
+func (g git) GetUpstream(branch string) (Upstream, error) {
 	output, err := exec.Run(
 		"git",
 		exec.WithArgs(
@@ -44,7 +176,7 @@ func (g Git) GetUpstream(branch string) (Upstream, error) {
 	}
 }
 
-func (g Git) GetRootDir() (string, error) {
+func (g git) GetRootDir() (string, error) {
 	// Use the helper function to run the git command
 	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--show-toplevel"))
 	if err != nil {
@@ -53,7 +185,7 @@ func (g Git) GetRootDir() (string, error) {
 	return output.Stdout, nil
 }
 
-func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
+func (g git) CommitFixup(commitHash string, add bool) (string, error) {
 	args := []string{"commit", "--fixup", commitHash}
 	if add {
 		args = append(args, "-a")
@@ -65,7 +197,7 @@ func (g Git) CommitFixup(commitHash string, add bool) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g Git) CommitEmpty(msg string) error {
+func (g git) CommitEmpty(msg string) error {
 	_, err := exec.Run("git", exec.WithArgs("commit", "--allow-empty", "-m", msg))
 	if err != nil {
 		return fmt.Errorf("failed to commit, err: %v", err)
@@ -73,7 +205,7 @@ func (g Git) CommitEmpty(msg string) error {
 	return nil
 }
 
-func (g Git) GetCurrentBranch() (string, error) {
+func (g git) GetCurrentBranch() (string, error) {
 	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--abbrev-ref", "HEAD"))
 	if err != nil {
 		return "", fmt.Errorf("failed to get current branch, err: %v", err)
@@ -81,7 +213,7 @@ func (g Git) GetCurrentBranch() (string, error) {
 	return output.Stdout, nil
 }
 
-func (g Git) GetCommitHash(branch string) (string, error) {
+func (g git) GetCommitHash(branch string) (string, error) {
 	output, err := exec.Run("git", exec.WithArgs("rev-parse", branch))
 	if err != nil {
 		return "", fmt.Errorf("failed to get commit hash for branch %s, err: %v", branch, err)
@@ -89,7 +221,7 @@ func (g Git) GetCommitHash(branch string) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g *Git) PushForceWithLease(branchName string) (string, error) {
+func (g git) PushForceWithLease(branchName string) (string, error) {
 	res, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
@@ -98,7 +230,7 @@ func (g *Git) PushForceWithLease(branchName string) (string, error) {
 	return fmt.Sprintf("Force pushing branch %s\n%s", branchName, res), nil
 }
 
-func (g *Git) Fetch(repo string, refspec string) error {
+func (g git) Fetch(repo string, refspec string) error {
 	_, err := exec.Run("git", exec.WithArgs("fetch", repo, refspec))
 	if err != nil {
 		return fmt.Errorf("failed to fetch, err: %v", err)
@@ -113,7 +245,7 @@ type RebaseOpts struct {
 	AdditionalArgs []string
 }
 
-func (g *Git) Rebase(branch string, opts RebaseOpts) (string, error) {
+func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 	args := []string{"rebase", branch, "--update-refs"}
 	args = append(args, opts.AdditionalArgs...)
 	if opts.Interactive {
@@ -130,7 +262,7 @@ func (g *Git) Rebase(branch string, opts RebaseOpts) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g Git) CreateBranch(name string) error {
+func (g git) CreateBranch(name string) error {
 	_, err := exec.Run("git", exec.WithArgs("checkout", "-b", name))
 	if err != nil {
 		return fmt.Errorf("failed to create branch, err: %v", err)
@@ -138,7 +270,7 @@ func (g Git) CreateBranch(name string) error {
 	return nil
 }
 
-func (g Git) Checkout(name string) error {
+func (g git) Checkout(name string) error {
 	_, err := exec.Run("git", exec.WithArgs("checkout", name))
 	if err != nil {
 		return fmt.Errorf("failed to checkout branch, err: %v", err)
@@ -160,7 +292,7 @@ type Commit struct {
 	LocalBranches []string
 }
 
-func (g Git) LogAll(notReachableFrom string) (Log, error) {
+func (g git) LogAll(notReachableFrom string) (Log, error) {
 	output, err := exec.Run(
 		"git",
 		exec.WithArgs(

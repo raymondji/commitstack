@@ -1,114 +1,97 @@
 package gitlab
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"strings"
-
-	"github.com/raymondji/git-stack/exec"
 	"github.com/raymondji/git-stack/githost"
+	gitlabSDK "gitlab.com/gitlab-org/api/client-go"
 )
 
-type Gitlab struct{}
-
-var _ githost.Host = Gitlab{}
-
-type GitlabMR struct {
-	Title        string `json:"title"`
-	TargetBranch string `json:"target_branch"`
-	SourceBranch string `json:"source_branch"`
-	Description  string `json:"description"`
-	WebURL       string `json:"web_url"`
-	IID          int    `json:"iid"`
+type gitlab struct {
+	client *gitlabSDK.Client
 }
 
-type GitlabRepo struct {
-	DefaultBranch string `json:"default_branch"`
-}
-
-func (g Gitlab) GetRepo() (githost.Repo, error) {
-	output, err := exec.Run(
-		"glab",
-		exec.WithArgs(
-			"repo", "view", "--output=json",
-		),
-	)
+func New(personalAccessToken string) (githost.Host, error) {
+	client, err := gitlabSDK.NewClient(personalAccessToken)
 	if err != nil {
-		return githost.Repo{}, fmt.Errorf(
-			"error getting repo info, output: %+v, err: %v", output, err)
+		return gitlab{}, fmt.Errorf("Failed to create client: %v", err)
 	}
-	var repo GitlabRepo
-	if err := json.Unmarshal([]byte(output.Stdout), &repo); err != nil {
+	return gitlab{
+		client: client,
+	}, nil
+}
+
+// e.g. for https://gitlab.com/raymondji/git-stacked-gitlab-test, the path is raymondji/git-stacked-gitlab-test
+func (g gitlab) GetRepo(repoPath string) (githost.Repo, error) {
+	project, _, err := g.client.Projects.GetProject(repoPath, &gitlabSDK.GetProjectOptions{})
+	if err != nil {
 		return githost.Repo{}, err
 	}
 
 	return githost.Repo{
-		DefaultBranch: repo.DefaultBranch,
+		DefaultBranch: project.DefaultBranch,
 	}, nil
 }
 
-func (g Gitlab) GetPullRequest(sourceBranch string) (githost.PullRequest, error) {
-	output, err := exec.Run(
-		"glab",
-		exec.WithArgs(
-			"mr", "view", sourceBranch, "--output=json",
-		),
-	)
+func (g gitlab) GetPullRequest(repoPath string, sourceBranch string) (githost.PullRequest, error) {
+	opts := &gitlabSDK.ListProjectMergeRequestsOptions{
+		SourceBranch: &sourceBranch,
+	}
+	mergeRequests, _, err := g.client.MergeRequests.ListProjectMergeRequests(repoPath, opts)
 	if err != nil {
-		if strings.Contains(err.Error(), "no open merge request available") {
-			return githost.PullRequest{}, githost.ErrDoesNotExist
-		}
-		return githost.PullRequest{}, fmt.Errorf(
-			"error checking MRs for branch %s, output: %+v, err: %v", sourceBranch, output, err)
+		return githost.PullRequest{}, fmt.Errorf("failed to list merge requests: %w", err)
+	}
+	switch len(mergeRequests) {
+	case 0:
+		return githost.PullRequest{}, fmt.Errorf("no merge request found for source branch: %s", sourceBranch)
+	case 1:
+		mr := mergeRequests[0]
+		return convertMR(mr), nil
+	default:
+		return githost.PullRequest{}, fmt.Errorf("found multiple merge requests for source branch: %s", sourceBranch)
+	}
+}
+
+func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+	opts := &gitlabSDK.UpdateMergeRequestOptions{
+		TargetBranch: &pr.TargetBranch,
+		Title:        &pr.Title,
+		Description:  &pr.Description,
 	}
 
-	var mr GitlabMR
-	if err := json.Unmarshal([]byte(output.Stdout), &mr); err != nil {
-		return githost.PullRequest{}, err
+	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
+	if err != nil {
+		return githost.PullRequest{}, fmt.Errorf("failed to create merge request: %w", err)
 	}
 
+	return convertMR(mr), nil
+}
+
+func (g gitlab) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+	// TODO: make it a draft
+	opts := &gitlabSDK.CreateMergeRequestOptions{
+		SourceBranch: &pr.SourceBranch,
+		TargetBranch: &pr.TargetBranch,
+		Title:        &pr.Title,
+		Description:  &pr.Description,
+	}
+
+	mr, _, err := g.client.MergeRequests.CreateMergeRequest(repoPath, opts)
+	if err != nil {
+		return githost.PullRequest{}, fmt.Errorf("failed to create merge request: %w", err)
+	}
+
+	return convertMR(mr), nil
+}
+
+func convertMR(mr *gitlabSDK.MergeRequest) githost.PullRequest {
 	return githost.PullRequest{
+		ID:             mr.IID,
 		SourceBranch:   mr.SourceBranch,
 		TargetBranch:   mr.TargetBranch,
 		Description:    mr.Description,
 		WebURL:         mr.WebURL,
 		MarkdownWebURL: fmt.Sprintf("%s+", mr.WebURL),
 		Title:          mr.Title,
-	}, nil
-}
-
-func (g Gitlab) UpdatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
-	_, err := exec.Run(
-		"glab",
-		exec.WithArgs(
-			"mr", "update", pr.SourceBranch,
-			"--target-branch", pr.TargetBranch,
-			"--description", pr.Description,
-		),
-	)
-	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("error updating pr: %s, err: %v", pr.SourceBranch, err)
 	}
-
-	return g.GetPullRequest(pr.SourceBranch)
-}
-
-func (g Gitlab) CreatePullRequest(pr githost.PullRequest) (githost.PullRequest, error) {
-	_, err := exec.Run(
-		"glab",
-		exec.WithArgs(
-			"mr", "create",
-			"--source-branch", pr.SourceBranch,
-			"--target-branch", pr.TargetBranch,
-			"--title", pr.SourceBranch,
-			"--description", pr.Description,
-			"--draft",
-		),
-	)
-	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("error creating merge request: %+v, err: %v", pr, err)
-	}
-
-	return g.GetPullRequest(pr.SourceBranch)
 }
