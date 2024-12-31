@@ -35,6 +35,7 @@ func (g gitlabClient) GetRepo(repoPath string) (githost.Repo, error) {
 
 func (g gitlabClient) GetPullRequest(repoPath string, sourceBranch string) (githost.PullRequest, error) {
 	opts := &gitlab.ListProjectMergeRequestsOptions{
+		State:        gitlab.Ptr("opened"),
 		SourceBranch: &sourceBranch,
 	}
 	mergeRequests, _, err := g.client.MergeRequests.ListProjectMergeRequests(repoPath, opts)
