@@ -2,8 +2,6 @@
 
 A simple tool to facilitate [stacking workflows](https://www.stacking.dev/) in git.
 
-[![CI](https://github.com/raymondji/git-stack/actions/workflows/ci.yml/badge.svg)](https://github.com/raymondji/git-stack/actions/workflows/ci.yml)
-
 ## Goals
 
 1. Make stacking PRs in Git easier.
