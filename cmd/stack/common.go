@@ -15,6 +15,7 @@ type deps struct {
 	host    githost.Host
 	repoCfg config.RepoConfig
 	theme   config.Theme
+	remote  libgit.Remote
 }
 
 func initDeps() (deps, error) {
@@ -56,6 +57,7 @@ func initDeps() (deps, error) {
 		git:     git,
 		host:    host,
 		repoCfg: repoCfg,
+		remote:  remote,
 	}, nil
 }
 

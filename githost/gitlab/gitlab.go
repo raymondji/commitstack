@@ -43,7 +43,7 @@ func (g gitlab) GetPullRequest(repoPath string, sourceBranch string) (githost.Pu
 	}
 	switch len(mergeRequests) {
 	case 0:
-		return githost.PullRequest{}, fmt.Errorf("no merge request found for source branch: %s", sourceBranch)
+		return githost.PullRequest{}, fmt.Errorf("%w, source branch: %s", githost.ErrDoesNotExist, sourceBranch)
 	case 1:
 		mr := mergeRequests[0]
 		return convertMR(mr), nil
@@ -52,14 +52,20 @@ func (g gitlab) GetPullRequest(repoPath string, sourceBranch string) (githost.Pu
 	}
 }
 
-func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
-	opts := &gitlabSDK.UpdateMergeRequestOptions{
-		TargetBranch: &pr.TargetBranch,
-		Title:        &pr.Title,
-		Description:  &pr.Description,
+func (g gitlab) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+	if pr.Title == "" {
+		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
-	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
+	// TODO: make it a draft
+	opts := &gitlabSDK.CreateMergeRequestOptions{
+		Title:        &pr.Title,
+		Description:  &pr.Description,
+		SourceBranch: &pr.SourceBranch,
+		TargetBranch: &pr.TargetBranch,
+	}
+
+	mr, _, err := g.client.MergeRequests.CreateMergeRequest(repoPath, opts)
 	if err != nil {
 		return githost.PullRequest{}, fmt.Errorf("failed to create merge request: %w", err)
 	}
@@ -67,18 +73,23 @@ func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (gith
 	return convertMR(mr), nil
 }
 
-func (g gitlab) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
-	// TODO: make it a draft
-	opts := &gitlabSDK.CreateMergeRequestOptions{
-		SourceBranch: &pr.SourceBranch,
-		TargetBranch: &pr.TargetBranch,
-		Title:        &pr.Title,
-		Description:  &pr.Description,
+func (g gitlab) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+	if pr.ID == 0 {
+		return githost.PullRequest{}, fmt.Errorf("pull request ID must be set")
+	}
+	if pr.Title == "" {
+		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
-	mr, _, err := g.client.MergeRequests.CreateMergeRequest(repoPath, opts)
+	opts := &gitlabSDK.UpdateMergeRequestOptions{
+		Title:        &pr.Title,
+		Description:  &pr.Description,
+		TargetBranch: &pr.TargetBranch,
+	}
+
+	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("failed to create merge request: %w", err)
+		return githost.PullRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
 	}
 
 	return convertMR(mr), nil

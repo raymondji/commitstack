@@ -60,7 +60,7 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			r, err := host.GetRepo()
+			r, err := host.GetRepo(remote.RepoPath)
 			if err != nil {
 				return err
 			}

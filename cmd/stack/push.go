@@ -53,22 +53,25 @@ var pushCmd = &cobra.Command{
 			// For safety, also reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
 			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(branch.Name)
+				pr, err := host.GetPullRequest(deps.remote.RepoPath, branch.Name)
 				if errors.Is(err, githost.ErrDoesNotExist) {
-					return host.CreatePullRequest(githost.PullRequest{
+					return host.CreatePullRequest(deps.remote.RepoPath, githost.PullRequest{
+						Title:        branch.Name,
+						Description:  "",
 						SourceBranch: branch.Name,
 						TargetBranch: wantTargets[branch.Name],
-						Description:  "",
 					})
 				} else if err != nil {
 					return githost.PullRequest{}, err
 				}
 
 				if pr.TargetBranch != wantTargets[branch.Name] {
-					return host.UpdatePullRequest(githost.PullRequest{
+					return host.UpdatePullRequest(deps.remote.RepoPath, githost.PullRequest{
+						ID:           pr.ID,
+						Title:        pr.Title,
+						Description:  pr.Description,
 						SourceBranch: branch.Name,
 						TargetBranch: defaultBranch,
-						Description:  pr.Description,
 					})
 				}
 
@@ -91,10 +94,12 @@ var pushCmd = &cobra.Command{
 			// Update PRs with correct target branches and stack info.
 			return concurrent.Map(ctx, prs, func(ctx context.Context, pr githost.PullRequest) (githost.PullRequest, error) {
 				desc := formatPullRequestDescription(pr, prs)
-				pr, err := host.UpdatePullRequest(githost.PullRequest{
+				pr, err := host.UpdatePullRequest(deps.remote.RepoPath, githost.PullRequest{
+					ID:           pr.ID,
+					Title:        pr.Title,
+					Description:  desc,
 					SourceBranch: pr.SourceBranch,
 					TargetBranch: wantTargets[pr.SourceBranch],
-					Description:  desc,
 				})
 				return pr, err
 			})

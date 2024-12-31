@@ -66,7 +66,7 @@ var showCmd = &cobra.Command{
 			var actionErr error
 			action := func() {
 				prs, err := concurrent.Map(ctx, stack.LocalBranches(), func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-					pr, err := host.GetPullRequest(branch.Name)
+					pr, err := host.GetPullRequest(deps.remote.RepoPath, branch.Name)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
 					} else if err != nil {
