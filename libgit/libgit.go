@@ -224,12 +224,12 @@ func (g git) GetCommitHash(branch string) (string, error) {
 }
 
 func (g git) PushForceWithLease(branchName string) (string, error) {
-	res, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
+	output, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
 	}
 
-	return fmt.Sprintf("Force pushing branch %s\n%s", branchName, res), nil
+	return fmt.Sprintf("force pushing branch %s\n%s", branchName, output.Stdout), nil
 }
 
 func (g git) Fetch(repo string, refspec string) error {
