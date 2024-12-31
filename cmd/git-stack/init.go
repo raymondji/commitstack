@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/raymondji/git-stack/config"
-	"github.com/raymondji/git-stack/githost"
-	"github.com/raymondji/git-stack/githost/github"
-	"github.com/raymondji/git-stack/githost/gitlab"
-	"github.com/raymondji/git-stack/libgit"
+	"github.com/raymondji/commitstack/config"
+	"github.com/raymondji/commitstack/githost"
+	"github.com/raymondji/commitstack/githost/github"
+	"github.com/raymondji/commitstack/githost/gitlab"
+	"github.com/raymondji/commitstack/libgit"
 	"github.com/spf13/cobra"
 )
 

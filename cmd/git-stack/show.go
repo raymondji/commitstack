@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/git-stack/commitstack"
-	"github.com/raymondji/git-stack/concurrent"
-	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/commitstack/commitstack"
+	"github.com/raymondji/commitstack/concurrent"
+	"github.com/raymondji/commitstack/githost"
 	"github.com/spf13/cobra"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	"github.com/raymondji/git-stack/commitstack"
+	"github.com/raymondji/commitstack/commitstack"
 	"github.com/spf13/cobra"
 )
 

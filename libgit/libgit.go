@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/raymondji/git-stack/exec"
-	"github.com/raymondji/git-stack/githost"
+	"github.com/raymondji/commitstack/exec"
+	"github.com/raymondji/commitstack/githost"
 )
 
 // When --update-refs was introduced

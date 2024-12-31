@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/raymondji/git-stack/commitstack/commitgraph"
+	"github.com/raymondji/commitstack/commitstack/commitgraph"
 )
 
 type Git interface {

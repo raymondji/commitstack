@@ -3,7 +3,7 @@ package commitgraph
 import (
 	"fmt"
 
-	"github.com/raymondji/git-stack/libgit"
+	"github.com/raymondji/commitstack/libgit"
 )
 
 type Git interface {

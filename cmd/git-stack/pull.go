@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/raymondji/git-stack/commitstack"
-	"github.com/raymondji/git-stack/libgit"
+	"github.com/raymondji/commitstack/commitstack"
+	"github.com/raymondji/commitstack/libgit"
 	"github.com/spf13/cobra"
 )
 
