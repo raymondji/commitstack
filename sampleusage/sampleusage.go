@@ -74,8 +74,12 @@ func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 
 func (s Samples) Part1() Sample {
 	segments := parseLines(
-		"Welcome to commitstack!\nHere is a quick tutorial on how to use the CLI.",
-		"First, let's start on the default branch:",
+		multiline(
+			"Welcome to commitstack!",
+			"Here is a quick tutorial on how to use the CLI.",
+			"",
+			"First, let's start on the default branch:",
+		),
 		shellCmd(fmt.Sprintf("git checkout %s", s.defaultBranch)),
 		"Next, let's create our first branch:",
 		shellCmd("git checkout -b learncommitstack"),
@@ -88,17 +92,26 @@ func (s Samples) Part1() Sample {
 		shellCmd("git commit -am 'break'"),
 		shellCmd("echo 'have a kitkat' >> learncommitstack.txt"),
 		shellCmd("git commit -am 'kitkat'"),
-		"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
-		"Our current stack has two branches in it, which we can see with:",
+		multiline(
+			"So far everything we've done has been normal Git.",
+			"Let's see what commitstack can do for us already.",
+			"Our current stack has two branches in it, which we can see with:",
+		),
 		shellCmd(`git stack show`),
 		"Our current stack has 3 commits in it, which we can see with:",
 		shellCmd(`git stack log`),
-		"We can easily push all branches in the stack up as separate PRs.\ncommitstack automatically sets the target branches for you on the PRs.",
+		multiline(
+			"We can easily push all branches in the stack up as separate PRs.",
+			"commitstack automatically sets the target branches for you on the PRs.",
+		),
 		shellCmd(`git stack push`),
 		"We can quickly view the PRs in the stack using:",
 		shellCmd(`git stack show --prs`),
-		"Nice! All done part 1 of the tutorial. In part 2 we'll learn how to make more changes to a stack.",
-		"Once you're ready, continue the tutorial using:",
+		multiline(
+			"Nice! All done part 1 of the tutorial.",
+			"In part 2 we'll learn how to make more changes to a stack.",
+			"Once you're ready, continue the tutorial using:",
+		),
 		shellCmd("git stack learn --part 2"),
 	)
 	return newSample(s.git, segments, s.theme)
@@ -125,8 +138,8 @@ func (s Sample) Execute() error {
 		return fmt.Errorf("aborting, git repo has changes")
 	}
 
-	for _, l := range s.segments {
-		if err := l.Execute(s.theme); err != nil {
+	for _, seg := range s.segments {
+		if err := seg.Execute(s.theme); err != nil {
 			return err
 		}
 	}
@@ -135,8 +148,8 @@ func (s Sample) Execute() error {
 
 func (s Sample) String() string {
 	var sb strings.Builder
-	for _, l := range s.segments {
-		sb.Write([]byte(l.String(s.theme) + "\n"))
+	for _, seg := range s.segments {
+		sb.Write([]byte(seg.String(s.theme) + "\n"))
 	}
 	return sb.String()
 }
@@ -148,14 +161,14 @@ type segment interface {
 
 func parseLines(segments ...any) []segment {
 	var out []segment
-	for _, l := range segments {
-		switch t := l.(type) {
+	for _, seg := range segments {
+		switch t := seg.(type) {
 		case string:
 			out = append(out, text(t))
 		case shellCmdLine:
 			out = append(out, t)
 		default:
-			panic(fmt.Sprintf("invalid segment %v", l))
+			panic(fmt.Sprintf("invalid segment %v", seg))
 		}
 	}
 
@@ -180,6 +193,10 @@ func (t textLine) String(theme config.Theme) string {
 		Width(50)
 
 	return fmt.Sprint(style.Render(string(t)))
+}
+
+func multiline(lines ...string) string {
+	return strings.Join(lines, "\n")
 }
 
 func (t textLine) Execute(theme config.Theme) error {
