@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/raymondji/commitstack/config"
 	"github.com/raymondji/commitstack/exec"
 	"github.com/raymondji/commitstack/githost"
@@ -73,16 +74,9 @@ func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 
 func (s Samples) Part1() Sample {
 	lines := parseLines(
-		"================================",
-		"============ Part 1 ============",
-		"================================",
-		"",
-		"Welcome to commitstack!",
-		"Here is a quick tutorial on how to use the CLI.",
-		"",
+		"Welcome to commitstack!\nHere is a quick tutorial on how to use the CLI.",
 		"First, let's start on the default branch:",
 		shellCmd(fmt.Sprintf("git checkout %s", s.defaultBranch)),
-		"",
 		"Next, let's create our first branch:",
 		shellCmd(
 			"git checkout -b learncommitstack && \\\n"+
@@ -90,7 +84,6 @@ func (s Samples) Part1() Sample {
 				"git add . && \\\n"+
 				"git commit -m 'hello world'",
 		),
-		"",
 		"Now let's stack a second branch on top of our first:",
 		shellCmd(
 			"git checkout -b learncommitstack-pt2 && \\\n"+
@@ -99,22 +92,15 @@ func (s Samples) Part1() Sample {
 				"echo 'have a kitkat' >> learncommitstack.txt && \\\n"+
 				"git commit -am 'kitkat'",
 		),
-		"",
 		"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
-		"",
 		"Our current stack has two branches in it, which we can see with:",
 		shellCmd(`git stack show`),
-		"",
 		"Our current stack has 3 commits in it, which we can see with:",
 		shellCmd(`git stack log`),
-		"",
-		"We can easily push all branches in the stack up as separate PRs:",
-		"commitstack automatically sets the target branches for you on the PRs.",
+		"We can easily push all branches in the stack up as separate PRs.\ncommitstack automatically sets the target branches for you on the PRs.",
 		shellCmd(`git stack push`),
-		"",
 		"We can quickly view the PRs in the stack using:",
 		shellCmd(`git stack show --prs`),
-		"",
 		"Nice! All done part 1 of the tutorial. In part 2 we'll learn how to make more changes to a stack.",
 		"Once you're ready, continue the tutorial using:",
 		shellCmd("git stack learn --part 2"),
@@ -187,12 +173,22 @@ func text(s string) textLine {
 }
 
 func (t textLine) String(theme config.Theme) string {
-	return string(t)
+	if string(t) == "" {
+		return ""
+	}
+
+	style := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("61")).
+		Padding(1).
+		Width(50)
+
+	return fmt.Sprint(style.Render(string(t)))
 }
 
 func (t textLine) Execute(theme config.Theme) error {
-	_, err := exec.Run("echo", exec.WithArgs(strings.Fields(string(t))...), exec.WithOSStdout())
-	return err
+	fmt.Println(t.String(theme))
+	return nil
 }
 
 type shellCmdLine struct {

@@ -105,7 +105,7 @@ func (g gitlabClient) ClosePullRequest(repoPath string, pr internal.PullRequest)
 	}
 
 	opts := &gitlab.UpdateMergeRequestOptions{
-		StateEvent: gitlab.Ptr("closed"),
+		StateEvent: gitlab.Ptr("close"),
 	}
 
 	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)

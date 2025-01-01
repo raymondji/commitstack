@@ -43,6 +43,117 @@ All set! To learn how to use commitstack, you can access an interactive tutorial
 git stack learn
 ```
 
+## Sample usage
+
+```
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Welcome to commitstack!                          │
+│ Here is a quick tutorial on how to use the CLI.  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ First, let's start on the default branch:        │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git checkout main
+Your branch is up to date with 'origin/main'.
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Next, let's create our first branch:             │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git checkout -b learncommitstack && \
+echo 'hello world' > learncommitstack.txt && \
+git add . && \
+git commit -m 'hello world'
+[learncommitstack e87e35b] hello world
+ 1 file changed, 1 insertion(+)
+ create mode 100644 learncommitstack.txt
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Now let's stack a second branch on top of our    │
+│ first:                                           │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git checkout -b learncommitstack-pt2 && \
+echo 'have a break' >> learncommitstack.txt && \
+git commit -am 'break' && \
+echo 'have a kitkat' >> learncommitstack.txt && \
+git commit -am 'kitkat'
+[learncommitstack-pt2 e64e5b4] break
+ 1 file changed, 1 insertion(+)
+[learncommitstack-pt2 cb6073d] kitkat
+ 1 file changed, 1 insertion(+)
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ So far everything we've done has been normal     │
+│ Git. Let's see what commitstack can do for us    │
+│ already.                                         │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Our current stack has two branches in it, which  │
+│ we can see with:                                 │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git stack show
+On stack learncommitstack-pt2
+Branches in stack:
+* learncommitstack-pt2 (top)
+  learncommitstack
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Our current stack has 3 commits in it, which we  │
+│ can see with:                                    │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git stack log
+* cb6073d (learncommitstack-pt2) kitkat
+  e64e5b4 break
+  e87e35b (learncommitstack) hello world
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ We can easily push all branches in the stack up  │
+│ as separate PRs.                                 │
+│ commitstack automatically sets the target        │
+│ branches for you on the PRs.                     │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git stack push
+Pushed learncommitstack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/54
+Pushed learncommitstack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/53
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ We can quickly view the PRs in the stack using:  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git stack show --prs
+On stack learncommitstack-pt2
+Branches in stack:
+* learncommitstack-pt2 (top)
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/54
+
+  learncommitstack
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/53
+
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Nice! All done part 1 of the tutorial. In part 2 │
+│ we'll learn how to make more changes to a stack. │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Once you're ready, continue the tutorial using:  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+> git stack learn --part 2
+TODO
+```
+
 ## References
 
 `exec.go` is heavily inspired by https://github.com/aviator-co/av (MIT license)
