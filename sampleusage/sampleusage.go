@@ -42,7 +42,6 @@ func (s Samples) Cleanup() error {
 
 func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 	for _, name := range names {
-		fmt.Println("DEBUG got host", s.host)
 		hasPR := true
 		pr, err := s.host.GetPullRequest(repoPath, name)
 		if errors.Is(err, githost.ErrDoesNotExist) {
