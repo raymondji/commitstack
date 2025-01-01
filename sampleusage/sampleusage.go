@@ -133,7 +133,7 @@ func (s Sample) Execute() error {
 func (s Sample) String() string {
 	var sb strings.Builder
 	for _, l := range s.lines {
-		sb.Write([]byte(l.String()))
+		sb.Write([]byte(l.String() + "\n"))
 	}
 	return sb.String()
 }
