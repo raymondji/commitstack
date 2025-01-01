@@ -174,25 +174,29 @@ func (t textLine) RunAsShellCmd() error {
 }
 
 type shellCmdLine struct {
-	cmd  string
-	args []string
+	text string
 }
 
 func shellCmd(s string) line {
-	if strings.TrimSpace(s) == "" {
-		panic(fmt.Sprintf("shellCmd passed invalid string: %q", s))
-	}
 	return shellCmdLine{
-		cmd:  "bash",
-		args: []string{"-c", s},
+		text: s,
 	}
 }
 
 func (s shellCmdLine) String() string {
-	return fmt.Sprintf("%s %s", s.cmd, strings.Join(s.args, " "))
+	return s.text
 }
 
 func (s shellCmdLine) RunAsShellCmd() error {
-	_, err := exec.Run(s.cmd, exec.WithArgs(s.args...), exec.WithOSStdout())
+	_, err := exec.Run("echo", exec.WithArgs(s.text), exec.WithOSStdout())
+	if err != nil {
+		return err
+	}
+
+	args := []string{
+		"-c",
+	}
+	args = append(args, strings.Fields(s.text)...)
+	_, err = exec.Run("bash", exec.WithArgs(args...), exec.WithOSStdout())
 	return err
 }
