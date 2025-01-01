@@ -43,7 +43,7 @@ All set! To learn how to use commitstack, you can access an interactive tutorial
 git stack learn
 ```
 
-## Sample usage
+## Sample usage (output from `git stack learn`)
 
 ```
 ╭──────────────────────────────────────────────────╮
@@ -64,11 +64,11 @@ Your branch is up to date with 'origin/main'.
 │ Next, let's create our first branch:             │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git checkout -b learncommitstack && \
-echo 'hello world' > learncommitstack.txt && \
-git add . && \
-git commit -m 'hello world'
-[learncommitstack e87e35b] hello world
+> git checkout -b learncommitstack
+> echo 'hello world' > learncommitstack.txt
+> git add .
+> git commit -m 'hello world'
+[learncommitstack 400ab52] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 learncommitstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -77,14 +77,14 @@ git commit -m 'hello world'
 │ first:                                           │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git checkout -b learncommitstack-pt2 && \
-echo 'have a break' >> learncommitstack.txt && \
-git commit -am 'break' && \
-echo 'have a kitkat' >> learncommitstack.txt && \
-git commit -am 'kitkat'
-[learncommitstack-pt2 e64e5b4] break
+> git checkout -b learncommitstack-pt2
+> echo 'have a break' >> learncommitstack.txt
+> git commit -am 'break'
+[learncommitstack-pt2 b78bbdb] break
  1 file changed, 1 insertion(+)
-[learncommitstack-pt2 cb6073d] kitkat
+> echo 'have a kitkat' >> learncommitstack.txt
+> git commit -am 'kitkat'
+[learncommitstack-pt2 60b3b2c] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -111,9 +111,9 @@ Branches in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-* cb6073d (learncommitstack-pt2) kitkat
-  e64e5b4 break
-  e87e35b (learncommitstack) hello world
+* 60b3b2c (learncommitstack-pt2) kitkat
+  b78bbdb break
+  400ab52 (learncommitstack) hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -123,8 +123,8 @@ Branches in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed learncommitstack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/54
-Pushed learncommitstack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/53
+Pushed learncommitstack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/57
+Pushed learncommitstack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/58
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -134,10 +134,10 @@ Pushed learncommitstack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/
 On stack learncommitstack-pt2
 Branches in stack:
 * learncommitstack-pt2 (top)
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/54
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/57
 
   learncommitstack
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/53
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/58
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │

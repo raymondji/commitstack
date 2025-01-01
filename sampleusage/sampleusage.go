@@ -73,25 +73,21 @@ func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 }
 
 func (s Samples) Part1() Sample {
-	lines := parseLines(
+	segments := parseLines(
 		"Welcome to commitstack!\nHere is a quick tutorial on how to use the CLI.",
 		"First, let's start on the default branch:",
 		shellCmd(fmt.Sprintf("git checkout %s", s.defaultBranch)),
 		"Next, let's create our first branch:",
-		shellCmd(
-			"git checkout -b learncommitstack && \\\n"+
-				"echo 'hello world' > learncommitstack.txt && \\\n"+
-				"git add . && \\\n"+
-				"git commit -m 'hello world'",
-		),
+		shellCmd("git checkout -b learncommitstack"),
+		shellCmd("echo 'hello world' > learncommitstack.txt"),
+		shellCmd("git add ."),
+		shellCmd("git commit -m 'hello world'"),
 		"Now let's stack a second branch on top of our first:",
-		shellCmd(
-			"git checkout -b learncommitstack-pt2 && \\\n"+
-				"echo 'have a break' >> learncommitstack.txt && \\\n"+
-				"git commit -am 'break' && \\\n"+
-				"echo 'have a kitkat' >> learncommitstack.txt && \\\n"+
-				"git commit -am 'kitkat'",
-		),
+		shellCmd("git checkout -b learncommitstack-pt2"),
+		shellCmd("echo 'have a break' >> learncommitstack.txt"),
+		shellCmd("git commit -am 'break'"),
+		shellCmd("echo 'have a kitkat' >> learncommitstack.txt"),
+		shellCmd("git commit -am 'kitkat'"),
 		"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
 		"Our current stack has two branches in it, which we can see with:",
 		shellCmd(`git stack show`),
@@ -105,20 +101,20 @@ func (s Samples) Part1() Sample {
 		"Once you're ready, continue the tutorial using:",
 		shellCmd("git stack learn --part 2"),
 	)
-	return newSample(s.git, lines, s.theme)
+	return newSample(s.git, segments, s.theme)
 }
 
 type Sample struct {
-	lines []line
-	theme config.Theme
-	git   libgit.Git
+	segments []segment
+	theme    config.Theme
+	git      libgit.Git
 }
 
-func newSample(git libgit.Git, lines []line, theme config.Theme) Sample {
+func newSample(git libgit.Git, segments []segment, theme config.Theme) Sample {
 	return Sample{
-		git:   git,
-		lines: lines,
-		theme: theme,
+		git:      git,
+		segments: segments,
+		theme:    theme,
 	}
 }
 
@@ -129,7 +125,7 @@ func (s Sample) Execute() error {
 		return fmt.Errorf("aborting, git repo has changes")
 	}
 
-	for _, l := range s.lines {
+	for _, l := range s.segments {
 		if err := l.Execute(s.theme); err != nil {
 			return err
 		}
@@ -139,27 +135,27 @@ func (s Sample) Execute() error {
 
 func (s Sample) String() string {
 	var sb strings.Builder
-	for _, l := range s.lines {
+	for _, l := range s.segments {
 		sb.Write([]byte(l.String(s.theme) + "\n"))
 	}
 	return sb.String()
 }
 
-type line interface {
+type segment interface {
 	String(theme config.Theme) string
 	Execute(theme config.Theme) error
 }
 
-func parseLines(lines ...any) []line {
-	var out []line
-	for _, l := range lines {
+func parseLines(segments ...any) []segment {
+	var out []segment
+	for _, l := range segments {
 		switch t := l.(type) {
 		case string:
 			out = append(out, text(t))
 		case shellCmdLine:
 			out = append(out, t)
 		default:
-			panic(fmt.Sprintf("invalid line %v", l))
+			panic(fmt.Sprintf("invalid segment %v", l))
 		}
 	}
 
@@ -195,7 +191,7 @@ type shellCmdLine struct {
 	text string
 }
 
-func shellCmd(s string) line {
+func shellCmd(s string) segment {
 	return shellCmdLine{
 		text: s,
 	}
