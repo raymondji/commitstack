@@ -13,7 +13,7 @@ import (
 type Config struct {
 	Theme ThemeConfig `json:"theme"`
 
-	// Keys are the git repo path, e.g. "raymondji/git-stack"
+	// Keys are the git repo path, e.g. "raymondji/commitstack"
 	Repositories map[string]RepoConfig `json:"repositories"`
 }
 
