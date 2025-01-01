@@ -9,9 +9,13 @@ import (
 )
 
 var learnPartFlag int
+var learnExecFlag bool
+var learnCleanupFlag bool
 
 func init() {
 	learnCmd.Flags().IntVar(&learnPartFlag, "part", 1, "Which part of the tutorial to continue from")
+	learnCmd.Flags().BoolVar(&learnExecFlag, "exec", false, "Whether to execute the commands in the tutorial")
+	learnCmd.Flags().BoolVar(&learnCleanupFlag, "cleanup", false, "Whether to cleanup everything created as part of the tutorial")
 }
 
 var learnCmd = &cobra.Command{
@@ -23,17 +27,21 @@ var learnCmd = &cobra.Command{
 			return err
 		}
 		samples := sampleusage.New(deps.theme, deps.repoCfg.DefaultBranch, deps.git, deps.host)
+		if learnCleanupFlag {
+			if err := samples.Cleanup(); err != nil {
+				return err
+			}
+		}
 
 		switch learnPartFlag {
 		case 1:
-			if err := samples.Cleanup(); err != nil {
-				return fmt.Errorf("ERROR failed to cleanup sample: %w", err)
+			if learnExecFlag {
+				if err := samples.Part1().Execute(); err != nil {
+					return err
+				}
+			} else {
+				fmt.Println(samples.Part1().String())
 			}
-			fmt.Println("SUCCESS cleanup done")
-			if err := samples.Part1().Execute(); err != nil {
-				return fmt.Errorf("ERROR failed to execute: %w", err)
-			}
-
 		case 2:
 			fmt.Println("TODO")
 		default:

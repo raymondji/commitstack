@@ -15,6 +15,7 @@ import (
 var minGitVersion = version{major: 2, minor: 38}
 
 type Git interface {
+	IsRepoClean() (bool, error)
 	GetRemote() (Remote, error)
 	GetUpstream(branch string) (Upstream, error)
 	GetRootDir() (string, error)
@@ -101,6 +102,15 @@ func (g git) getVersion() (version, error) {
 		major: major,
 		minor: minor,
 	}, nil
+}
+
+func (g git) IsRepoClean() (bool, error) {
+	output, err := exec.Run("git", exec.WithArgs("status", "--porcelain"))
+	if err != nil {
+		return false, fmt.Errorf("failed to run git status: %v", err)
+	}
+
+	return len(output.Stdout) > 0, nil
 }
 
 type Remote struct {
