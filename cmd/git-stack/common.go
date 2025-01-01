@@ -34,12 +34,12 @@ func initDeps() (deps, error) {
 	if err != nil {
 		return deps{}, fmt.Errorf("failed to load config, err: %v", err.Error())
 	}
-	repoCfg, ok := cfg.Repositories[remote.RepoPath]
+	repoCfg, ok := cfg.Repositories[remote.URLPath]
 	if !ok {
 		return deps{}, fmt.Errorf(
 			"no config found for the current repo (%s)"+
 				", please setup git stack using the `git stack init` command",
-			remote.RepoPath)
+			remote.URLPath)
 	}
 
 	var host githost.Host

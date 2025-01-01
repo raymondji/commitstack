@@ -1,12 +1,12 @@
 package libgit
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
 	"strings"
 
+	giturls "github.com/chainguard-dev/git-urls"
 	"github.com/raymondji/commitstack/exec"
 	"github.com/raymondji/commitstack/githost"
 )
@@ -103,8 +103,8 @@ func (g git) getVersion() (version, error) {
 }
 
 type Remote struct {
-	Kind     githost.Kind
-	RepoPath string
+	Kind    githost.Kind
+	URLPath string // e.g. raymondji/commitstack
 }
 
 func (g git) GetRemote() (Remote, error) {
@@ -125,7 +125,7 @@ func (g git) GetRemote() (Remote, error) {
 	case strings.Contains(output.Stdout, "github.com"):
 		kind = githost.Github
 	default:
-		return Remote{}, errors.New(fmt.Sprintf("unsupported git host: %s", output.Stdout))
+		return Remote{}, fmt.Errorf("unsupported git host: %s", output.Stdout)
 	}
 
 	// Extract the repository name
@@ -134,19 +134,20 @@ func (g git) GetRemote() (Remote, error) {
 		return Remote{}, err
 	}
 	return Remote{
-		RepoPath: path,
-		Kind:     kind,
+		URLPath: path,
+		Kind:    kind,
 	}, nil
 }
 
 func parseRepoPathFromRemoteURL(url string) (string, error) {
-	url = strings.TrimSuffix(url, ".git")
-	parts := strings.Split(url, ":")
-	if len(parts) != 2 {
-		return "", fmt.Errorf("failed to parse repo path from url: %s", url)
+	u, err := giturls.Parse(url)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse origin url %q, err: %v", url, err)
 	}
 
-	return parts[1], nil
+	path := strings.TrimSuffix(u.Path, ".git")
+	path = strings.TrimPrefix(path, "/")
+	return path, nil
 }
 
 func (g git) GetUpstream(branch string) (Upstream, error) {

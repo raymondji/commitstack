@@ -36,9 +36,9 @@ var initCmd = &cobra.Command{
 			cfg.Repositories = map[string]config.RepoConfig{}
 		}
 
-		_, ok := cfg.Repositories[remote.RepoPath]
+		_, ok := cfg.Repositories[remote.URLPath]
 		if ok {
-			fmt.Printf("Repository '%s' already exists in the config. Do you want to overwrite it? (y/n): ", remote.RepoPath)
+			fmt.Printf("Repository '%s' already exists in the config. Do you want to overwrite it? (y/n): ", remote.URLPath)
 			overwrite, err := promptUserConfirmation()
 			if err != nil {
 				return err
@@ -61,12 +61,12 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			repo, err := host.GetRepo(remote.RepoPath)
+			repo, err := host.GetRepo(remote.URLPath)
 			if err != nil {
 				return err
 			}
 
-			cfg.Repositories[remote.RepoPath] = config.RepoConfig{
+			cfg.Repositories[remote.URLPath] = config.RepoConfig{
 				Gitlab: config.GitlabConfig{
 					PersonalAccessToken: personalAccessToken,
 				},
@@ -96,12 +96,12 @@ var initCmd = &cobra.Command{
 				return err
 			}
 
-			repo, err := host.GetRepo(remote.RepoPath)
+			repo, err := host.GetRepo(remote.URLPath)
 			if err != nil {
 				return err
 			}
 
-			cfg.Repositories[remote.RepoPath] = config.RepoConfig{
+			cfg.Repositories[remote.URLPath] = config.RepoConfig{
 				Github: config.GithubConfig{
 					Username:            username,
 					PersonalAccessToken: personalAccessToken,
