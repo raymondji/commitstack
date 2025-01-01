@@ -1,32 +1,23 @@
 package githost
 
-import "errors"
+import (
+	"fmt"
 
-// Using PullRequest since it's the most widely used term, but this represents an
-// umbrella term including pull requests (github), merge requests (gitlab), diffs (phabricator), etc.
-type PullRequest struct {
-	ID             int
-	Title          string
-	Description    string
-	SourceBranch   string
-	TargetBranch   string
-	WebURL         string
-	MarkdownWebURL string
-}
+	"github.com/raymondji/commitstack/config"
+	"github.com/raymondji/commitstack/githost/github"
+	"github.com/raymondji/commitstack/githost/gitlab"
+	"github.com/raymondji/commitstack/githost/internal"
+)
 
-type Repo struct {
-	DefaultBranch string
-}
+type (
+	Host        = internal.Host
+	PullRequest = internal.PullRequest
+	Repo        = internal.Repo
+)
 
-var ErrDoesNotExist = errors.New("does not exist")
-
-type Host interface {
-	GetRepo(repoPath string) (Repo, error)
-	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
-	GetPullRequest(repoPath string, sourceBranch string) (PullRequest, error)
-	UpdatePullRequest(repoPath string, r PullRequest) (PullRequest, error)
-	CreatePullRequest(repoPaths string, r PullRequest) (PullRequest, error)
-}
+var (
+	ErrDoesNotExist = internal.ErrDoesNotExist
+)
 
 type Kind string
 
@@ -34,3 +25,23 @@ const (
 	Gitlab Kind = "GITLAB"
 	Github Kind = "GITHUB"
 )
+
+func New(kind Kind, repoCfg config.RepoConfig) (Host, error) {
+	switch kind {
+	case Gitlab:
+		host, err := gitlab.New(repoCfg.Gitlab.PersonalAccessToken)
+		if err != nil {
+			return host, fmt.Errorf("failed to init gitlab client, err: %v", err)
+		}
+		return host, nil
+	case Github:
+		host, err := github.New(repoCfg.Github.PersonalAccessToken)
+		if err != nil {
+			return host, fmt.Errorf("failed to init github client, err: %v", err)
+		}
+		return host, nil
+	default:
+		var host Host
+		return host, fmt.Errorf("unsupported git host %s", kind)
+	}
+}

@@ -6,41 +6,41 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v68/github"
-	"github.com/raymondji/commitstack/githost"
+	"github.com/raymondji/commitstack/githost/internal"
 )
 
 type githubClient struct {
 	client *github.Client
 }
 
-func New(personalAccessToken string) (githost.Host, error) {
+func New(personalAccessToken string) (internal.Host, error) {
 	client := github.NewClient(nil).WithAuthToken(personalAccessToken)
 	return &githubClient{
 		client: client,
 	}, nil
 }
 
-func (g *githubClient) GetRepo(repoPath string) (githost.Repo, error) {
+func (g *githubClient) GetRepo(repoPath string) (internal.Repo, error) {
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return githost.Repo{}, err
+		return internal.Repo{}, err
 	}
 
 	repository, _, err := g.client.Repositories.Get(context.Background(), owner, repo)
 	if err != nil {
-		return githost.Repo{}, fmt.Errorf("failed to get repository: %w", err)
+		return internal.Repo{}, fmt.Errorf("failed to get repository: %w", err)
 	}
 
-	return githost.Repo{
+	return internal.Repo{
 		DefaultBranch: *repository.DefaultBranch,
 	}, nil
 }
 
 // GetPullRequest retrieves a pull request by its source branch.
-func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (githost.PullRequest, error) {
+func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (internal.PullRequest, error) {
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return githost.PullRequest{}, err
+		return internal.PullRequest{}, err
 	}
 
 	opts := &github.PullRequestListOptions{
@@ -49,12 +49,12 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (git
 	}
 	prs, _, err := g.client.PullRequests.List(context.Background(), owner, repo, opts)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("failed to list pull requests: %w", err)
+		return internal.PullRequest{}, fmt.Errorf("failed to list pull requests: %w", err)
 	}
 
 	switch len(prs) {
 	case 0:
-		return githost.PullRequest{}, fmt.Errorf("%w, source branch: %s", githost.ErrDoesNotExist, sourceBranch)
+		return internal.PullRequest{}, fmt.Errorf("%w, source branch: %s", internal.ErrDoesNotExist, sourceBranch)
 	case 1:
 		return convertPR(prs[0]), nil
 	default:
@@ -62,18 +62,18 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (git
 		for _, pr := range prs {
 			urls = append(urls, *pr.HTMLURL)
 		}
-		return githost.PullRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s, urls: %v", sourceBranch, urls)
+		return internal.PullRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s, urls: %v", sourceBranch, urls)
 	}
 }
 
-func (g *githubClient) CreatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+func (g *githubClient) CreatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
 	if pr.Title == "" {
-		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return githost.PullRequest{}, err
+		return internal.PullRequest{}, err
 	}
 
 	// TODO: add optional support for draft PRs, not supported in every repo
@@ -86,24 +86,24 @@ func (g *githubClient) CreatePullRequest(repoPath string, pr githost.PullRequest
 
 	createdPR, _, err := g.client.PullRequests.Create(context.Background(), owner, repo, newPR)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf(
+		return internal.PullRequest{}, fmt.Errorf(
 			"failed to create pull request: %w, contents: %+v", err, pr)
 	}
 
 	return convertPR(createdPR), nil
 }
 
-func (g *githubClient) UpdatePullRequest(repoPath string, pr githost.PullRequest) (githost.PullRequest, error) {
+func (g *githubClient) UpdatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
 	if pr.ID == 0 {
-		return githost.PullRequest{}, fmt.Errorf("pull request ID must be set")
+		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
 	}
 	if pr.Title == "" {
-		return githost.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return githost.PullRequest{}, err
+		return internal.PullRequest{}, err
 	}
 
 	updatedPR := &github.PullRequest{
@@ -116,14 +116,39 @@ func (g *githubClient) UpdatePullRequest(repoPath string, pr githost.PullRequest
 
 	prResult, _, err := g.client.PullRequests.Edit(context.Background(), owner, repo, int(pr.ID), updatedPR)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("failed to update pull request, pr: %+v, err: %w", pr, err)
+		return internal.PullRequest{}, fmt.Errorf("failed to update pull request, pr: %+v, err: %w", pr, err)
 	}
 
 	return convertPR(prResult), nil
 }
 
-func convertPR(pr *github.PullRequest) githost.PullRequest {
-	out := githost.PullRequest{
+func (g githubClient) ClosePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+	if pr.ID == 0 {
+		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
+	}
+	if pr.Title == "" {
+		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+	}
+
+	owner, repo, err := parseRepoPath(repoPath)
+	if err != nil {
+		return internal.PullRequest{}, err
+	}
+
+	updatedPR := &github.PullRequest{
+		State: github.Ptr("closed"),
+	}
+
+	prResult, _, err := g.client.PullRequests.Edit(context.Background(), owner, repo, int(pr.ID), updatedPR)
+	if err != nil {
+		return internal.PullRequest{}, fmt.Errorf("failed to close pull request, pr: %+v, err: %w", pr, err)
+	}
+
+	return convertPR(prResult), nil
+}
+
+func convertPR(pr *github.PullRequest) internal.PullRequest {
+	out := internal.PullRequest{
 		ID:             *pr.Number,
 		SourceBranch:   *pr.Head.Ref,
 		TargetBranch:   *pr.Base.Ref,
