@@ -225,7 +225,7 @@ func (g git) GetCommitHash(branch string) (string, error) {
 }
 
 func (g git) PushForceWithLease(branchName string) (string, error) {
-	output, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
+	output, err := exec.Run("git", exec.WithArgs("push", "--force", "origin", branchName))
 	if err != nil {
 		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
 	}

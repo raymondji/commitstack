@@ -33,7 +33,6 @@ type GitlabConfig struct {
 }
 
 type GithubConfig struct {
-	Username            string
 	PersonalAccessToken string `json:"personalAccessToken"`
 }
 

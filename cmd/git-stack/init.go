@@ -47,6 +47,7 @@ var initCmd = &cobra.Command{
 				fmt.Println("Cancelling.")
 				return nil
 			}
+			fmt.Println()
 		}
 
 		switch remote.Kind {
@@ -73,25 +74,26 @@ var initCmd = &cobra.Command{
 				DefaultBranch: repo.DefaultBranch,
 			}
 		case githost.Github:
-			fmt.Println("Git stack requires a Github personal access token in order to manage pull requests on your behalf.")
-			fmt.Println("You can create a personal access token at https://github.com/settings/personal-access-tokens/new.")
-			fmt.Println("At minimum, the following fine grained permissions are required:")
-			fmt.Println("- Repository permissions (Pull Requests): Read and write ")
+			fmt.Println("Commitstack requires a Github personal access token in order to manage pull requests on your behalf.")
+			fmt.Println()
+			fmt.Println("'Fine-grained Tokens' have limitations with accessing repositories that you do not own, we recommend using 'Tokens (classic)' instead.")
+			fmt.Println()
+			fmt.Println("For 'Tokens (classic)', the 'repo' permissions are required.")
+			fmt.Println()
+			fmt.Println("For 'Fine-grained tokens', the following permissions are required:")
 			fmt.Println("- Repository permissions (Contents): Read-only")
 			fmt.Println("- Repository permissions (Metadata): Read-only")
+			fmt.Println("- Repository permissions (Pull Requests): Read and write ")
+			fmt.Println()
+			fmt.Println("You can create a personal access token at https://github.com/settings/personal-access-tokens/new.")
+			fmt.Println()
 			fmt.Print("To continue, enter your Github personal access token: ")
 			personalAccessToken, err := promptUserInput()
 			if err != nil {
 				return err
 			}
 
-			fmt.Print("Enter your Github username:")
-			username, err := promptUserInput()
-			if err != nil {
-				return err
-			}
-
-			host, err := github.New(username, personalAccessToken)
+			host, err := github.New(personalAccessToken)
 			if err != nil {
 				return err
 			}
@@ -103,20 +105,21 @@ var initCmd = &cobra.Command{
 
 			cfg.Repositories[remote.URLPath] = config.RepoConfig{
 				Github: config.GithubConfig{
-					Username:            username,
 					PersonalAccessToken: personalAccessToken,
 				},
 				DefaultBranch: repo.DefaultBranch,
 			}
 		default:
-			return fmt.Errorf("Unsupported git host %s", remote.Kind)
+			return fmt.Errorf("unsupported git host %s", remote.Kind)
 		}
 
 		cfgPath, err := config.Save(cfg)
 		if err != nil {
 			return err
 		}
+		fmt.Println()
 		fmt.Println("Config saved to", cfgPath)
+		fmt.Println("Setup complete! First time? Try 'git stack add mytestbranch' and 'git stack show'")
 		return nil
 	},
 }

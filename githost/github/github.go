@@ -10,15 +10,13 @@ import (
 )
 
 type githubClient struct {
-	client   *github.Client
-	username string
+	client *github.Client
 }
 
-func New(username string, personalAccessToken string) (githost.Host, error) {
+func New(personalAccessToken string) (githost.Host, error) {
 	client := github.NewClient(nil).WithAuthToken(personalAccessToken)
 	return &githubClient{
-		client:   client,
-		username: username,
+		client: client,
 	}, nil
 }
 
@@ -47,7 +45,7 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (git
 
 	opts := &github.PullRequestListOptions{
 		State: "open",
-		Head:  fmt.Sprintf("%s:%s", g.username, sourceBranch),
+		Head:  fmt.Sprintf("%s:%s", owner, sourceBranch),
 	}
 	prs, _, err := g.client.PullRequests.List(context.Background(), owner, repo, opts)
 	if err != nil {
@@ -118,7 +116,7 @@ func (g *githubClient) UpdatePullRequest(repoPath string, pr githost.PullRequest
 
 	prResult, _, err := g.client.PullRequests.Edit(context.Background(), owner, repo, int(pr.ID), updatedPR)
 	if err != nil {
-		return githost.PullRequest{}, fmt.Errorf("failed to update pull request: %w", err)
+		return githost.PullRequest{}, fmt.Errorf("failed to update pull request, pr: %+v, err: %w", pr, err)
 	}
 
 	return convertPR(prResult), nil

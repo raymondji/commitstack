@@ -50,7 +50,7 @@ func initDeps() (deps, error) {
 			return deps{}, fmt.Errorf("failed to init gitlab client, err: %v", err)
 		}
 	case githost.Github:
-		host, err = github.New(repoCfg.Github.Username, repoCfg.Github.PersonalAccessToken)
+		host, err = github.New(repoCfg.Github.PersonalAccessToken)
 		if err != nil {
 			return deps{}, fmt.Errorf("failed to init github client, err: %v", err)
 		}
