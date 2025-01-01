@@ -39,6 +39,7 @@ func main() {
 		showCmd,
 		listCmd,
 		logCmd,
+		learnCmd,
 	)
 
 	rootCmd.Execute()

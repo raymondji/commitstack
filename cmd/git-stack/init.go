@@ -119,7 +119,9 @@ var initCmd = &cobra.Command{
 		}
 		fmt.Println()
 		fmt.Println("Config saved to", cfgPath)
-		fmt.Println("Setup complete! First time? Try 'git stack add mytestbranch' and 'git stack show'")
+		fmt.Println("Init complete!")
+		fmt.Println()
+		fmt.Println("First time? Try running 'git stack learn' for a quick tutorial")
 		return nil
 	},
 }

@@ -18,8 +18,13 @@ In addition, Commitstack aims to provide a user experience that feels like a nat
 
 ## Installation
 
+Go version >= 1.22 is required. To install Go on macOS:
 ```
-brew install go # go version >= 1.22 is required
+brew install go 
+```
+
+Install Commitstack:
+```
 go install github.com/raymondji/commitstack/cmd/git-stack@latest
 ```
 
