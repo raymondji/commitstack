@@ -26,7 +26,7 @@ var learnCmd = &cobra.Command{
 		switch learnPartFlag {
 		case 1:
 			printLines(
-				"Welcome to Commitstack!",
+				"Welcome to commitstack!",
 				"Here is a quick tutorial on how to use the CLI.",
 				"First, let's start on the default branch:",
 				shellCmd(fmt.Sprintf("git checkout %s", deps.repoCfg.DefaultBranch)),
@@ -44,14 +44,14 @@ var learnCmd = &cobra.Command{
 				shellCmd(`echo 'have a kitkat' > learncommitstack.txt && \`),
 				shellCmd(`git commit -am 'kitkat'`),
 				"",
-				"So far everything we've done has been normal Git. Let's see what Commitstack can do for us!",
+				"So far everything we've done has been normal Git. Let's see what commitstack can do for us!",
 				"Our current stack has two branches in it, which we can see with:",
 				shellCmd(`git stack show`),
 				"Our current stack has 3 commits in it, which we can see with:",
 				shellCmd(`git stack log`),
 				"",
 				"We can easily push all branches in the stack up as separate PRs:",
-				"Commitstack automatically sets the target branches for you on the PRs.",
+				"commitstack automatically sets the target branches for you on the PRs.",
 				shellCmd(`git stack push`),
 				"We can quickly view the PRs in the stack using:",
 				shellCmd(`git stack show --prs`),

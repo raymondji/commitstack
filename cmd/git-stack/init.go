@@ -74,7 +74,7 @@ var initCmd = &cobra.Command{
 				DefaultBranch: repo.DefaultBranch,
 			}
 		case githost.Github:
-			fmt.Println("Commitstack requires a Github personal access token in order to manage pull requests on your behalf.")
+			fmt.Println("commitstack requires a Github personal access token in order to manage pull requests on your behalf.")
 			fmt.Println()
 			fmt.Println("'Fine-grained Tokens' have limitations with accessing repositories that you do not own, we recommend using 'Tokens (classic)' instead.")
 			fmt.Println()
