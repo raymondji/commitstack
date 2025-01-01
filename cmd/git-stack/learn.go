@@ -43,7 +43,13 @@ var learnCmd = &cobra.Command{
 				fmt.Println(samples.Part1().String())
 			}
 		case 2:
-			fmt.Println("TODO")
+			if learnExecFlag {
+				if err := samples.Part2().Execute(); err != nil {
+					return err
+				}
+			} else {
+				fmt.Println(samples.Part2().String())
+			}
 		default:
 			return errors.New("invalid tutorial part")
 		}
