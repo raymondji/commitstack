@@ -30,6 +30,9 @@ var learnCmd = &cobra.Command{
 				return fmt.Errorf("ERROR failed to cleanup sample: %w", err)
 			}
 			fmt.Println("SUCCESS cleanup done")
+			if err := samples.Part1().Execute(); err != nil {
+				return fmt.Errorf("error failed to execute pt1, %v", err)
+			}
 		case 2:
 			fmt.Println("TODO")
 		default:

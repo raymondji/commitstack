@@ -37,26 +37,30 @@ func (s Samples) Cleanup() error {
 		return err
 	}
 
-	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack2")
+	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack-pt2")
 }
 
 func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 	for _, name := range names {
+		fmt.Println("cleaning up", name)
 		hasPR := true
 		pr, err := s.host.GetPullRequest(repoPath, name)
 		if errors.Is(err, githost.ErrDoesNotExist) {
+			fmt.Println("no existing PR", name)
 			hasPR = false
 		} else if err != nil {
 			return err
 		}
 
 		if hasPR {
+			fmt.Println("closing PR", name)
 			_, err = s.host.ClosePullRequest(repoPath, pr)
 			if err != nil {
 				return err
 			}
 		}
 
+		fmt.Println("deleting branch", name)
 		if err := s.git.DeleteBranchIfExists(name); err != nil {
 			return err
 		}
