@@ -19,7 +19,7 @@ In addition, Commitstack aims to provide a user experience that feels like a nat
 ## Installation
 
 ```
-brew install go
+brew install go # go version >= 1.22 is required
 go install github.com/raymondji/commitstack/cmd/git-stack@latest
 ```
 
