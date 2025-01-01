@@ -30,13 +30,13 @@ go install github.com/raymondji/commitstack/cmd/git-stack@latest
 
 ## Getting started
 
-Commitstack needs a personal access token in order to manage MRs on Gitlab/PRs on Github for you. To set this up:
+Commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
 ```
 cd ~/your/git/repo
 git stack init
 ```
 
-Now you're all set up! The CLI ships with an interactive tutorial that teaches you the basics, access it here:
+Now you're all set up! The CLI ships with an interactive tutorial that teaches you the basics, access it using:
 ```
 git stack learn
 ```
