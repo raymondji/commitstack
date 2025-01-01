@@ -110,7 +110,7 @@ func (g git) IsRepoClean() (bool, error) {
 		return false, fmt.Errorf("failed to run git status: %v", err)
 	}
 
-	return len(output.Stdout) > 0, nil
+	return len(output.Stdout) == 0, nil
 }
 
 type Remote struct {
