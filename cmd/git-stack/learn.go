@@ -53,7 +53,7 @@ var learnCmd = &cobra.Command{
 				"We can easily push all branches in the stack up as separate PRs:",
 				"Commitstack automatically sets the target branches for you on the PRs.",
 				shellCmd(`git stack push`),
-				"We can also quickly view the PRs in the stack using:",
+				"We can quickly view the PRs in the stack using:",
 				shellCmd(`git stack show --prs`),
 				"",
 				"Nice! All done part 1 of the tutorial. In part 2 we'll learn how to make more changes to a stack.",

@@ -28,6 +28,19 @@ Install Commitstack:
 go install github.com/raymondji/commitstack/cmd/git-stack@latest
 ```
 
+## Quick start
+
+Commitstack needs a personal access token in order to manage MRs on Gitlab/PRs on Github for you. To set this up:
+```
+cd ~/your/git/repo
+git stack init
+```
+
+Now you're all set up! The CLI ships with an interactive tutorial that teaches you the basics, access it here:
+```
+git stack learn
+```
+
 ## References
 
 `exec.go` is heavily inspired by https://github.com/aviator-co/av (MIT license)
