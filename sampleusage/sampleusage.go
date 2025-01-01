@@ -169,7 +169,7 @@ func (t textLine) String() string {
 }
 
 func (t textLine) RunAsShellCmd() error {
-	_, err := exec.Run("echo", exec.WithArgs(strings.Fields(string(t))...))
+	_, err := exec.Run("echo", exec.WithArgs(strings.Fields(string(t))...), exec.WithOSStdout())
 	return err
 }
 
@@ -193,6 +193,6 @@ func (s shellCmdLine) String() string {
 }
 
 func (s shellCmdLine) RunAsShellCmd() error {
-	_, err := exec.Run(s.cmd, exec.WithArgs(s.args...))
+	_, err := exec.Run(s.cmd, exec.WithArgs(s.args...), exec.WithOSStdout())
 	return err
 }

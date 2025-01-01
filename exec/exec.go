@@ -34,6 +34,7 @@ type runOpts struct {
 	// If true, the standard I/Os are connected to the console, allowing the git command to
 	// interact with the user. Stdout and Stderr will be empty.
 	Interactive bool
+	OSStdout    bool
 }
 
 type runOpt func(*runOpts)
@@ -62,6 +63,12 @@ func WithDir(dir string) runOpt {
 	}
 }
 
+func WithOSStdout() runOpt {
+	return func(opts *runOpts) {
+		opts.OSStdout = true
+	}
+}
+
 func Run(name string, fOpts ...runOpt) (*Output, error) {
 	var opts runOpts
 	for _, o := range fOpts {
@@ -75,6 +82,9 @@ func Run(name string, fOpts ...runOpt) (*Output, error) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else if opts.OSStdout {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = &stderr
 	} else {
 		cmd.Stdout = &stdout
 		cmd.Stderr = &stderr
