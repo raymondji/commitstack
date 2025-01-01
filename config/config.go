@@ -90,5 +90,5 @@ func getConfigFilePath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get user home directory: %w", err)
 	}
-	return filepath.Join(homeDir, ".git-stack.json"), nil
+	return filepath.Join(homeDir, ".commitstack.json"), nil
 }

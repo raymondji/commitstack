@@ -18,22 +18,24 @@ var addCmd = &cobra.Command{
 			return err
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
-
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
-		if err != nil {
-			return err
-		}
-		stack, err := stacks.GetCurrent()
-		if err != nil {
-			return err
-		}
 		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
-		if currBranch != stack.Name() {
-			return fmt.Errorf("must be on the tip of the stack to add another branch, currently checked out: %s, tip: %s",
-				currBranch, stack.Name())
+
+		if currBranch != defaultBranch {
+			stacks, err := commitstack.ComputeAll(git, defaultBranch)
+			if err != nil {
+				return err
+			}
+			stack, err := stacks.GetCurrent()
+			if err != nil {
+				return err
+			}
+			if currBranch != stack.Name() {
+				return fmt.Errorf("must be on the tip of the stack to add another branch, currently checked out: %s, tip: %s",
+					currBranch, stack.Name())
+			}
 		}
 
 		branchName := args[0]
