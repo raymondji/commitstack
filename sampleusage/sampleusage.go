@@ -37,7 +37,7 @@ func (s Samples) Cleanup() error {
 		return err
 	}
 
-	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack2")
+	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack-pt2")
 }
 
 func (s Samples) cleanupBranches(repoPath string, names ...string) error {
