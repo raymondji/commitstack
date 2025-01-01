@@ -4,7 +4,7 @@ CLI to facilitate [stacking workflows](https://www.stacking.dev/) in git. Suppor
 
 ## Why another stacking tool?
 
-There's a plethora of stacking tools that work great with Github (I thoroughly enjoyed using https://github.com/spacedentist/spr), but after I started working at a company that uses Gitlab, I was surprised to find almost no options.
+There's a plethora of stacking tools that work great with Github (I thoroughly enjoyed using https://github.com/spacedentist/spr), but after I started using Gitlab at work, I was surprised to find almost no tools that fit the bill.
 
 The only one I came across is the experimental `glab stack` CLI command, but it's missing a few features I personally want and has the opposite problem: it's Gitlab only. I ideally wanted a single tool once that could work with both.
 
