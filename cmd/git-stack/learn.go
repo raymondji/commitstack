@@ -70,6 +70,17 @@ var learnCmd = &cobra.Command{
 			if err := sample.Cleanup(); err != nil {
 				return err
 			}
+<<<<<<< HEAD
+=======
+		case 2:
+			if learnExecFlag {
+				if err := samples.Part2().Execute(); err != nil {
+					return err
+				}
+			} else {
+				fmt.Println(samples.Part2().String())
+			}
+>>>>>>> fc95d07 (fix)
 		default:
 			return errors.New("invalid mode flag")
 		}
