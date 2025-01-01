@@ -8,7 +8,7 @@ Stacking with plain Git is totally doable but cumbersome. There's a plethora of 
 
 The only tool I came across is the experimental `glab stack` CLI command, but it's missing a few features I wanted and has the opposite problem: it's Gitlab only. I ideally wanted a single tool I could use with both.
 
-Thus, commitstack was born. It was initially a set of bash aliases and functions, and grew into a Go CLI binary as I kept adding to it. The project currently supports Gitlab and Github, and should (hopefully) be easily extensible to other Git hosting providers.
+Thus, commitstack was born. It was initially a set of bash aliases and functions, and turned into a Go binary as I kept adding to it. The project currently supports Gitlab and Github, and should (hopefully) be easily extensible to other Git hosting providers.
 
 ## Goals
 
