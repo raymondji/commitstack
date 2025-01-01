@@ -16,6 +16,13 @@ Stacking workflows in Git can be cumbersome both because of your interactions wi
 
 In addition, Commitstack aims to provide a user experience that feels like a natural extension of Git. Git already has all the basic building blocks needed to do stacking workflows, and many people use stacking workflows without any extra tools. I wanted to avoid introducing entirely new paradigms and instead make Commitstack feel familiar if you're used to stacking with plain Git - just with the annoying parts automated.
 
+## Installation
+
+```
+brew install go
+go install github.com/raymondji/commitstack/cmd/git-stack@latest
+```
+
 ## References
 
 `exec.go` is heavily inspired by https://github.com/aviator-co/av (MIT license)
