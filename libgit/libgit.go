@@ -26,6 +26,7 @@ type Git interface {
 	Fetch(repo string, refspec string) error
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string) error
+	DeleteBranchIfExists(name string) error
 	Checkout(name string) error
 	LogAll(notReachableFrom string) (Log, error)
 }
@@ -268,6 +269,17 @@ func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 func (g git) CreateBranch(name string) error {
 	_, err := exec.Run("git", exec.WithArgs("checkout", "-b", name))
 	if err != nil {
+		return fmt.Errorf("failed to create branch, err: %v", err)
+	}
+	return nil
+}
+
+func (g git) DeleteBranchIfExists(name string) error {
+	_, err := exec.Run("git", exec.WithArgs("branch", "-D", name))
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil
+		}
 		return fmt.Errorf("failed to create branch, err: %v", err)
 	}
 	return nil
