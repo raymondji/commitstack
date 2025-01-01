@@ -28,7 +28,7 @@ Install Commitstack:
 go install github.com/raymondji/commitstack/cmd/git-stack@latest
 ```
 
-## Quick start
+## Getting started
 
 Commitstack needs a personal access token in order to manage MRs on Gitlab/PRs on Github for you. To set this up:
 ```
