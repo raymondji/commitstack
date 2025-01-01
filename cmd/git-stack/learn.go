@@ -26,6 +26,10 @@ var learnCmd = &cobra.Command{
 
 		switch learnPartFlag {
 		case 1:
+			if err := samples.Cleanup(); err != nil {
+				fmt.Println("ERROR failed to cleanup sample", err.Error())
+				return nil
+			}
 			if err := samples.Part1().Execute(); err != nil {
 				fmt.Println("ERROR failed to execute sample", err.Error())
 			}
