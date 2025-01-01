@@ -30,7 +30,7 @@ go install github.com/raymondji/commitstack/cmd/git-stack@latest
 
 ## Getting started
 
-The commitstack binary is named `git-stack`. Git offers a handy built-in trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so commitstack can be invoked as `git stack`.
+The commitstack binary is named `git-stack`. Git offers a handy trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so commitstack can be invoked as `git stack`.
 
 commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
 ```
