@@ -6,7 +6,7 @@ CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. In
 
 https://graphite.dev/guides/stacked-diffs has a good overview on what it is and why you might want to do it.
 
-## Why use a dedicated tool for stacking?
+## Why use an additional tool for stacking?
 
 Stacking with just Git is totally doable but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
