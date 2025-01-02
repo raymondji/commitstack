@@ -18,7 +18,7 @@ In addition, commitstack tries to fit into Git as naturally as possible and avoi
 
 ## Sample usage
 
-This sample output comes from `git stack learn --mode=exec`, an interactive tutorial built-in to the CLI.
+This sample output comes from `git stack learn --chapter=1 --mode=exec`, an interactive tutorial built-in to the CLI.
 
 ```
 ╭──────────────────────────────────────────────────╮
