@@ -201,7 +201,7 @@ Under the hood though, commitstack thinks about stacks as "stacks of commits", n
 - Each commit is a unique entity
 - Commits do inherently have a notion of parent commits and children commits
 
-Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will just print an error message and not try to interpret it as a stack.
+Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and not try to interpret it as a stack.
 
 ## References
 
