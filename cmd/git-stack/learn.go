@@ -45,7 +45,7 @@ var learnCmd = &cobra.Command{
 		case 1:
 			sample = sampleusage.Basics(deps.git, deps.host, deps.repoCfg.DefaultBranch, deps.theme)
 		case 2:
-			sample = sampleusage.Basics(deps.git, deps.host, deps.repoCfg.DefaultBranch, deps.theme)
+			sample = sampleusage.Advanced(deps.git, deps.host, deps.repoCfg.DefaultBranch, deps.theme)
 		default:
 			return errors.New("invalid tutorial chapter number")
 		}
@@ -70,17 +70,6 @@ var learnCmd = &cobra.Command{
 			if err := sample.Cleanup(); err != nil {
 				return err
 			}
-<<<<<<< HEAD
-=======
-		case 2:
-			if learnExecFlag {
-				if err := samples.Part2().Execute(); err != nil {
-					return err
-				}
-			} else {
-				fmt.Println(samples.Part2().String())
-			}
->>>>>>> fc95d07 (fix)
 		default:
 			return errors.New("invalid mode flag")
 		}
