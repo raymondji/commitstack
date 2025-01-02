@@ -45,7 +45,7 @@ git stack learn
 
 ## Sample usage
 
-This sample output comes from `git stack learn --chapter=1 --mode=exec`, an interactive tutorial built-in to the CLI.
+This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 
 ```
 ╭──────────────────────────────────────────────────╮
