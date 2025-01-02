@@ -34,9 +34,9 @@ var learnCmd = &cobra.Command{
 		var sample sampleusage.Sample
 		switch learnChapterFlag {
 		case 0:
-			fmt.Println("Welcome to commitstack! The following tutorial(s) will explain the core functionality and present various sample commands.")
+			fmt.Println("Welcome to commitstack! The following tutorial(s) will explain the core functionality and show how to use various sample commands.")
 			fmt.Println()
-			fmt.Println("Recommended: commitstack can execute the sample commands in the tutorial automatically and show you their live output. To continue with this option, run:")
+			fmt.Println("Recommended: commitstack can execute the sample commands in the tutorial automatically and show you their output live. To continue with this option, run:")
 			fmt.Println(deps.theme.TertiaryColor.Render("git stack learn --chapter 1 --mode=exec"))
 			fmt.Println()
 			fmt.Println("Alternative: you can also view the text-only version and follow along if desired by copying the commands and running them yourself. To continue with this option, run:")
