@@ -1,22 +1,12 @@
 # commitstack
 
-CLI to facilitate [stacking workflows](https://www.stacking.dev/) in git. Support for Gitlab (!) and Github.
+CLI to facilitate [stacking merge requests](https://www.stacking.dev/) in git. Integrates with Gitlab (!) and Github.
 
-## Why another stacking tool?
+## Why commitstack over `<other stacking tool>`?
 
-Stacking with plain Git is totally doable but cumbersome. There's a plethora of tools that make stacking easier for Github, but after I started using Gitlab at work, I was surprised to find almost nothing that fit the bill.
+The first reason is that if you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of. If you just need Gitlab support, the only options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one resonates with you more. If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
 
-The only tool I came across is the experimental `glab stack` CLI command. While it seems promising, it's missing a few features I wanted and has the opposite problem: it only supports Gitlab. Ideally I wanted a single tool that works with both.
-
-Enter: commitstack. The project currently supports Gitlab and Github, and should (hopefully) be easily extensible to other Git hosting providers.
-
-## Goals
-
-Stacking workflows in Git can be cumbersome both because of your interactions with Git itself (e.g. pushing multiple branches and keeping track of your stacks), and because of your interactions with Gitlab/Github/etc. (e.g. opening PRs and setting target branches). commitstack aims to make both of these aspects easier.
-
-In addition, commitstack tries to fit into Git as naturally as possible and lean on existing concepts/funcionality. Git already has the basic building blocks needed to do stacking workflows (e.g. with `git rebase --update-refs`), and many people stack without any extra tools. For everyone in that bucket, commitstack should (hopefully) feel like it fits right in (while removing much of the friction).
-
-Lastly, as mentioned above, commitstack aims to provide full support for Gitlab and Github, and hopefully be easy to extend to other Git hosting providers.
+The second reason is that if you already know how to stack MRs/PRs using native Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
 
 ## Installation
 
