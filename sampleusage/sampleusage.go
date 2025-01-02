@@ -21,15 +21,15 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		),
 		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),
 		"Next, let's create our first branch:",
-		shellCmd("git checkout -b learncommitstack"),
-		shellCmd("echo 'hello world' > learncommitstack.txt"),
+		shellCmd("git checkout -b myfirststack"),
+		shellCmd("echo 'hello world' > myfirststack.txt"),
 		shellCmd("git add ."),
 		shellCmd("git commit -m 'hello world'"),
 		"Now let's stack a second branch on top of our first:",
-		shellCmd("git checkout -b learncommitstack-pt2"),
-		shellCmd("echo 'have a break' >> learncommitstack.txt"),
+		shellCmd("git checkout -b myfirststack-pt2"),
+		shellCmd("echo 'have a break' >> myfirststack.txt"),
 		shellCmd("git commit -am 'break'"),
-		shellCmd("echo 'have a kitkat' >> learncommitstack.txt"),
+		shellCmd("echo 'have a kitkat' >> myfirststack.txt"),
 		shellCmd("git commit -am 'kitkat'"),
 		multiline(
 			"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
@@ -130,7 +130,7 @@ func (s Sample) Cleanup() error {
 		return err
 	}
 
-	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack-pt2", "mysecondstack")
+	return s.cleanupBranches(remote.URLPath, "myfirststack", "myfirststack-pt2", "mysecondstack")
 }
 
 func (s Sample) cleanupBranches(repoPath string, names ...string) error {

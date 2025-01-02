@@ -9,13 +9,17 @@ import (
 )
 
 var learnPartFlag int
-var learnExecFlag bool
-var learnCleanupFlag bool
+var learnModeFlag string
+
+const (
+	learnModePrint   string = "print"
+	learnModeExec    string = "exec"
+	learnModeCleanup string = "cleanup"
+)
 
 func init() {
 	learnCmd.Flags().IntVar(&learnPartFlag, "part", 1, "Which part of the tutorial to continue from")
-	learnCmd.Flags().BoolVar(&learnExecFlag, "exec", false, "Whether to execute the commands in the tutorial")
-	learnCmd.Flags().BoolVar(&learnCleanupFlag, "cleanup", false, "Whether to cleanup everything created as part of the tutorial")
+	learnCmd.Flags().StringVar(&learnModeFlag, "mode", learnModePrint, "Which mode to use.")
 }
 
 var learnCmd = &cobra.Command{
@@ -26,32 +30,33 @@ var learnCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		samples := sampleusage.New(deps.theme, deps.repoCfg.DefaultBranch, deps.git, deps.host)
-		if learnCleanupFlag {
-			if err := samples.Cleanup(); err != nil {
-				return err
-			}
-		}
 
+		var sample sampleusage.Sample
 		switch learnPartFlag {
 		case 1:
-			if learnExecFlag {
-				if err := samples.Part1().Execute(); err != nil {
-					return err
-				}
-			} else {
-				fmt.Println(samples.Part1().String())
-			}
+			sample = sampleusage.Basics(deps.git, deps.host, deps.repoCfg.DefaultBranch, deps.theme)
 		case 2:
-			if learnExecFlag {
-				if err := samples.Part2().Execute(); err != nil {
-					return err
-				}
-			} else {
-				fmt.Println(samples.Part2().String())
+			sample = sampleusage.Basics(deps.git, deps.host, deps.repoCfg.DefaultBranch, deps.theme)
+		default:
+			return errors.New("invalid tutorial part number")
+		}
+
+		switch learnModeFlag {
+		case learnModePrint:
+			fmt.Println(sample.String())
+		case learnModeExec:
+			if err := sample.Cleanup(); err != nil {
+				return err
+			}
+			if err := sample.Execute(); err != nil {
+				return err
+			}
+		case learnModeCleanup:
+			if err := sample.Cleanup(); err != nil {
+				return err
 			}
 		default:
-			return errors.New("invalid tutorial part")
+			return errors.New("invalid mode flag")
 		}
 
 		return nil
