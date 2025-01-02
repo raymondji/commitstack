@@ -23,6 +23,7 @@ func main() {
 		listCmd,
 		logCmd,
 		learnCmd,
+		versionCmd,
 	)
 
 	rootCmd.Execute()

@@ -34,7 +34,7 @@ brew install go
 
 To install Commitstack:
 ```
-go install github.com/raymondji/commitstack/cmd/git-stack@latest
+go install github.com/raymondji/commitstack/cmd/git-stack@0.3.0
 ```
 
 ## Getting started
