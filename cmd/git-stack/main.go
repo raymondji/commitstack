@@ -12,7 +12,6 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		versionCmd,
 		initCmd,
 		addCmd,
 		switchCmd,
