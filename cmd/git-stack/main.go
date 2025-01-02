@@ -4,13 +4,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Set by goreleaser
-var (
-	version = "unknown"
-	commit  = "unknown commit"
-	date    = "unknown date"
-)
-
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:          "stack",
