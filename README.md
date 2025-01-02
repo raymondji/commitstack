@@ -14,12 +14,12 @@ Stacking with just Git is totally doable but cumbersome.
 
 ## Why commitstack over `<other stacking tool>`?
 
-The first reason is that while Github users are spoiled for choice, there are surprisingly few options that integrate with Gitlab.
+The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av?tab=readme-ov-file) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), there are surprisingly few options that integrate with Gitlab.
 - If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
 - If you need Gitlab support only, the two options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one suits your preferences more.
 - If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
 
-The second reason is that if you already know how to stack MRs/PRs using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
+The second reason is that if you already know how to stack branches using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
 
 ## Installation
 
@@ -203,4 +203,5 @@ commitstack doesn't persist any additional state to keep track of your stacks - 
 
 ## References
 
-`exec.go` is heavily inspired by https://github.com/aviator-co/av (MIT license)
+Some code is adapted from sections of https://github.com/aviator-co/av (MIT license). See av's license at `sources/av/LICENSE`.
+- `exec.go` is adapted from https://github.com/aviator-co/av/blob/fbcb5bfc0f19c8a7924e309cb1e86678a9761daa/internal/git/git.go#L178
