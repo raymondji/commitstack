@@ -49,8 +49,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		"To pull in the latest changes from the default branch into the stack, run:",
 		shellCmd(`git stack pull`),
 		multiline(
-			"Great, we're getting the hang of this!",
-			"One stack is nice, but how do we deal with multiple stacks?",
+			"Great, we've got the basics down for one stack. How do we deal with multiple stacks?",
 			"Let's head back to our default branch and create a second stack.",
 		),
 		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),

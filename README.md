@@ -40,7 +40,7 @@ cd ~/your/git/repo
 git stack init
 ```
 
-All set! To learn how to use commitstack, you can access an interactive tutorial built-in to the CLI:
+To learn how to use commitstack, you can access an interactive tutorial built-in to the CLI:
 ```
 git stack learn
 ```
