@@ -15,7 +15,7 @@ Stacking natively with Git is totally doable, but cumbersome.
 ## Why Commitstack over `<other stacking tool>`?
 
 The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
-- If you want a stacking tool that integrates with both Gitlab and Github, Commitstack is the one of the few options I'm aware of. Another one is [git-spice](https://github.com/abhinav/git-spice).
+- If you want a stacking tool that integrates with both Gitlab and Github, Commitstack is the one of the few options I'm aware of. Some others include [git-town](https://github.com/git-town/git-town) and [git-spice](https://github.com/abhinav/git-spice).
 - If you need Gitlab support only, the most prominent option seems to be the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. The user experience is pretty different between `glab stack` and Commitstack, so see which one suits your preferences.
 
 The second reason is that if you already stack branches natively using Git and/or know your way around `git rebase`, you might really like the user experience of Commitstack. It's designed to lean on existing Git concepts/functionality as much as possible, so it should be easy to learn and integrate into your Git workflow.
