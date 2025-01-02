@@ -1,6 +1,6 @@
 # commitstack
 
-CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. Integrates with Gitlab (!) and Github.
+CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. Integrates with Gitlab and Github.
 
 ## What is stacking?
 
@@ -14,12 +14,11 @@ Stacking with just Git is totally doable, but cumbersome.
 
 ## Why commitstack over `<other stacking tool>`?
 
-The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), there are surprisingly few options that integrate with Gitlab.
-- If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
-- If you need Gitlab support only, the two options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one suits your preferences more.
-- If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
+The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
+- If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the one of the few options I'm aware of. Another one is [git-spice](https://github.com/abhinav/git-spice).
+- If you need Gitlab support only, the most prominent option seems to be the `glab stack` CLI command. The user experience is pretty different between `glab stack` and commitstack, so see which one suits your preferences.
 
-The second reason is that if you already know how to stack branches using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your workflow. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
+The second reason is that if you already stack branches using just Git and/or know you're way around `git rebase`, you might like the user experience of commitstack. It's designed to lean on existing Git concepts/functionality as much as possible, so it should be easy to learn and integrate into your Git workflow.
 
 ## Installation
 
