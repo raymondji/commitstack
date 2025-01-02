@@ -12,23 +12,122 @@ import (
 	"github.com/raymondji/commitstack/libgit"
 )
 
-type Samples struct {
-	theme         config.Theme
-	defaultBranch string
-	host          githost.Host
-	git           libgit.Git
+func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme config.Theme) Sample {
+	segments := parseLines(
+		multiline(
+			"Welcome to commitstack!",
+			"Here is a quick tutorial on how to use the CLI.",
+		),
+		"Let's start things off on the default branch:",
+		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),
+		"Next, let's create our first branch:",
+		shellCmd("git checkout -b myfirststack"),
+		shellCmd("echo 'hello world' > myfirststack.txt"),
+		shellCmd("git add ."),
+		shellCmd("git commit -m 'hello world'"),
+		"Now let's stack a second branch on top of our first:",
+		shellCmd("git checkout -b myfirststack-pt2"),
+		shellCmd("echo 'have a break' >> myfirststack.txt"),
+		shellCmd("git commit -am 'break'"),
+		shellCmd("echo 'have a kitkat' >> myfirststack.txt"),
+		shellCmd("git commit -am 'kitkat'"),
+		multiline(
+			"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
+			"",
+			"Our current stack has two branches in it, which we can see with:",
+		),
+		shellCmd(`git stack show`),
+		"Our current stack has 3 commits in it, which we can see with:",
+		shellCmd(`git stack log`),
+		multiline(
+			"We can easily push all branches in the stack up as separate PRs.",
+			"commitstack automatically sets the target branches for you.",
+		),
+		shellCmd(`git stack push`),
+		"We can quickly view the PRs in the stack using:",
+		shellCmd(`git stack show --prs`),
+		"To pull in the latest changes from the default branch into the stack, run:",
+		shellCmd(`git stack pull`),
+		multiline(
+			"Great, we're getting the hang of this!",
+			"One stack is nice, but how do we deal with multiple stacks?",
+			"Let's head back to our default branch and create a second stack.",
+		),
+		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),
+		shellCmd("git checkout -b mysecondstack"),
+		shellCmd("echo 'buy one get one free' > mysecondstack.txt"),
+		shellCmd("git add ."),
+		shellCmd("git commit -m 'My second stack'"),
+		"To view all the stacks:",
+		shellCmd("git stack list"),
+		multiline(
+			"Nice! All done part 1 of the tutorial.",
+			"",
+			"In part 2 we'll see how to make changes to earlier branches in the stack.",
+			"Once you're ready, continue the tutorial using:",
+			"git stack learn --part 2",
+			"",
+			"To cleanup all the branches/PRs that were created, run:",
+			"git stack learn --cleanup",
+		),
+	)
+	branchesToCleanup := []string{
+		"myfirststack", "myfirststack-pt2", "mysecondstack",
+	}
+	return newSample(git, host, segments, branchesToCleanup, theme, defaultBranch)
 }
 
-func New(theme config.Theme, defaultBranch string, git libgit.Git, host githost.Host) Samples {
-	return Samples{
-		theme:         theme,
-		defaultBranch: defaultBranch,
-		host:          host,
-		git:           git,
+func Advanced(git libgit.Git, host githost.Host, defaultBranch string, theme config.Theme) Sample {
+	segments := parseLines(
+		"Coming soon!",
+	)
+	branchesToCleanup := []string{}
+	return newSample(git, host, segments, branchesToCleanup, theme, defaultBranch)
+}
+
+type Sample struct {
+	defaultBranch     string
+	segments          []segment
+	theme             config.Theme
+	git               libgit.Git
+	host              githost.Host
+	branchesToCleanup []string
+}
+
+func newSample(
+	git libgit.Git,
+	host githost.Host,
+	segments []segment,
+	branchesToCleanup []string,
+	theme config.Theme,
+	defaultBranch string,
+) Sample {
+	return Sample{
+		git:               git,
+		host:              host,
+		segments:          segments,
+		branchesToCleanup: branchesToCleanup,
+		theme:             theme,
+		defaultBranch:     defaultBranch,
 	}
 }
 
-func (s Samples) Cleanup() error {
+func (s Sample) Execute() error {
+	if ok, err := s.git.IsRepoClean(); err != nil {
+		return err
+	} else if !ok {
+		return fmt.Errorf("aborting, git repo has changes")
+	}
+
+	for _, seg := range s.segments {
+		if err := seg.Execute(s.theme); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s Sample) Cleanup() error {
 	if ok, err := s.git.IsRepoClean(); err != nil {
 		return err
 	} else if !ok {
@@ -44,10 +143,10 @@ func (s Samples) Cleanup() error {
 		return err
 	}
 
-	return s.cleanupBranches(remote.URLPath, "learncommitstack", "learncommitstack-pt2")
+	return s.cleanupBranches(remote.URLPath, s.branchesToCleanup...)
 }
 
-func (s Samples) cleanupBranches(repoPath string, names ...string) error {
+func (s Sample) cleanupBranches(repoPath string, names ...string) error {
 	for _, name := range names {
 		hasPR := true
 		pr, err := s.host.GetPullRequest(repoPath, name)
@@ -72,94 +171,29 @@ func (s Samples) cleanupBranches(repoPath string, names ...string) error {
 	return nil
 }
 
-func (s Samples) Part1() Sample {
-	lines := parseLines(
-		"Welcome to commitstack!\nHere is a quick tutorial on how to use the CLI.",
-		"First, let's start on the default branch:",
-		shellCmd(fmt.Sprintf("git checkout %s", s.defaultBranch)),
-		"Next, let's create our first branch:",
-		shellCmd(
-			"git checkout -b learncommitstack && \\\n"+
-				"echo 'hello world' > learncommitstack.txt && \\\n"+
-				"git add . && \\\n"+
-				"git commit -m 'hello world'",
-		),
-		"Now let's stack a second branch on top of our first:",
-		shellCmd(
-			"git checkout -b learncommitstack-pt2 && \\\n"+
-				"echo 'have a break' >> learncommitstack.txt && \\\n"+
-				"git commit -am 'break' && \\\n"+
-				"echo 'have a kitkat' >> learncommitstack.txt && \\\n"+
-				"git commit -am 'kitkat'",
-		),
-		"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
-		"Our current stack has two branches in it, which we can see with:",
-		shellCmd(`git stack show`),
-		"Our current stack has 3 commits in it, which we can see with:",
-		shellCmd(`git stack log`),
-		"We can easily push all branches in the stack up as separate PRs.\ncommitstack automatically sets the target branches for you on the PRs.",
-		shellCmd(`git stack push`),
-		"We can quickly view the PRs in the stack using:",
-		shellCmd(`git stack show --prs`),
-		"Nice! All done part 1 of the tutorial. In part 2 we'll learn how to make more changes to a stack.",
-		"Once you're ready, continue the tutorial using:",
-		shellCmd("git stack learn --part 2"),
-	)
-	return newSample(s.git, lines, s.theme)
-}
-
-type Sample struct {
-	lines []line
-	theme config.Theme
-	git   libgit.Git
-}
-
-func newSample(git libgit.Git, lines []line, theme config.Theme) Sample {
-	return Sample{
-		git:   git,
-		lines: lines,
-		theme: theme,
-	}
-}
-
-func (s Sample) Execute() error {
-	if ok, err := s.git.IsRepoClean(); err != nil {
-		return err
-	} else if !ok {
-		return fmt.Errorf("aborting, git repo has changes")
-	}
-
-	for _, l := range s.lines {
-		if err := l.Execute(s.theme); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (s Sample) String() string {
 	var sb strings.Builder
-	for _, l := range s.lines {
-		sb.Write([]byte(l.String(s.theme) + "\n"))
+	for _, seg := range s.segments {
+		sb.Write([]byte(seg.String(s.theme) + "\n"))
 	}
 	return sb.String()
 }
 
-type line interface {
+type segment interface {
 	String(theme config.Theme) string
 	Execute(theme config.Theme) error
 }
 
-func parseLines(lines ...any) []line {
-	var out []line
-	for _, l := range lines {
-		switch t := l.(type) {
+func parseLines(segments ...any) []segment {
+	var out []segment
+	for _, seg := range segments {
+		switch t := seg.(type) {
 		case string:
 			out = append(out, text(t))
 		case shellCmdLine:
 			out = append(out, t)
 		default:
-			panic(fmt.Sprintf("invalid line %v", l))
+			panic(fmt.Sprintf("invalid segment %v", seg))
 		}
 	}
 
@@ -186,6 +220,10 @@ func (t textLine) String(theme config.Theme) string {
 	return fmt.Sprint(style.Render(string(t)))
 }
 
+func multiline(lines ...string) string {
+	return strings.Join(lines, "\n")
+}
+
 func (t textLine) Execute(theme config.Theme) error {
 	fmt.Println(t.String(theme))
 	return nil
@@ -195,7 +233,7 @@ type shellCmdLine struct {
 	text string
 }
 
-func shellCmd(s string) line {
+func shellCmd(s string) segment {
 	return shellCmdLine{
 		text: s,
 	}

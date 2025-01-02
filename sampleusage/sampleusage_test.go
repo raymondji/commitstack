@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSamples(t *testing.T) {
+func TestBasics(t *testing.T) {
 	git, err := libgit.New()
 	require.NoError(t, err)
 
@@ -26,9 +26,9 @@ func TestSamples(t *testing.T) {
 	host, err := githost.New(remote.Kind, repoCfg)
 	require.NoError(t, err)
 
-	samples := sampleusage.New(config.NewTheme(cfg.Theme), repoCfg.DefaultBranch, git, host)
-	err = samples.Cleanup()
+	basics := sampleusage.Basics(git, host, repoCfg.DefaultBranch, config.NewTheme(cfg.Theme))
+	err = basics.Cleanup()
 	require.NoError(t, err)
-	err = samples.Part1().Execute()
+	err = basics.Execute()
 	require.NoError(t, err)
 }
