@@ -16,6 +16,33 @@ Stacking workflows in Git can be cumbersome both because of your interactions wi
 
 In addition, commitstack tries to fit into Git as naturally as possible and lean on existing concepts/funcionality. Git already has the basic building blocks needed to do stacking workflows (e.g. with `git rebase --update-refs`), and many people stack without any extra tools. For everyone in that bucket, commitstack should (hopefully) feel like it fits right in (while removing much of the friction).
 
+## Installation
+
+Go version >= 1.22 is required. To install Go on macOS:
+```
+brew install go 
+```
+
+To install commitstack:
+```
+go install github.com/raymondji/commitstack/cmd/git-stack@latest
+```
+
+## Getting started
+
+The commitstack binary is named `git-stack`. Git offers a handy trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so commitstack can be invoked as `git stack`.
+
+commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
+```
+cd ~/your/git/repo
+git stack init
+```
+
+All set! To learn how to use commitstack, you can access an interactive tutorial built-in to the CLI:
+```
+git stack learn
+```
+
 ## Sample usage
 
 This sample output comes from `git stack learn --chapter=1 --mode=exec`, an interactive tutorial built-in to the CLI.
@@ -160,33 +187,6 @@ Your branch is up to date with 'origin/main'.
 │ git stack learn --cleanup                        │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-```
-
-## Installation
-
-Go version >= 1.22 is required. To install Go on macOS:
-```
-brew install go 
-```
-
-To install commitstack:
-```
-go install github.com/raymondji/commitstack/cmd/git-stack@latest
-```
-
-## Getting started
-
-The commitstack binary is named `git-stack`. Git offers a handy trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so commitstack can be invoked as `git stack`.
-
-commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
-```
-cd ~/your/git/repo
-git stack init
-```
-
-All set! To learn how to use commitstack, you can access an interactive tutorial built-in to the CLI:
-```
-git stack learn
 ```
 
 ## How does it work?
