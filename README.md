@@ -1,14 +1,25 @@
 # commitstack
 
-CLI to facilitate [stacking merge requests](https://www.stacking.dev/) in git. Integrates with Gitlab (!) and Github.
+CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. Integrates with Gitlab (!) and Github.
+
+## What is stacking?
+
+https://graphite.dev/guides/stacked-diffs has a good overview on what it is and why you might want to do it.
+
+## Why use a dedicated tool for stacking?
+
+Stacking with just Git is totally doable but combersome.
+- While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
+- Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
 ## Why commitstack over `<other stacking tool>`?
 
-The first reason is that if you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
-- If you just need Gitlab support, the only options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one resonates with you more.
+The first reason is that while Github users are spoiled for choice, there are surprisingly few options that integrate with Gitlab.
+- If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
+- If you need Gitlab support only, the two options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one suits your preferences more.
 - If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
 
-The second reason is that if you already know how to stack MRs/PRs using native Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
+The second reason is that if you already know how to stack MRs/PRs using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
 
 ## Installation
 
@@ -187,6 +198,8 @@ Under the hood, commitstack therefore thinks about stacks as "stacks of commits"
 - Commits do inherently have a notion of parent commits and children commits
 
 Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and otherwise ignore the commit.
+
+commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). When it encounters a structure it can't parse, it tries to print a helpful error and otherwise ignore the incompatible commit(s).
 
 ## References
 
