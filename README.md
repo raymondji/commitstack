@@ -14,7 +14,7 @@ Stacking with just Git is totally doable but cumbersome.
 
 ## Why commitstack over `<other stacking tool>`?
 
-The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av?tab=readme-ov-file) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), there are surprisingly few options that integrate with Gitlab.
+The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), there are surprisingly few options that integrate with Gitlab.
 - If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
 - If you need Gitlab support only, the two options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one suits your preferences more.
 - If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
