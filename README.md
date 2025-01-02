@@ -1,6 +1,6 @@
 # Commitstack
 
-CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. Integrates with Gitlab and Github.
+CLI to facilitate stacking pull requests in git. Integrates with Gitlab and Github.
 
 ## What is stacking?
 
