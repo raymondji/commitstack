@@ -201,7 +201,7 @@ Merge commits still pose a problem. It's easy to reason about a linear series of
 
 commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). When it encounters a structure it can't parse, it tries to print a helpful error and otherwise ignore the incompatible commit(s).
 
-## References
+## Attribution
 
 Some code is adapted from sections of https://github.com/aviator-co/av (MIT license). A copy of av's license is included at `sources/av/LICENSE`.
 - `exec.go` is adapted from https://github.com/aviator-co/av/blob/fbcb5bfc0f19c8a7924e309cb1e86678a9761daa/internal/git/git.go#L178
