@@ -42,7 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("done")
+	fmt.Println("Done")
 }
 
 func generateGoFile(tag string) error {
