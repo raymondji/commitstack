@@ -16,6 +16,8 @@ Stacking workflows in Git can be cumbersome both because of your interactions wi
 
 In addition, commitstack tries to fit into Git as naturally as possible and lean on existing concepts/funcionality. Git already has the basic building blocks needed to do stacking workflows (e.g. with `git rebase --update-refs`), and many people stack without any extra tools. For everyone in that bucket, commitstack should (hopefully) feel like it fits right in (while removing much of the friction).
 
+Lastly, as mentioned above, commitstack aims to provide full support for Gitlab and Github, and hopefully be easy to extend to other Git hosting providers.
+
 ## Installation
 
 Go version >= 1.22 is required. To install Go on macOS:
