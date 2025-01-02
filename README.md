@@ -16,9 +16,9 @@ Stacking workflows in Git can be cumbersome both because of your interactions wi
 
 In addition, commitstack tries to fit into Git as naturally as possible and avoid introducing whole new paradigms. Git already has the basic building blocks needed to do stacking workflows (e.g. with `git rebase --update-refs`), and many people stack without any extra tools. For everyone in that bucket, commitstack should (hopefully) feel like it fits right in (while removing much of the friction).
 
-## Sample usage (output from `git stack learn`)
+## Sample usage
 
-This sample output is generated entirely from `git stack learn --mode=exec`, an interactive tutorial built-in to the CLI.
+This sample output comes from `git stack learn --mode=exec`, an interactive tutorial built-in to the CLI.
 
 ```
 ╭──────────────────────────────────────────────────╮
