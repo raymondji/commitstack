@@ -23,7 +23,7 @@ type Git interface {
 	CommitEmpty(msg string) error
 	Commit(msg string) error
 	Add() error
-	Tag(tag string) error
+	TagForce(tag string) error
 	GetCurrentBranch() (string, error)
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
@@ -239,8 +239,8 @@ func (g git) Add() error {
 	return nil
 }
 
-func (g git) Tag(tag string) error {
-	_, err := exec.Run("git", exec.WithArgs("tag", tag))
+func (g git) TagForce(tag string) error {
+	_, err := exec.Run("git", exec.WithArgs("tag", "--force", tag))
 	if err != nil {
 		return fmt.Errorf("failed to tag, err: %v", err)
 	}
