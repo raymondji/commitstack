@@ -6,7 +6,7 @@ CLI to facilitate [stacking workflows](https://www.stacking.dev/) in git. Suppor
 
 Stacking with plain Git is totally doable but cumbersome. There's a plethora of tools that make stacking easier for Github, but after I started using Gitlab at work, I was surprised to find almost nothing that fit the bill.
 
-The only tool I came across is the experimental `glab stack` CLI command, but it's missing a few features I wanted and has the opposite problem: it's Gitlab only. I ideally wanted a single tool I could use with both.
+The only tool I came across is the experimental `glab stack` CLI command. However, it's missing a few features I wanted and has the opposite problem: it's Gitlab only. Ideally I wanted a single tool that works with both.
 
 Enter: commitstack. The project currently supports Gitlab and Github, and should (hopefully) be easily extensible to other Git hosting providers.
 
