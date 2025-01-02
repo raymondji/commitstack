@@ -23,7 +23,7 @@ Another reason is that if you want a tool that feels like "just Git" at the end 
 - It's designed to lean on existing Git concepts and functionality as much as possible, and provide a minimal set of abstractions on top.
 - The goal is to make Commitstack easy to learn and integrate into your existing Git workflow.
 
-On the flipside, here's one reason Commitstack might not be right for you. Commitstack depends heavily on `git rebase`, so if you don't enjoy `git rebase` workflows, there probably exists a better tool for you.
+On the flipside, here's one reason Commitstack might not be right for you. Commitstack depends heavily on `git rebase`, so if you don't enjoy `git rebase` workflows, another tool might be a better fit.
 
 ## Installation
 
