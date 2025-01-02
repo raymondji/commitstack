@@ -21,7 +21,7 @@ One reason you might want to use Commitstack is if you need Gitlab support. Whil
 - If you need Gitlab support only, the most prominent option seems to be the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command.
 - These options are all pretty different in terms of the user experience and feature set they provide; see which one fits your needs the best. 
 
-Another reason is that if you already stack branches natively using Git and/or know your way around `git rebase`, you might really like the user experience of Commitstack. It's designed to lean on existing Git concepts and functionality as much as possible, so it should be easy to learn and integrate into your Git workflow.
+Another reason is that if you already stack branches natively using Git and/or know your way around `git rebase`, you might really like the user experience of Commitstack. It's designed to lean on existing Git concepts and functionality as much as possible, and provide a minimal set of abstractions on top. The goal is to make Commitstack easy to learn and integrate into your existing Git workflow.
 
 On the flipside, here's one reason Commitstack might not be right for you. Commitstack depends heavily on `git rebase`, so if you don't enjoy `git rebase` workflows, there probably exists a better tool for you.
 
