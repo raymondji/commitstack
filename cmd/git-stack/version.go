@@ -11,7 +11,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Prints the application version",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf(releasevars.Version)
+		fmt.Println(releasevars.Version)
 		return nil
 	},
 }
