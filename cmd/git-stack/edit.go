@@ -10,7 +10,7 @@ import (
 
 var editCmd = &cobra.Command{
 	Use:   "edit",
-	Short: "Edit the stack using interactive rebase",
+	Short: "Edit the current stack using interactive rebase",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {
