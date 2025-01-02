@@ -72,7 +72,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack f061dd0] hello world
+[myfirststack c538f6e] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -84,11 +84,11 @@ Your branch is up to date with 'origin/main'.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 9fcd0c6] break
+[myfirststack-pt2 c5a18db] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 ae7ae71] kitkat
+[myfirststack-pt2 5475cd6] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -112,9 +112,9 @@ Branches in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-* ae7ae71 (myfirststack-pt2) kitkat
-  9fcd0c6 break
-  f061dd0 (myfirststack) hello world
+* 5475cd6 (myfirststack-pt2) kitkat
+  c5a18db break
+  c538f6e (myfirststack) hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -124,8 +124,8 @@ Branches in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/103
-Pushed myfirststack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/104
+Pushed myfirststack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/110
+Pushed myfirststack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/109
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -135,10 +135,10 @@ Pushed myfirststack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merg
 On stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/103
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/110
 
   myfirststack
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/104
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/109
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -164,12 +164,12 @@ Your branch is up to date with 'origin/main'.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 5706faf] My second stack
+[mysecondstack 0b070c1] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ To view all stacks:                              │
+│ To view all the stacks:                          │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack list
@@ -177,16 +177,8 @@ Your branch is up to date with 'origin/main'.
 * mysecondstack (1 branches)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Nice! All done part 1 of the tutorial.           │
-│                                                  │
-│ In part 2 we'll see how to make changes to       │
-│ earlier branches in the stack.                   │
-│ Once you're ready, continue the tutorial using:  │
-│ git stack learn --part 2                         │
-│                                                  │
-│ To cleanup all the branches/PRs that were        │
-│ created, run:                                    │
-│ git stack learn --cleanup                        │
+│ Nice! All done chapter 1 of the tutorial.        │
+│ ...                                              │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 ```

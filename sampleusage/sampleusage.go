@@ -61,14 +61,14 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		"To view all the stacks:",
 		shellCmd("git stack list"),
 		multiline(
-			"Nice! All done part 1 of the tutorial.",
+			"Nice! All done chapter 1 of the tutorial.",
 			"",
-			"In part 2 we'll see how to make changes to earlier branches in the stack.",
+			"In chapter 2 we'll see how to make changes to earlier branches in the stack.",
 			"Once you're ready, continue the tutorial using:",
-			"git stack learn --part 2",
+			"git stack learn --chapter 2",
 			"",
 			"To cleanup all the branches/PRs that were created, run:",
-			"git stack learn --cleanup",
+			"git stack learn --chapter 1 --cleanup",
 		),
 	)
 	branchesToCleanup := []string{
