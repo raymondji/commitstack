@@ -8,7 +8,7 @@ https://graphite.dev/guides/stacked-diffs has a good overview on what it is and 
 
 ## Why use an additional tool for stacking?
 
-Stacking with just Git is totally doable but cumbersome.
+Stacking with just Git is totally doable, but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
