@@ -17,8 +17,8 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		multiline(
 			"Welcome to commitstack!",
 			"Here is a quick tutorial on how to use the CLI.",
-			"Let's start things off on the default branch:",
 		),
+		"Let's start things off on the default branch:",
 		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),
 		"Next, let's create our first branch:",
 		shellCmd("git checkout -b myfirststack"),
@@ -41,7 +41,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		shellCmd(`git stack log`),
 		multiline(
 			"We can easily push all branches in the stack up as separate PRs.",
-			"commitstack automatically sets the target branches for you on the PRs.",
+			"commitstack automatically sets the target branches for you.",
 		),
 		shellCmd(`git stack push`),
 		"We can quickly view the PRs in the stack using:",
@@ -50,7 +50,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		shellCmd(`git stack pull`),
 		multiline(
 			"Great, we're getting the hang of this!",
-			"Now one stack is nice, but how do we deal with multiple stacks?",
+			"One stack is nice, but how do we deal with multiple stacks?",
 			"Let's head back to our default branch and create a second stack.",
 		),
 		shellCmd(fmt.Sprintf("git checkout %s", defaultBranch)),
@@ -71,31 +71,44 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 			"git stack learn --cleanup",
 		),
 	)
-	return newSample(git, host, segments, theme, defaultBranch)
+	branchesToCleanup := []string{
+		"myfirststack", "myfirststack-pt2", "mysecondstack",
+	}
+	return newSample(git, host, segments, branchesToCleanup, theme, defaultBranch)
 }
 
 func Advanced(git libgit.Git, host githost.Host, defaultBranch string, theme config.Theme) Sample {
 	segments := parseLines(
 		"Coming soon!",
 	)
-	return newSample(git, host, segments, theme, defaultBranch)
+	branchesToCleanup := []string{}
+	return newSample(git, host, segments, branchesToCleanup, theme, defaultBranch)
 }
 
 type Sample struct {
-	defaultBranch string
-	segments      []segment
-	theme         config.Theme
-	git           libgit.Git
-	host          githost.Host
+	defaultBranch     string
+	segments          []segment
+	theme             config.Theme
+	git               libgit.Git
+	host              githost.Host
+	branchesToCleanup []string
 }
 
-func newSample(git libgit.Git, host githost.Host, segments []segment, theme config.Theme, defaultBranch string) Sample {
+func newSample(
+	git libgit.Git,
+	host githost.Host,
+	segments []segment,
+	branchesToCleanup []string,
+	theme config.Theme,
+	defaultBranch string,
+) Sample {
 	return Sample{
-		git:           git,
-		host:          host,
-		segments:      segments,
-		theme:         theme,
-		defaultBranch: defaultBranch,
+		git:               git,
+		host:              host,
+		segments:          segments,
+		branchesToCleanup: branchesToCleanup,
+		theme:             theme,
+		defaultBranch:     defaultBranch,
 	}
 }
 
@@ -130,7 +143,7 @@ func (s Sample) Cleanup() error {
 		return err
 	}
 
-	return s.cleanupBranches(remote.URLPath, "myfirststack", "myfirststack-pt2", "mysecondstack")
+	return s.cleanupBranches(remote.URLPath, s.branchesToCleanup...)
 }
 
 func (s Sample) cleanupBranches(repoPath string, names ...string) error {
