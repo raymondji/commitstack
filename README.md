@@ -199,7 +199,7 @@ Under the hood, commitstack therefore thinks about stacks as "stacks of commits"
 
 Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and otherwise ignore the commit.
 
-commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). When it encounters a structure it can't parse, it tries to print a helpful error and otherwise ignore the incompatible commit(s).
+commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). If commitstack encounters a structure it can't parse (e.g. merge commits), it tries to print a helpful error and otherwise ignores the incompatible commit(s).
 
 ## Attribution
 
