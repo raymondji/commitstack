@@ -21,6 +21,9 @@ type Git interface {
 	GetRootDir() (string, error)
 	CommitFixup(commitHash string, add bool) (string, error)
 	CommitEmpty(msg string) error
+	Commit(msg string) error
+	Add() error
+	Tag(tag string) error
 	GetCurrentBranch() (string, error)
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
@@ -215,6 +218,30 @@ func (g git) CommitEmpty(msg string) error {
 	_, err := exec.Run("git", exec.WithArgs("commit", "--allow-empty", "-m", msg))
 	if err != nil {
 		return fmt.Errorf("failed to commit, err: %v", err)
+	}
+	return nil
+}
+
+func (g git) Commit(msg string) error {
+	_, err := exec.Run("git", exec.WithArgs("commit", "-a", "-m", msg))
+	if err != nil {
+		return fmt.Errorf("failed to commit, err: %v", err)
+	}
+	return nil
+}
+
+func (g git) Add(msg string) error {
+	_, err := exec.Run("git", exec.WithArgs("add", "."))
+	if err != nil {
+		return fmt.Errorf("failed to git add, err: %v", err)
+	}
+	return nil
+}
+
+func (g git) Tag(tag string) error {
+	_, err := exec.Run("git", exec.WithArgs("tag", tag))
+	if err != nil {
+		return fmt.Errorf("failed to tag, err: %v", err)
 	}
 	return nil
 }
