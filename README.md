@@ -8,7 +8,7 @@ https://graphite.dev/guides/stacked-diffs has a good overview on what it is and 
 
 ## Why use a dedicated tool for stacking?
 
-Stacking with just Git is totally doable but combersome.
+Stacking with just Git is totally doable but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
@@ -187,7 +187,7 @@ Your branch is up to date with 'origin/main'.
 
 ## How does it work?
 
-When working with Git we tend to think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, commitstack tries to frame stacks in terms of "stacks of branches".
+When working with Git we often think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, commitstack tries to frame stacks in terms of "stacks of branches".
 
 However, branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
 - Multiple branches can point to the same commit
