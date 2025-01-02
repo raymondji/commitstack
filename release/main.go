@@ -41,6 +41,10 @@ func main() {
 		fmt.Printf("Error tagging commit: %v\n", err)
 		os.Exit(1)
 	}
+	if err := git.PushTag(tag); err != nil {
+		fmt.Printf("Error tagging commit: %v\n", err)
+		os.Exit(1)
+	}
 
 	fmt.Println("Done")
 }
