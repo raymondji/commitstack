@@ -27,7 +27,7 @@ brew install go
 
 To install commitstack:
 ```
-go install github.com/raymondji/commitstack/cmd/git-stack@latest
+go install github.com/raymondji/commitstack/cmd/git-stack@newest
 ```
 
 ## Getting started
@@ -151,7 +151,6 @@ Pulling from main into the current stack myfirststack-pt2
 Current branch myfirststack-pt2 is up to date.
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Great, we're getting the hang of this!           │
 │ One stack is nice, but how do we deal with       │
 │ multiple stacks?                                 │
 │ Let's head back to our default branch and create │
