@@ -19,7 +19,7 @@ The first reason is that while Github users are [spoiled](https://github.com/avi
 - If you need Gitlab support only, the two options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one suits your preferences more.
 - If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
 
-The second reason is that if you already know how to stack branches using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
+The second reason is that if you already know how to stack branches using just Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your workflow. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
 
 ## Installation
 
