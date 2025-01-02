@@ -203,5 +203,5 @@ commitstack doesn't persist any additional state to keep track of your stacks - 
 
 ## Attribution
 
-Some code is adapted from sections of https://github.com/aviator-co/av (MIT license). A copy of av's license is included at `sources/av/LICENSE`.
+Some code is adapted from sections of https://github.com/aviator-co/av (MIT license). A copy of av's license is included at `attribution/av/LICENSE`.
 - `exec.go` is adapted from https://github.com/aviator-co/av/blob/fbcb5bfc0f19c8a7924e309cb1e86678a9761daa/internal/git/git.go#L178
