@@ -4,7 +4,9 @@ CLI to facilitate [stacking merge requests](https://www.stacking.dev/) in git. I
 
 ## Why commitstack over `<other stacking tool>`?
 
-The first reason is that if you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of. If you just need Gitlab support, the only options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one resonates with you more. If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
+The first reason is that if you want a stacking tool that integrates with both Gitlab and Github, commitstack is the only option I'm aware of.
+- If you just need Gitlab support, the only options I'm aware of are the `glab stack` CLI command and commitstack. The user experience is pretty different between them, so see which one resonates with you more.
+- If you use another Git hosting platform, commitstack is designed to (hopefully) be easily extensible for additional hosting platforms.
 
 The second reason is that if you already know how to stack MRs/PRs using native Git (e.g. with `git rebase --update-refs`), commitstack should be easy to learn and integrate into your mental model. It's designed to lean on existing Git concepts/functionality as much as possible, while automating many of the cumbersome parts.
 
