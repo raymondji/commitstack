@@ -45,11 +45,11 @@ func main() {
 		fmt.Printf("Error tagging commit: %v\n", err)
 		os.Exit(1)
 	}
-	if err := git.TagForce("newest"); err != nil {
+	if err := git.TagForce("current"); err != nil {
 		fmt.Printf("Error tagging commit: %v\n", err)
 		os.Exit(1)
 	}
-	if err := git.PushTagForce("newest"); err != nil {
+	if err := git.PushTagForce("current"); err != nil {
 		fmt.Printf("Error tagging commit: %v\n", err)
 		os.Exit(1)
 	}
