@@ -193,13 +193,13 @@ Your branch is up to date with 'origin/main'.
 
 ## How does it work?
 
-Branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
+When working with Git we tend to think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, commitstack tries to frame stacks in terms of "stacks of branches".
+
+However, branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
 - Multiple branches can point to the same commit
 - Branches don't inherently have a notion of parent branches or children branches
 
-However, when working with Git we tend to think in terms of branches, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, commitstack tries to frame stacks in terms of branches.
-
-Under the hood though, commitstack thinks about stacks as "stacks of commits", not "stacks of branches". Hence the name. :) Commits serve this purpose much better than branches because:
+Under the hood, commitstack therefore thinks about stacks as "stacks of commits", not "stacks of branches". Hence the name. :) Commits serve this purpose much better than branches because:
 - Each commit is a unique entity
 - Commits do inherently have a notion of parent commits and children commits
 
