@@ -7,10 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addCmd = &cobra.Command{
-	Use:   "add [branch_name]",
-	Short: "Start a new stack or add a new branch onto the current stack",
-	Long:  "Start a new stack if not currently in one, or add a new branch onto the current stack",
+var appendCmd = &cobra.Command{
+	Use:   "append [branch_name]",
+	Short: "Checkout a new branch and create an initial commit",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()

@@ -24,7 +24,7 @@ func init() {
 
 var learnCmd = &cobra.Command{
 	Use:   "learn",
-	Short: "Prints sample commands to learn how to use Commitstack",
+	Short: "Learn how to use Commitstack through interactive tutorials",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {

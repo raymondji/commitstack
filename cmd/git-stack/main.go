@@ -13,7 +13,7 @@ func main() {
 
 	rootCmd.AddCommand(
 		initCmd,
-		addCmd,
+		appendCmd,
 		switchCmd,
 		pushCmd,
 		pullCmd,
