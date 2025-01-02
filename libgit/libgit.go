@@ -27,7 +27,7 @@ type Git interface {
 	GetCurrentBranch() (string, error)
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
-	PushTag(tag string) error
+	PushTagForce(tag string) error
 	Fetch(repo string, refspec string) error
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string) error
@@ -272,8 +272,8 @@ func (g git) PushForceWithLease(branchName string) (string, error) {
 	return fmt.Sprintf("force pushing branch %s\n%s", branchName, output.Stdout), nil
 }
 
-func (g git) PushTag(tag string) error {
-	_, err := exec.Run("git", exec.WithArgs("push", "origin", tag))
+func (g git) PushTagForce(tag string) error {
+	_, err := exec.Run("git", exec.WithArgs("push", "--force", "origin", tag))
 	if err != nil {
 		return fmt.Errorf("failed to push tag to origin, tag: %v, err: %v", tag, err)
 	}
