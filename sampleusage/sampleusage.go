@@ -15,7 +15,7 @@ import (
 func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme config.Theme) Sample {
 	segments := parseLines(
 		multiline(
-			"Welcome to commitstack!",
+			"Welcome to Commitstack!",
 			"Here is a quick tutorial on how to use the CLI.",
 		),
 		"Let's start things off on the default branch:",
@@ -32,7 +32,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		shellCmd("echo 'have a kitkat' >> myfirststack.txt"),
 		shellCmd("git commit -am 'kitkat'"),
 		multiline(
-			"So far everything we've done has been normal Git. Let's see what commitstack can do for us already.",
+			"So far we've only used standard Git commands. Let's see what Commitstack can do for us already.",
 			"",
 			"Our current stack has two branches in it, which we can see with:",
 		),
@@ -41,7 +41,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		shellCmd(`git stack log`),
 		multiline(
 			"We can easily push all branches in the stack up as separate PRs.",
-			"commitstack automatically sets the target branches for you.",
+			"Commitstack automatically sets the target branches for you.",
 		),
 		shellCmd(`git stack push`),
 		"We can quickly view the PRs in the stack using:",
