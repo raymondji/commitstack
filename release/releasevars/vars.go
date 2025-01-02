@@ -1,5 +1,5 @@
 package releasevars
 
 const (
-	Version = "placeholer"
+	Version = "0.2.0"
 )

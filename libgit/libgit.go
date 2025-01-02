@@ -230,7 +230,7 @@ func (g git) Commit(msg string) error {
 	return nil
 }
 
-func (g git) Add(msg string) error {
+func (g git) Add() error {
 	_, err := exec.Run("git", exec.WithArgs("add", "."))
 	if err != nil {
 		return fmt.Errorf("failed to git add, err: %v", err)

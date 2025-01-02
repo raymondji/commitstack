@@ -47,7 +47,7 @@ func main() {
 
 func generateGoFile(tag string) error {
 	// Load the template file
-	tmplPath := "release/releasevars/release.go.tmpl"
+	tmplPath := "release/releasevars/vars.go.tmpl"
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
@@ -65,7 +65,7 @@ func generateGoFile(tag string) error {
 		return fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	outputPath := "release/releasevars/release.go"
+	outputPath := "release/releasevars/vars.go"
 	err = os.WriteFile(outputPath, buf.Bytes(), 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
