@@ -1,6 +1,7 @@
 package sampleusage_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/raymondji/commitstack/config"
@@ -11,6 +12,10 @@ import (
 )
 
 func TestBasics(t *testing.T) {
+	if isCI() {
+		t.Skip()
+	}
+
 	git, err := libgit.New()
 	require.NoError(t, err)
 
@@ -31,4 +36,8 @@ func TestBasics(t *testing.T) {
 	require.NoError(t, err)
 	err = basics.Execute()
 	require.NoError(t, err)
+}
+
+func isCI() bool {
+	return os.Getenv("GITHUB_ACTIONS") == "true"
 }
