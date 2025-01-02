@@ -21,9 +21,9 @@ One reason you might want to use Commitstack is if you need Gitlab support. Whil
 
 Another reason to use Commitstack is if you want a tool that still feels like "just Git" at the end of the day.
 - It's designed to lean on existing Git concepts and functionality as much as possible, and provide a minimal set of abstractions on top.
-- The goal is to make Commitstack easy to learn and integrate into your existing Git workflow.
+- The goal is to make Commitstack easy to learn and integrate into existing Git workflows.
 
-On the flipside, here's one reason Commitstack might not be right for you. Commitstack depends heavily on `git rebase`, so if you don't enjoy `git rebase` workflows, another tool might be a better fit.
+On the flipside, one reason Commitstack might not be a good fit is if you prefer not to use `git rebase`. Commitstack doesn't provide much machinery for editing branches in a stack, since `git rebase` already handles that well.
 
 ## Installation
 
