@@ -1,4 +1,4 @@
-# commitstack
+# Commitstack
 
 CLI to facilitate [stacking pull requests](https://www.stacking.dev/) in git. Integrates with Gitlab and Github.
 
@@ -12,13 +12,13 @@ Stacking natively with Git is totally doable, but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
-## Why commitstack over `<other stacking tool>`?
+## Why Commitstack over `<other stacking tool>`?
 
 The first reason is that while Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
-- If you want a stacking tool that integrates with both Gitlab and Github, commitstack is the one of the few options I'm aware of. Another one is [git-spice](https://github.com/abhinav/git-spice).
-- If you need Gitlab support only, the most prominent option seems to be the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. The user experience is pretty different between `glab stack` and commitstack, so see which one suits your preferences.
+- If you want a stacking tool that integrates with both Gitlab and Github, Commitstack is the one of the few options I'm aware of. Another one is [git-spice](https://github.com/abhinav/git-spice).
+- If you need Gitlab support only, the most prominent option seems to be the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. The user experience is pretty different between `glab stack` and Commitstack, so see which one suits your preferences.
 
-The second reason is that if you already stack branches natively using Git and/or know your way around `git rebase`, you might really like the user experience of commitstack. It's designed to lean on existing Git concepts/functionality as much as possible, so it should be easy to learn and integrate into your Git workflow.
+The second reason is that if you already stack branches natively using Git and/or know your way around `git rebase`, you might really like the user experience of Commitstack. It's designed to lean on existing Git concepts/functionality as much as possible, so it should be easy to learn and integrate into your Git workflow.
 
 ## Installation
 
@@ -27,22 +27,22 @@ Go version >= 1.22 is required. To install Go on macOS:
 brew install go 
 ```
 
-To install commitstack:
+To install Commitstack:
 ```
 go install github.com/raymondji/commitstack/cmd/git-stack@latest
 ```
 
 ## Getting started
 
-The commitstack binary is named `git-stack`. Git offers a handy trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so commitstack can be invoked as `git stack`.
+The Commitstack binary is named `git-stack`. Git offers a handy trick allowing binaries named `git-<foo>` to be invoked as git subcommands, so Commitstack can be invoked as `git stack`.
 
-commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
+Commitstack needs a Gitlab/Github personal access token in order to manage MRs/PRs for you. To set this up:
 ```
 cd ~/your/git/repo
 git stack init
 ```
 
-To learn how to use commitstack, you can access an interactive tutorial built-in to the CLI:
+To learn how to use Commitstack, you can access an interactive tutorial built-in to the CLI:
 ```
 git stack learn
 ```
@@ -54,7 +54,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 ```
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Welcome to commitstack!                          │
+│ Welcome to Commitstack!                          │
 │ Here is a quick tutorial on how to use the CLI.  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
@@ -95,7 +95,7 @@ Your branch is up to date with 'origin/main'.
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ So far everything we've done has been normal     │
-│ Git. Let's see what commitstack can do for us    │
+│ Git. Let's see what Commitstack can do for us    │
 │ already.                                         │
 │                                                  │
 │ Our current stack has two branches in it, which  │
@@ -121,7 +121,7 @@ Branches in stack:
 │                                                  │
 │ We can easily push all branches in the stack up  │
 │ as separate PRs.                                 │
-│ commitstack automatically sets the target        │
+│ Commitstack automatically sets the target        │
 │ branches for you.                                │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
@@ -186,19 +186,19 @@ Your branch is up to date with 'origin/main'.
 
 ## How does it work?
 
-When working with Git we often think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, commitstack tries to frame stacks in terms of "stacks of branches".
+When working with Git we often think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, Commitstack tries to frame stacks in terms of "stacks of branches".
 
 However, branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
 - Multiple branches can point to the same commit
 - Branches don't inherently have a notion of parent branches or children branches
 
-Under the hood, commitstack therefore thinks about stacks as "stacks of commits", not "stacks of branches". Hence the name. :) Commits serve this purpose much better than branches because:
+Under the hood, Commitstack therefore thinks about stacks as "stacks of commits", not "stacks of branches". Hence the name. :) Commits serve this purpose much better than branches because:
 - Each commit is a unique entity
 - Commits do inherently have a notion of parent commits and children commits
 
-Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and otherwise ignore the commit.
+Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, Commitstack takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and otherwise ignore the commit.
 
-commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). If commitstack encounters a structure it can't parse (e.g. merge commits), it tries to print a helpful error and otherwise ignores the incompatible commit(s).
+Commitstack doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). If Commitstack encounters a structure it can't parse (e.g. merge commits), it tries to print a helpful error and otherwise ignores the incompatible commit(s).
 
 ## Attribution
 
