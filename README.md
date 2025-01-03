@@ -15,14 +15,13 @@ Stacking natively with Git is completely doable, but cumbersome.
 ## How does Commitstack compare to `<other stacking tool>`?
 
 One reason you might want to use Commitstack is if you need Gitlab support. While Github users are [spoiled](https://graphite.dev/) [for](https://github.com/aviator-co/av) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
-- If you want a stacking tool that integrates with both Gitlab and Github, Commitstack is one of the few options I'm aware of. Others include [git-town](https://github.com/git-town/git-town) and [git-spice](https://github.com/abhinav/git-spice).
-- If you're okay with Gitlab support only, the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command is probably the most prominent option.
-- These options are all pretty different in terms of the user experience and feature set they provide; see which one fits your needs the best. 
+- The few options I'm aware of include Commitstack, [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. Note that the latter is Gitlab only.
+- These options all work pretty differently and have different feature sets; see which one fits your needs the best.
 
-Another reason you might choose Commitstack is if you want a tool that doesn't try to abstract away Git.
-- Commitstack is designed to let existing Git concepts and functionality do the heavy lifting, with minimal abstractions on top.
-- To borrow a popular phrase, Commitstack wants to be a Git [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
-- It has only five core commands: `list`, `show` and `log` to view your stacks, `rebase` to modify them and `push` to sync them to Gitlab/Github.
+Another reason you might use Commitstack is if you're mostly happy with stacking natively in Git, and just want something minimal to fill in the gaps.
+- Commitstack is designed to let existing Git concepts and functionality do the heavy lifting, with minimal new commands or abstractions to learn.
+- To borrow a popular phrase: Commitstack wants to be a Git [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
+- It only has five core commands: `list`, `show` and `log` to view your stacks, `rebase` to modify them and `push` to sync them to Gitlab or Github.
 
 On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack uses `git rebase --update-refs` internally, and users will need to be comfortable doing so as well.
 
