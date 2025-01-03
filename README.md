@@ -22,7 +22,7 @@ One reason you might want to use Commitstack is if you need Gitlab support. Whil
 Another reason you might choose Commitstack is if you want a tool that doesn't try to abstract away Git.
 - Commitstack is designed to let existing Git concepts and functionality do the heavy lifting, with minimal abstractions on top.
 - In popular parlance, Commitstack wants to be a [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
-- It has only five core subcommands: `list`, `log` and `show` to view your stacks, `rebase` to modify them and `push` to sync them to Gitlab/Github.
+- It has only five core commands: `list`, `log` and `show` to view your stacks, `rebase` to modify them and `push` to sync them to Gitlab/Github.
 
 On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack uses `git rebase --update-refs` internally, and users will need to be comfortable doing so as well.
 
