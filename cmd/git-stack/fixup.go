@@ -18,7 +18,7 @@ func init() {
 }
 
 var fixupCmd = &cobra.Command{
-	Use:   "fixup",
+	Use:   "fixup [branch]",
 	Short: "Create a commit to fixup a branch in the current stack",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -43,7 +43,7 @@ var pushCmd = &cobra.Command{
 			return err
 		}
 		if len(s.ValidationErrors) > 0 {
-			fmt.Printf("the current stack %s is invalid, please resolve errors and try again\n", s.Name())
+			fmt.Printf("the current stack %s is invalid, please resolve errors\n", s.Name())
 			printProblems(inference)
 			return nil
 		}

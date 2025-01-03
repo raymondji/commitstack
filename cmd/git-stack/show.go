@@ -24,8 +24,8 @@ func init() {
 }
 
 var showCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show information about the current stack",
+	Use:   "show [stack]",
+	Short: "Show information about the current or specified stack",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if showPRsFlag && showLogFlag {
@@ -160,10 +160,14 @@ var showCmd = &cobra.Command{
 					for _, b := range c.LocalBranches {
 						if pr, ok := prsBySrcBranch[b]; ok {
 							fmt.Printf("  └── %s\n", pr.WebURL)
+						} else {
+							fmt.Printf("  └── Not created yet\n")
 						}
 					}
 
-					fmt.Println()
+					if i != len(stack.Commits)-1 {
+						fmt.Println()
+					}
 				}
 			}
 		}

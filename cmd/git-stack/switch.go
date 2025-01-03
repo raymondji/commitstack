@@ -17,7 +17,7 @@ func init() {
 }
 
 var switchCmd = &cobra.Command{
-	Use:   "switch",
+	Use:   "switch [target]",
 	Short: "Switch stacks or branches within the current stack",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -81,7 +81,6 @@ var switchCmd = &cobra.Command{
 					huh.NewSelect[string]().
 						Title(formTitle).
 						Options(opts...).
-						Filtering(true).
 						Value(&target),
 				),
 			)
