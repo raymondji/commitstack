@@ -122,7 +122,7 @@ Branches in stack:
 │ can see with:                                    │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack log
+> git stack show --log
 * 5475cd6 (myfirststack-pt2) kitkat
   c5a18db break
   c538f6e (myfirststack) hello world
