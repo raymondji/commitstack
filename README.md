@@ -201,7 +201,7 @@ However, branches in Git don't inherently make sense as belonging to a "stack", 
 - Multiple branches can point to the same commit
 - Branches don't inherently have a notion of parent branches or children branches
 
-Under the hood, `git stack` therefore thinks about stacks as "stacks of commits", not "stacks of branches". Hence the name. :) Commits serve this purpose much better than branches because:
+Under the hood, `git stack` therefore thinks about stacks as "stacks of commits", not "stacks of branches". Commits serve this purpose much better than branches because:
 - Each commit is a unique entity
 - Commits do inherently have a notion of parent commits and children commits
 
