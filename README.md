@@ -23,7 +23,7 @@ Another reason you might use Commitstack is if you're mostly happy with stacking
 - To borrow a popular phrase: Commitstack wants to be a Git [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
 - It only has five core commands: `list`, `show` and `log` to view your stacks, `rebase` to modify them and `push` to sync them to Gitlab or Github.
 
-On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack uses it internally, and users will need to be comfortable doing so as well.
+On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack uses it internally, and users will need to be comfortable with it as well.
 
 ## Installation
 
