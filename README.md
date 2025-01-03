@@ -1,6 +1,6 @@
 # git stack
 
-A minimal Git CLI subcommand for stacking pull requests. Works with Gitlab and Github.
+A minimal Git CLI subcommand for managing stacked branches/pull requests. Works with Gitlab and Github.
 
 Core commands:
 - `git stack list`: list all stacks
@@ -23,11 +23,11 @@ One reason you might want to use `git stack` is if you want Gitlab support. I wa
 - Besides `git stack`, existing options include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. Note that the latter is Gitlab only.
 - They all work pretty differently and have different feature sets; see which one fits your needs the best.
 
-Another reason you might opt for `git stack` is if you prefer a tool that feels like a small extension to Git, rather than a whole new way of doing things.
+Another reason you might opt for `git stack` is if you want a tool that feels like a small extension to Git, rather than a whole new way of doing things.
 - `git stack` is designed to let existing Git concepts and functionality do the heavy lifting, with minimal new commands or abstractions to learn.
 - `git stack` is also stateless, so there's no external state that can get out of sync with Git. `git stack` instead infers stacks from the structure of your commits and branches.
 
-On the flipside, one reason `git stack` might not be a good fit is if you prefer to avoid `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches, and `git stack` doesn't provide any alternative mechanisms. Moreover, `git stack` requires a linear commit histories in order to infer stacks.
+On the flipside, one reason `git stack` might not be a good fit is if you prefer to avoid `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches, and `git stack` doesn't provide any alternative mechanisms. Moreover, `git stack` requires maintaining linear commit histories in your feature branches in order to infer stacks.
 
 ## Installation
 
