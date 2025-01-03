@@ -1,6 +1,10 @@
 package slices
 
-import "slices"
+import (
+	"slices"
+
+	"golang.org/x/exp/maps"
+)
 
 func ToMap[K comparable, V any](s []V, keyFunc func(V) K) map[K]V {
 	m := map[K]V{}
@@ -27,4 +31,12 @@ func IndexFunc[S ~[]E, E any](s S, f func(E) bool) int {
 
 func Clone[S ~[]E, E any](s S) S {
 	return slices.Clone(s)
+}
+
+func Unique[T comparable](s []T) []T {
+	m := map[T]struct{}{}
+	for _, v := range s {
+		m[v] = struct{}{}
+	}
+	return maps.Keys(m)
 }

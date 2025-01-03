@@ -21,11 +21,18 @@ type Commit struct {
 }
 
 type DivergenceError struct {
-	StackNames []string
+	StackName       string
+	OtherStackNames []string
 }
 
 func (e DivergenceError) Error() string {
-	return fmt.Sprintf("Stacks %s have diverged", strings.Join(e.StackNames, ", "))
+	assert(len(e.OtherStackNames) > 0, "other stack names must not be empty")
+
+	if len(e.OtherStackNames) == 1 {
+		return fmt.Sprintf("Stack %s has diverged from stack %s", e.StackName, e.OtherStackNames[0])
+	} else {
+		return fmt.Sprintf("Stack %s has diverged from stacks %s", e.StackName, strings.Join(e.OtherStackNames, ", "))
+	}
 }
 
 type BranchCollisionError struct {
@@ -35,8 +42,8 @@ type BranchCollisionError struct {
 
 func (e BranchCollisionError) Error() string {
 	return fmt.Sprintf(
-		"Branches %v point to the same commit",
-		strings.Join(e.Branches, ", "))
+		"Stack %s contains multiple branches (%v) pointing to the same commit",
+		e.StackName, strings.Join(e.Branches, ", "))
 }
 
 type MergeCommitError struct {
@@ -45,10 +52,14 @@ type MergeCommitError struct {
 }
 
 func (e MergeCommitError) Error() string {
-	if len(e.ContainingBranches) > 0 {
-		return fmt.Sprintf("Encountered merge commit %v in branches %v", e.MergeCommitHash, strings.Join(e.ContainingBranches, ", "))
+	switch len(e.ContainingBranches) {
+	case 0:
+		return fmt.Sprintf("Merge commit %v", e.MergeCommitHash)
+	case 1:
+		return fmt.Sprintf("Merge commit %v is present in branch %v", e.MergeCommitHash, e.ContainingBranches[0])
+	default:
+		return fmt.Sprintf("Merge commit %v is present in branches %v", e.MergeCommitHash, strings.Join(e.ContainingBranches, ", "))
 	}
-	return fmt.Sprintf("Encountered merge commit %v", e.MergeCommitHash)
 }
 
 type Git interface {
@@ -136,14 +147,19 @@ func InferStacks(git Git, log libgit.Log) (InferenceResult, error) {
 
 		// Validate the stacks
 		if len(stacks) != 1 {
-			err := DivergenceError{}
-			for _, s := range stacks {
-				err.StackNames = append(err.StackNames, s.Name())
-			}
-			sort.Strings(err.StackNames)
-
 			for i, s := range stacks {
-				s.ValidationErrors = append(s.ValidationErrors, err)
+				var otherStackNames []string
+				for j, s := range stacks {
+					if i == j {
+						continue
+					}
+					otherStackNames = append(otherStackNames, s.Name())
+				}
+
+				s.ValidationErrors = append(s.ValidationErrors, DivergenceError{
+					StackName:       s.Name(),
+					OtherStackNames: otherStackNames,
+				})
 				stacks[i] = s
 			}
 		}

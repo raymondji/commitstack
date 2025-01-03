@@ -8,7 +8,6 @@ import (
 	"github.com/raymondji/git-stack-cli/config"
 	"github.com/raymondji/git-stack-cli/githost"
 	"github.com/raymondji/git-stack-cli/libgit"
-	"golang.org/x/exp/maps"
 )
 
 type deps struct {
@@ -64,26 +63,24 @@ Unmerged paths:
         both added:      src/module2.py
 */
 func printProblems(inference commitstack.InferenceResult) {
+	validationErrMessages := []string{}
+	for _, s := range inference.InferredStacks {
+		for _, err := range s.ValidationErrors {
+			validationErrMessages = append(validationErrMessages, err.Error())
+		}
+	}
+	sort.Strings(validationErrMessages)
+	fmt.Println()
+	fmt.Println("Invalid stacks:")
+	for _, msg := range validationErrMessages {
+		fmt.Printf("  %s\n", msg)
+	}
+
 	if len(inference.InferenceErrors) > 0 {
 		fmt.Println()
-		fmt.Println("Unable to infer all stacks:")
+		fmt.Println("Stack inference is ignoring incompatible commits:")
 		for _, err := range inference.InferenceErrors {
 			fmt.Printf("  %s\n", err.Error())
 		}
-	}
-
-	var validationErrMessages map[string]struct{}
-	for _, s := range inference.InferredStacks {
-		for _, err := range s.ValidationErrors {
-			validationErrMessages[err.Error()] = struct{}{}
-		}
-	}
-	uniqueValidationErrMessages := maps.Keys(validationErrMessages)
-	sort.Strings(uniqueValidationErrMessages)
-
-	fmt.Println()
-	fmt.Println("Invalid stacks:")
-	for _, msg := range uniqueValidationErrMessages {
-		fmt.Printf("  %s\n", msg)
 	}
 }
