@@ -38,16 +38,18 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		defer func() {
-			printProblems(inference)
-		}()
 		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
 		if err != nil {
 			return err
 		}
 		if len(s.ValidationErrors) > 0 {
-			return fmt.Errorf("cannot push stack, please resolve validation errors")
+			fmt.Println("cannot push stack, please resolve validation errors")
+			printProblems(inference)
+			return nil
 		}
+		defer func() {
+			printProblems(inference)
+		}()
 
 		wantTargets := map[string]string{}
 		branches, err := s.UniqueBranches()
