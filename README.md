@@ -1,6 +1,11 @@
-# Commitstack
+# git-stack-cli
 
-CLI for stacking pull requests in Gitlab and Github.
+Minimal CLI for stacking pull requests in git. Works with Gitlab and Github.
+
+Core commands:
+- `git stack list`: view all your stacks
+- `git stack show`: view branches in a stack
+- `git stack push`: push branches in the current stack to Gitlab/Github and open MRs/PRs
 
 ## What is stacking?
 
