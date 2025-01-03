@@ -1,6 +1,8 @@
 package slices
 
-import "slices"
+import (
+	"slices"
+)
 
 func ToMap[K comparable, V any](s []V, keyFunc func(V) K) map[K]V {
 	m := map[K]V{}
@@ -23,4 +25,8 @@ func Filter[T any](s []T, predicate func(T) bool) []T {
 
 func IndexFunc[S ~[]E, E any](s S, f func(E) bool) int {
 	return slices.IndexFunc(s, f)
+}
+
+func Clone[S ~[]E, E any](s S) S {
+	return slices.Clone(s)
 }

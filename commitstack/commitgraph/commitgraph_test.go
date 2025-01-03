@@ -171,11 +171,7 @@ func TestCompute(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			fg := &FakeGit{
-				Log: c.log,
-			}
-
-			got, err := commitgraph.Compute(fg, "main")
+			got, err := commitgraph.Compute(c.log)
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 		})
@@ -190,12 +186,4 @@ func toDAG(nodes ...commitgraph.Node) commitgraph.DAG {
 		dag.Nodes[n.Hash] = n
 	}
 	return dag
-}
-
-type FakeGit struct {
-	Log libgit.Log
-}
-
-func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
-	return fg.Log, nil
 }

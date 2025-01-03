@@ -18,8 +18,8 @@ func init() {
 }
 
 var fixupCmd = &cobra.Command{
-	Use:   "fixup",
-	Short: "Create a commit to fixup a branch in the stack",
+	Use:   "fixup [branch]",
+	Short: "Create a commit to fixup a branch in the current stack",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
@@ -28,11 +28,19 @@ var fixupCmd = &cobra.Command{
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
+		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
 		}
-		stack, err := stacks.GetCurrent()
+		stacks, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		currBranch, err := git.GetCurrentBranch()
+		if err != nil {
+			return err
+		}
+		stack, err := commitstack.GetCurrent(stacks.InferredStacks, currBranch)
 		if err != nil {
 			return err
 		}
@@ -42,8 +50,8 @@ var fixupCmd = &cobra.Command{
 			branchToFix = args[0]
 		} else {
 			var opts []huh.Option[string]
-			for _, b := range stack.LocalBranches() {
-				opts = append(opts, huh.NewOption(b.Name, b.Name))
+			for _, b := range stack.AllBranches() {
+				opts = append(opts, huh.NewOption(b, b))
 			}
 			form := huh.NewForm(
 				huh.NewGroup(

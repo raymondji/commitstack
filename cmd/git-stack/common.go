@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/config"
@@ -61,11 +62,26 @@ Unmerged paths:
         both modified:   src/module1.py
         both added:      src/module2.py
 */
-func printProblems(stacks commitstack.Stacks) {
-	if len(stacks.Errors) > 0 {
+func printProblems(inference commitstack.InferenceResult) {
+	validationErrMessages := []string{}
+	for _, s := range inference.InferredStacks {
+		for _, err := range s.ValidationErrors {
+			validationErrMessages = append(validationErrMessages, err.Error())
+		}
+	}
+	sort.Strings(validationErrMessages)
+	if len(validationErrMessages) > 0 {
 		fmt.Println()
-		fmt.Println("Unable to infer all stacks:")
-		for _, err := range stacks.Errors {
+		fmt.Println("Invalid stacks:")
+		for _, msg := range validationErrMessages {
+			fmt.Printf("  %s\n", msg)
+		}
+	}
+
+	if len(inference.InferenceErrors) > 0 {
+		fmt.Println()
+		fmt.Println("Stack inference is ignoring incompatible commits:")
+		for _, err := range inference.InferenceErrors {
 			fmt.Printf("  %s\n", err.Error())
 		}
 	}

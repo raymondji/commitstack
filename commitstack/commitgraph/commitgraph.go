@@ -6,19 +6,15 @@ import (
 	"github.com/raymondji/git-stack-cli/libgit"
 )
 
-type Git interface {
-	LogAll(notReachableFrom string) (libgit.Log, error)
-}
-
 type Node struct {
 	Author        string
 	Subject       string
 	Date          string
 	Hash          string
 	LocalBranches []string
-	// Keys are hashes. All keys must be present in the DAG.
+	// Keys are hashes. All keys must be present in the DirectedAcyclicGraph.
 	Children map[string]struct{}
-	// Keys are hashes. All keys must be present in the DAG.
+	// Keys are hashes. All keys must be present in the DirectedAcyclicGraph.
 	Parents map[string]struct{}
 }
 
@@ -31,12 +27,7 @@ type DAG struct {
 	Nodes map[string]Node
 }
 
-func Compute(git Git, defaultBranch string) (DAG, error) {
-	log, err := git.LogAll(defaultBranch)
-	if err != nil {
-		return DAG{}, err
-	}
-
+func Compute(log libgit.Log) (DAG, error) {
 	dag := DAG{
 		Nodes: map[string]Node{},
 	}

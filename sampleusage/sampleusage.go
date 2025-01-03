@@ -38,7 +38,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		),
 		shellCmd(`git stack show`),
 		"Our current stack has 3 commits in it, which we can see with:",
-		shellCmd(`git stack log`),
+		shellCmd(`git stack show --log`),
 		multiline(
 			"We can easily push all branches in the stack up as separate PRs.",
 			"git stack automatically sets the target branches for you.",

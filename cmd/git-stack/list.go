@@ -17,23 +17,38 @@ var listCmd = &cobra.Command{
 		}
 		git, defaultBranch, theme := deps.git, deps.repoCfg.DefaultBranch, deps.theme
 
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
+		log, err := git.LogAll(defaultBranch)
+		if err != nil {
+			return err
+		}
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			printProblems(inference)
+		}()
 
-		for _, s := range stacks.Entries {
+		for _, s := range inference.InferredStacks {
 			var name string
-			if s.Current() {
+			if s.IsCurrent(currBranch) {
 				name = "* " + theme.PrimaryColor.Render(s.Name())
 			} else {
 				name = "  " + s.Name()
 			}
 
-			fmt.Printf("%s (%d branches)\n", name, len(s.LocalBranches()))
+			all := s.AllBranches()
+			if len(all) == 1 {
+				fmt.Printf("%s (1 branch)\n", name)
+			} else {
+				fmt.Printf("%s (%d branches)\n", name, len(s.AllBranches()))
+			}
 		}
 
-		printProblems(stacks)
 		return nil
 	},
 }

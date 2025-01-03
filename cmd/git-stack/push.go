@@ -17,7 +17,7 @@ import (
 
 var pushCmd = &cobra.Command{
 	Use:   "push",
-	Short: "Push all branches in the stack to the remote and create/update pull requests",
+	Short: "Push all branches in the current stack and create/update pull requests",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {
@@ -26,45 +26,61 @@ var pushCmd = &cobra.Command{
 		git, defaultBranch, host := deps.git, deps.repoCfg.DefaultBranch, deps.host
 
 		ctx := context.Background()
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
-		s, err := stacks.GetCurrent()
+		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
 		}
-		if s.Error != nil {
-			return fmt.Errorf("cannot push when stack has an error: %v", s.Error)
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
 		}
+		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+		if err != nil {
+			return err
+		}
+		if len(s.ValidationErrors) > 0 {
+			fmt.Printf("the current stack %s is invalid, please resolve errors\n", s.Name())
+			printProblems(inference)
+			return nil
+		}
+		defer func() {
+			printProblems(inference)
+		}()
 
 		wantTargets := map[string]string{}
-		lb := s.LocalBranches()
-		for i, b := range lb {
-			if i == len(lb)-1 {
-				wantTargets[b.Name] = defaultBranch
+		branches, err := s.SingleBranchPerCommit()
+		if err != nil {
+			return err
+		}
+		for i, b := range branches {
+			if i == len(branches)-1 {
+				wantTargets[b] = defaultBranch
 			} else {
-				wantTargets[b.Name] = lb[i+1].Name
+				wantTargets[b] = branches[i+1]
 			}
 		}
 
 		pushStack := func() ([]githost.PullRequest, error) {
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
-			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(deps.remote.URLPath, branch.Name)
+			prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
+				pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
 				} else if err != nil {
 					return githost.PullRequest{}, err
 				}
 
-				if pr.TargetBranch != wantTargets[branch.Name] {
+				if pr.TargetBranch != wantTargets[branch] {
 					return host.UpdatePullRequest(deps.remote.URLPath, githost.PullRequest{
 						ID:           pr.ID,
 						Title:        pr.Title,
 						Description:  pr.Description,
-						SourceBranch: branch.Name,
+						SourceBranch: branch,
 						TargetBranch: defaultBranch,
 					})
 				}
@@ -82,9 +98,8 @@ var pushCmd = &cobra.Command{
 			})
 
 			// Push all branches.
-			localBranches := s.LocalBranches()
-			err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch commitstack.Branch) error {
-				_, err := git.PushForceWithLease(branch.Name)
+			err = concurrent.ForEach(ctx, branches, func(ctx context.Context, branch string) error {
+				_, err := git.PushForceWithLease(branch)
 				return err
 			})
 			if err != nil {
@@ -94,16 +109,16 @@ var pushCmd = &cobra.Command{
 			// Create any new PRs
 			prs, err = concurrent.Map(
 				ctx,
-				localBranches,
-				func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-					if pr, ok := prsBySourceBranch[branch.Name]; ok {
+				branches,
+				func(ctx context.Context, branch string) (githost.PullRequest, error) {
+					if pr, ok := prsBySourceBranch[branch]; ok {
 						return pr, nil
 					}
 
 					return host.CreatePullRequest(deps.remote.URLPath, githost.PullRequest{
-						Title:        branch.Name,
-						SourceBranch: branch.Name,
-						TargetBranch: wantTargets[branch.Name],
+						Title:        branch,
+						SourceBranch: branch,
+						TargetBranch: wantTargets[branch],
 					})
 				})
 			if err != nil {
