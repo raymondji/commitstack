@@ -25,7 +25,7 @@ type Git interface {
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
 	Rebase(branch string, opts RebaseOpts) (string, error)
-	CreateBranch(name string) error
+	CreateBranch(name string, startPoint string) error
 	DeleteBranchIfExists(name string) error
 	Checkout(name string) error
 	LogAll(notReachableFrom string) (Log, error)
@@ -307,8 +307,8 @@ func (g git) GetBranchesContainingCommit(commitHash string) ([]string, error) {
 	return branches, nil
 }
 
-func (g git) CreateBranch(name string) error {
-	_, err := exec.Run("git", exec.WithArgs("checkout", "-b", name))
+func (g git) CreateBranch(name string, startPoint string) error {
+	_, err := exec.Run("git", exec.WithArgs("branch", name, startPoint))
 	if err != nil {
 		return fmt.Errorf("failed to create branch, err: %v", err)
 	}

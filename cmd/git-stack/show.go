@@ -15,10 +15,12 @@ import (
 )
 
 var showPRsFlag bool
+var showLogFlag bool
 
 func init() {
 	showCmd.Flags().BoolVar(&showPRsFlag, "prs", false, "Whether to show PRs for each branch")
 	showCmd.Flags().BoolVar(&showPRsFlag, "mrs", false, "Whether to show MRs for each branch. Alias for --prs")
+	showCmd.Flags().BoolVarP(&showLogFlag, "log", "l", false, "Whether to log all commits in the stack")
 }
 
 var showCmd = &cobra.Command{
@@ -26,6 +28,10 @@ var showCmd = &cobra.Command{
 	Short: "Show information about the current stack",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if showPRsFlag && showLogFlag {
+			return fmt.Errorf("--log and --prs are incompatible")
+		}
+
 		deps, err := initDeps()
 		if err != nil {
 			return err
@@ -106,36 +112,59 @@ var showCmd = &cobra.Command{
 		if len(args) == 0 {
 			fmt.Printf("On stack %s\n", stack.Name())
 		}
-		fmt.Println("Branches in stack:")
-		for i, c := range stack.Commits {
-			var prefix, name, suffix string
-			switch len(c.LocalBranches) {
-			case 0:
-				continue
-			case 1:
-				name = c.LocalBranches[0]
-			default:
-				name = fmt.Sprintf("%s", strings.Join(c.LocalBranches, ", "))
-			}
-			if i == 0 {
-				suffix = "(top)"
-			}
-			if slices.Contains(c.LocalBranches, currBranch) {
-				prefix = "*"
-				name = theme.PrimaryColor.Render(name)
-			} else {
-				prefix = " "
-			}
 
-			fmt.Printf("%s %s %s\n", prefix, name, suffix)
-			if showPRsFlag {
-				for _, b := range c.LocalBranches {
-					if pr, ok := prsBySrcBranch[b]; ok {
-						fmt.Printf("  └── %s\n", pr.WebURL)
-					}
+		if showLogFlag {
+			fmt.Println("Commits in stack:")
+			for _, c := range stack.Commits {
+				var hereMarker string
+				if slices.Contains(c.LocalBranches, currBranch) {
+					hereMarker = "*"
+				} else {
+					hereMarker = " "
+				}
+				var branchCol string
+				if len(c.LocalBranches) > 0 {
+					branchCol = fmt.Sprintf("(%s) ", theme.SecondaryColor.Render(strings.Join(c.LocalBranches, ", ")))
 				}
 
-				fmt.Println()
+				fmt.Printf("%s %s %s%s\n", hereMarker, theme.PrimaryColor.Render(c.Hash), branchCol, c.Subject)
+			}
+		} else {
+			fmt.Println("Branches in stack:")
+			for i, c := range stack.Commits {
+				var prefix, branchesSegment, suffix string
+				if len(c.LocalBranches) == 0 {
+					continue
+				} else {
+					var names []string
+					for _, b := range c.LocalBranches {
+						if b == currBranch {
+							names = append(names, theme.PrimaryColor.Render(b))
+						} else {
+							names = append(names, b)
+						}
+					}
+					branchesSegment = strings.Join(names, ", ")
+				}
+				if i == 0 {
+					suffix = "(top)"
+				}
+				if slices.Contains(c.LocalBranches, currBranch) {
+					prefix = "*"
+				} else {
+					prefix = " "
+				}
+
+				fmt.Printf("%s %s %s\n", prefix, branchesSegment, suffix)
+				if showPRsFlag {
+					for _, b := range c.LocalBranches {
+						if pr, ok := prsBySrcBranch[b]; ok {
+							fmt.Printf("  └── %s\n", pr.WebURL)
+						}
+					}
+
+					fmt.Println()
+				}
 			}
 		}
 

@@ -63,7 +63,7 @@ var rebaseCmd = &cobra.Command{
 			return err
 		}
 		if !rebaseInteractiveFlag {
-			fmt.Printf("Successfully rebased %s on %s\n", s.Name(), defaultBranch)
+			fmt.Printf("Successfully rebased %s on %s\n", s.Name(), newBase)
 		}
 		return nil
 	},
