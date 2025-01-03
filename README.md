@@ -19,7 +19,7 @@ Stacking natively with Git is completely doable, but cumbersome.
 
 ## How does `git stack` compare to `<other stacking tool>`?
 
-One reason you might want to use `git stack` is if you want Gitlab support. Most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github, and I was surprised to find few options for Gitlab.
+One reason you might want to use `git stack` is if you want Gitlab support. I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github, and there are few options for Gitlab.
 - Besides `git stack`, existing options include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. Note that the latter is Gitlab only.
 - They all work pretty differently and have different feature sets; see which one fits your needs the best.
 
