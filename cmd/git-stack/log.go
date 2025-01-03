@@ -63,6 +63,8 @@ var logCmd = &cobra.Command{
 
 			fmt.Printf("%s %s %s%s\n", hereMarker, theme.PrimaryColor.Render(c.Hash), branchCol, c.Subject)
 		}
+
+		printProblem(stack)
 		return nil
 	},
 }

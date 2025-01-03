@@ -36,6 +36,8 @@ func TestBasics(t *testing.T) {
 	require.NoError(t, err)
 	err = basics.Execute()
 	require.NoError(t, err)
+	err = basics.Cleanup()
+	require.NoError(t, err)
 }
 
 func isCI() bool {

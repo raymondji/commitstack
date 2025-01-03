@@ -46,8 +46,8 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		shellCmd(`git stack push`),
 		"We can quickly view the PRs in the stack using:",
 		shellCmd(`git stack show --prs`),
-		"To pull in the latest changes from the default branch into the stack, run:",
-		shellCmd(`git stack pull`),
+		"To sync the latest changes from the default branch into the stack, run:",
+		shellCmd(fmt.Sprintf(`git stack rebase %s --no-edit`, defaultBranch)),
 		multiline(
 			"Great, we've got the basics down for one stack. How do we deal with multiple stacks?",
 			"Let's head back to our default branch and create a second stack.",

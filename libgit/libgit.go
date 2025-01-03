@@ -17,18 +17,14 @@ var minGitVersion = version{major: 2, minor: 38}
 type Git interface {
 	IsRepoClean() (bool, error)
 	GetRemote() (Remote, error)
-	GetUpstream(branch string) (Upstream, error)
 	GetRootDir() (string, error)
 	CommitFixup(commitHash string, add bool) (string, error)
 	CommitEmpty(msg string) error
-	Commit(msg string) error
 	Add() error
 	TagForce(tag string) error
 	GetCurrentBranch() (string, error)
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
-	PushTagForce(tag string) error
-	Fetch(repo string, refspec string) error
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string) error
 	DeleteBranchIfExists(name string) error
@@ -291,21 +287,37 @@ func (g git) Fetch(repo string, refspec string) error {
 }
 
 type RebaseOpts struct {
-	Interactive    bool
-	Env            []string
-	AdditionalArgs []string
+	Interactive bool
+	Autosquash  bool
+	KeepBase    bool
+	UpdateRefs  bool
 }
 
 func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
-	args := []string{"rebase", branch, "--update-refs"}
-	args = append(args, opts.AdditionalArgs...)
+	env := []string{}
+	args := []string{"rebase", branch}
+	if opts.KeepBase {
+		args = append(args, "--keep-base")
+	}
+	if opts.UpdateRefs {
+		args = append(args, "--update-refs")
+	}
 	if opts.Interactive {
 		args = append(args, "-i")
 	}
+	if opts.Autosquash {
+		if !opts.Interactive {
+			// Hack(raymond): --autosquash only works with interactive rebase, so use
+			// GIT_SEQUENCE_EDITOR=true to accept the changes automatically.
+			env = append(env, "GIT_SEQUENCE_EDITOR=true")
+		}
+		args = append(args, "--autosquash")
+	}
+
 	output, err := exec.Run(
 		"git",
 		exec.WithArgs(args...),
-		exec.WithEnv(opts.Env...),
+		exec.WithEnv(env...),
 		exec.WithInteractive(opts.Interactive))
 	if err != nil {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)

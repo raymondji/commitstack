@@ -72,12 +72,11 @@ var fixupCmd = &cobra.Command{
 		fmt.Println(res)
 
 		if fixupRebaseFlag {
-			// Hack(raymond): --autosquash only works with interactive rebase, so use
-			// GIT_SEQUENCE_EDITOR=true to accept the changes automatically.
 			res, err := git.Rebase(defaultBranch, libgit.RebaseOpts{
-				Env:            []string{"GIT_SEQUENCE_EDITOR=true"},
-				AdditionalArgs: []string{"--keep-base", "--autosquash"},
-				Interactive:    true,
+				Interactive: true,
+				Autosquash:  true,
+				UpdateRefs:  true,
+				KeepBase:    true,
 			})
 			if err != nil {
 				return err
