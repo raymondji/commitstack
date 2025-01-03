@@ -87,11 +87,11 @@ func (s Stack) AllBranches() []string {
 	return out
 }
 
-// UniqueBranches returns a list of branch names where
+// SingleBranchPerCommit returns a list of branch names where
 // each branch name must be associated with a unique commit.
 // If any commits are associated with multiple branches, this returns an error.
 // Guaranteed to return at least one branch.
-func (s Stack) UniqueBranches() ([]string, error) {
+func (s Stack) SingleBranchPerCommit() ([]string, error) {
 	var out []string
 	for _, c := range s.Commits {
 		switch len(c.LocalBranches) {

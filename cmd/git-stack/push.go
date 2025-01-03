@@ -52,7 +52,7 @@ var pushCmd = &cobra.Command{
 		}()
 
 		wantTargets := map[string]string{}
-		branches, err := s.UniqueBranches()
+		branches, err := s.SingleBranchPerCommit()
 		if err != nil {
 			return err
 		}
