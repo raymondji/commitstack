@@ -30,17 +30,27 @@ var showCmd = &cobra.Command{
 		}
 		git, defaultBranch, host, theme := deps.git, deps.repoCfg.DefaultBranch, deps.host, deps.theme
 
-		stacks, err := commitstack.InferStacks(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
+		log, err := git.LogAll(defaultBranch)
+		if err != nil {
+			return err
+		}
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			printProblems(inference)
+		}()
 
 		var stack commitstack.Stack
 		if len(args) == 0 {
-			stack, err = stacks.GetCurrent()
+			stack, err = commitstack.GetCurrent(inference.InferredStacks, currBranch)
 			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
 				fmt.Println(err.Error())
-				printProblems(stacks)
 				return nil
 			} else if err != nil {
 				return err
@@ -48,7 +58,7 @@ var showCmd = &cobra.Command{
 		} else {
 			wantStack := args[0]
 			var found bool
-			for _, s := range stacks.Entries {
+			for _, s := range inference.InferredStacks {
 				if s.Name() == wantStack {
 					stack = s
 					found = true
@@ -64,8 +74,8 @@ var showCmd = &cobra.Command{
 		if showPRsFlag {
 			var actionErr error
 			action := func() {
-				prs, err := concurrent.Map(ctx, stack.LocalBranches(), func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-					pr, err := host.GetPullRequest(deps.remote.URLPath, branch.Name)
+				prs, err := concurrent.Map(ctx, stack.LocalBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
+					pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
 					} else if err != nil {
@@ -103,15 +113,15 @@ var showCmd = &cobra.Command{
 			if i == 0 {
 				suffix = "(top)"
 			}
-			if b.Current {
-				name = "* " + theme.PrimaryColor.Render(b.Name)
+			if b == currBranch {
+				name = "* " + theme.PrimaryColor.Render(b)
 			} else {
-				name = "  " + b.Name
+				name = "  " + b
 			}
 
 			fmt.Printf("%s %s\n", name, suffix)
 			if showPRsFlag {
-				if pr, ok := prsBySrcBranch[b.Name]; ok {
+				if pr, ok := prsBySrcBranch[b]; ok {
 					fmt.Printf("  └── %s\n", pr.WebURL)
 					fmt.Println()
 				} else {
@@ -120,15 +130,6 @@ var showCmd = &cobra.Command{
 			}
 		}
 
-		printProblem(stack)
 		return nil
 	},
-}
-
-func printProblem(stack commitstack.Stack) {
-	if stack.Error != nil {
-		fmt.Println()
-		fmt.Println("Unable to infer stack:")
-		fmt.Printf("  %s\n", stack.Error.Error())
-	}
 }

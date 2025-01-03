@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/spf13/cobra"
@@ -19,17 +21,27 @@ var logCmd = &cobra.Command{
 		}
 		git, defaultBranch, theme := deps.git, deps.repoCfg.DefaultBranch, deps.theme
 
-		stacks, err := commitstack.InferStacks(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
+		log, err := git.LogAll(defaultBranch)
+		if err != nil {
+			return err
+		}
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			printProblems(inference)
+		}()
 
 		var stack commitstack.Stack
 		if len(args) == 0 {
-			stack, err = stacks.GetCurrent()
+			stack, err = commitstack.GetCurrent(inference.InferredStacks, currBranch)
 			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
 				fmt.Println(err.Error())
-				printProblems(stacks)
 				return nil
 			} else if err != nil {
 				return err
@@ -37,7 +49,7 @@ var logCmd = &cobra.Command{
 		} else {
 			wantStack := args[0]
 			var found bool
-			for _, s := range stacks.Entries {
+			for _, s := range inference.InferredStacks {
 				if s.Name() == wantStack {
 					stack = s
 					found = true
@@ -50,20 +62,19 @@ var logCmd = &cobra.Command{
 
 		for _, c := range stack.Commits {
 			var hereMarker string
-			if c.LocalBranch != nil && c.LocalBranch.Current {
+			if slices.Contains(c.LocalBranches, currBranch) {
 				hereMarker = "*"
 			} else {
 				hereMarker = " "
 			}
 			var branchCol string
-			if c.LocalBranch != nil {
-				branchCol = fmt.Sprintf("(%s) ", theme.SecondaryColor.Render(c.LocalBranch.Name))
+			if len(c.LocalBranches) > 0 {
+				branchCol = fmt.Sprintf("(%s) ", theme.SecondaryColor.Render(strings.Join(c.LocalBranches, ", ")))
 			}
 
 			fmt.Printf("%s %s %s%s\n", hereMarker, theme.PrimaryColor.Render(c.Hash), branchCol, c.Subject)
 		}
 
-		printProblem(stack)
 		return nil
 	},
 }

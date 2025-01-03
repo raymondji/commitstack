@@ -25,18 +25,28 @@ var switchCmd = &cobra.Command{
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
-		stacks, err := commitstack.InferStacks(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
+		log, err := git.LogAll(defaultBranch)
+		if err != nil {
+			return err
+		}
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			printProblems(inference)
+		}()
 
 		var target, formTitle string
 		var opts []huh.Option[string]
 		if switchBranchFlag {
-			stack, err := stacks.GetCurrent()
+			stack, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
 			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
 				fmt.Println(err.Error())
-				printProblems(stacks)
 				return nil
 			} else if err != nil {
 				return err
@@ -44,11 +54,11 @@ var switchCmd = &cobra.Command{
 
 			formTitle = "Choose branch"
 			for _, b := range stack.LocalBranches() {
-				opts = append(opts, huh.NewOption(b.Name, b.Name))
+				opts = append(opts, huh.NewOption(b, b))
 			}
 		} else {
 			formTitle = "Choose stack"
-			for _, s := range stacks.Entries {
+			for _, s := range inference.InferredStacks {
 				opts = append(opts, huh.NewOption(s.Name(), s.Name()))
 			}
 		}

@@ -92,7 +92,7 @@ func (s Stack) IsCurrent(currentBranch string) bool {
 
 var ErrUnableToInferCurrentStack = errors.New("unable to infer current stack")
 
-func GetCurrent(currentBranch string, stacks []Stack) (Stack, error) {
+func GetCurrent(stacks []Stack, currentBranch string) (Stack, error) {
 	var currStacks []Stack
 	for _, s := range stacks {
 		if s.IsCurrent(currentBranch) {

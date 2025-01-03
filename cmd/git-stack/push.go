@@ -26,45 +26,56 @@ var pushCmd = &cobra.Command{
 		git, defaultBranch, host := deps.git, deps.repoCfg.DefaultBranch, deps.host
 
 		ctx := context.Background()
-		stacks, err := commitstack.InferStacks(git, defaultBranch)
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
-		s, err := stacks.GetCurrent()
+		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
 		}
-		if s.Error != nil {
-			return fmt.Errorf("cannot push when stack has an error: %v", s.Error)
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			printProblems(inference)
+		}()
+		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+		if err != nil {
+			return err
+		}
+		if len(s.ValidationErrors) > 0 {
+			return fmt.Errorf("cannot push stack, please resolve validation errors")
 		}
 
 		wantTargets := map[string]string{}
 		lb := s.LocalBranches()
 		for i, b := range lb {
 			if i == len(lb)-1 {
-				wantTargets[b.Name] = defaultBranch
+				wantTargets[b] = defaultBranch
 			} else {
-				wantTargets[b.Name] = lb[i+1].Name
+				wantTargets[b] = lb[i+1]
 			}
 		}
 
 		pushStack := func() ([]githost.PullRequest, error) {
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
-			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(deps.remote.URLPath, branch.Name)
+			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch string) (githost.PullRequest, error) {
+				pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
 				} else if err != nil {
 					return githost.PullRequest{}, err
 				}
 
-				if pr.TargetBranch != wantTargets[branch.Name] {
+				if pr.TargetBranch != wantTargets[branch] {
 					return host.UpdatePullRequest(deps.remote.URLPath, githost.PullRequest{
 						ID:           pr.ID,
 						Title:        pr.Title,
 						Description:  pr.Description,
-						SourceBranch: branch.Name,
+						SourceBranch: branch,
 						TargetBranch: defaultBranch,
 					})
 				}
@@ -83,8 +94,8 @@ var pushCmd = &cobra.Command{
 
 			// Push all branches.
 			localBranches := s.LocalBranches()
-			err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch commitstack.Branch) error {
-				_, err := git.PushForceWithLease(branch.Name)
+			err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch string) error {
+				_, err := git.PushForceWithLease(branch)
 				return err
 			})
 			if err != nil {
@@ -95,15 +106,15 @@ var pushCmd = &cobra.Command{
 			prs, err = concurrent.Map(
 				ctx,
 				localBranches,
-				func(ctx context.Context, branch commitstack.Branch) (githost.PullRequest, error) {
-					if pr, ok := prsBySourceBranch[branch.Name]; ok {
+				func(ctx context.Context, branch string) (githost.PullRequest, error) {
+					if pr, ok := prsBySourceBranch[branch]; ok {
 						return pr, nil
 					}
 
 					return host.CreatePullRequest(deps.remote.URLPath, githost.PullRequest{
-						Title:        branch.Name,
-						SourceBranch: branch.Name,
-						TargetBranch: wantTargets[branch.Name],
+						Title:        branch,
+						SourceBranch: branch,
+						TargetBranch: wantTargets[branch],
 					})
 				})
 			if err != nil {

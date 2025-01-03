@@ -28,21 +28,25 @@ var rebaseCmd = &cobra.Command{
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
-		stacks, err := commitstack.InferStacks(git, defaultBranch)
-		if err != nil {
-			return err
-		}
-		stack, err := stacks.GetCurrent()
-		if err != nil {
-			return err
-		}
 		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
-		if currBranch != stack.Name() {
+		log, err := git.LogAll(defaultBranch)
+		if err != nil {
+			return err
+		}
+		inference, err := commitstack.InferStacks(git, log)
+		if err != nil {
+			return err
+		}
+		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+		if err != nil {
+			return err
+		}
+		if currBranch != s.Name() {
 			return fmt.Errorf("must be on the tip of the stack to edit, currently checked out: %s, tip: %s",
-				currBranch, stack.Name())
+				currBranch, s.Name())
 		}
 
 		rebaseOpts := libgit.RebaseOpts{
@@ -59,7 +63,7 @@ var rebaseCmd = &cobra.Command{
 			return err
 		}
 		if !rebaseInteractiveFlag {
-			fmt.Printf("Successfully rebased %s on %s\n", stack.Name(), defaultBranch)
+			fmt.Printf("Successfully rebased %s on %s\n", s.Name(), defaultBranch)
 		}
 		return nil
 	},
