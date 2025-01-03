@@ -24,7 +24,7 @@ Another reason you might choose Commitstack is if you want a tool that doesn't t
 - In software parlance, Commitstack wants to be a [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
 - That said, I don't think Git is the pinnacle of what an easy to use VCS could look like, so kudos to products that are innovating there.
 
-On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack relies on `git rebase --update-refs` internally, and expects users to use it as well to edit their stacked branches.
+On the flipside, one reason Commitstack might not be a good fit is if you prefer to avoid `git rebase`. Commitstack uses `git rebase --update-refs` internally, and expects users to as well to edit stacked branches.
 
 ## Installation
 
