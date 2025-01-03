@@ -14,14 +14,15 @@ Stacking natively with Git is completely doable, but cumbersome.
 
 ## How does Commitstack compare to `<other stacking tool>`?
 
-One reason you might want to use Commitstack is if you need Gitlab support. While Github users are [spoiled](https://github.com/aviator-co/av) [for](https://graphite.dev/) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
+One reason you might want to use Commitstack is if you need Gitlab support. While Github users are [spoiled](https://graphite.dev/) [for](https://github.com/aviator-co/av) [choice](https://github.com/spacedentist/spr), most of the popular options don't support Gitlab.
 - If you want a stacking tool that integrates with both Gitlab and Github, Commitstack is one of the few options I'm aware of. Others include [git-town](https://github.com/git-town/git-town) and [git-spice](https://github.com/abhinav/git-spice).
 - If you're okay with Gitlab support only, the most prominent option is probably the [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command.
 - These options are all pretty different in terms of the user experience and feature set they provide; see which one fits your needs the best. 
 
-Another reason to use Commitstack is if you want a tool that still feels like "just Git" at the end of the day.
-- It's designed to lean on existing Git concepts and functionality as much as possible, with a minimal set of abstractions on top.
-- The goal is to make Commitstack easy to learn and integrate into existing Git workflows.
+Another reason you might choose Commitstack is if you want a tool that doesn't try to abstract away Git.
+- Commitstack is designed to lean on existing Git concepts and functionality as much as possible, with minimal new commands and abstractions on top.
+- in other words, Commitstack wants to be a [library, not a framework](https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/).
+- That said, I don't think Git is the pinnacle of what an easy to use version control model could look like, so kudos to products that are trying to innovate there.
 
 On the flipside, one reason Commitstack might not be a good fit is if you prefer not to use `git rebase`. Commitstack doesn't provide much machinery for editing branches in a stack, since `git rebase` already handles that well.
 
