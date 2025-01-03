@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/raymondji/commitstack/commitstack"
-	"github.com/raymondji/commitstack/config"
-	"github.com/raymondji/commitstack/githost"
-	"github.com/raymondji/commitstack/libgit"
+	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/config"
+	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/libgit"
 )
 
 type deps struct {
@@ -54,10 +54,17 @@ func initDeps() (deps, error) {
 	}, nil
 }
 
+// TODO: try to format this similar to git status.
+/*
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both modified:   src/module1.py
+        both added:      src/module2.py
+*/
 func printProblems(stacks commitstack.Stacks) {
 	if len(stacks.Errors) > 0 {
 		fmt.Println()
-		fmt.Println("Problems detected:")
+		fmt.Println("Unable to infer all stacks:")
 		for _, err := range stacks.Errors {
 			fmt.Printf("  %s\n", err.Error())
 		}

@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/commitstack/commitstack"
-	"github.com/raymondji/commitstack/concurrent"
-	"github.com/raymondji/commitstack/githost"
+	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/githost"
 	"github.com/spf13/cobra"
 )
 
@@ -129,7 +129,7 @@ var showCmd = &cobra.Command{
 func printProblem(stack commitstack.Stack) {
 	if stack.Error != nil {
 		fmt.Println()
-		fmt.Println("Problems detected:")
+		fmt.Println("Unable to infer stack:")
 		fmt.Printf("  %s\n", stack.Error.Error())
 	}
 }

@@ -1,4 +1,4 @@
-module github.com/raymondji/commitstack
+module github.com/raymondji/git-stack-cli
 
 go 1.22
 

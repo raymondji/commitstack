@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	giturls "github.com/chainguard-dev/git-urls"
-	"github.com/raymondji/commitstack/exec"
-	"github.com/raymondji/commitstack/githost"
+	"github.com/raymondji/git-stack-cli/exec"
+	"github.com/raymondji/git-stack-cli/githost"
 )
 
 // When --update-refs was introduced
@@ -115,7 +115,7 @@ func (g git) IsRepoClean() (bool, error) {
 
 type Remote struct {
 	Kind    githost.Kind
-	URLPath string // e.g. raymondji/commitstack
+	URLPath string // e.g. raymondji/git-stack-cli
 }
 
 func (g git) GetRemote() (Remote, error) {

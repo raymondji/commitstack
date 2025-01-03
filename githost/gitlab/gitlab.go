@@ -3,7 +3,7 @@ package gitlab
 import (
 	"fmt"
 
-	"github.com/raymondji/commitstack/githost/internal"
+	"github.com/raymondji/git-stack-cli/githost/internal"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 

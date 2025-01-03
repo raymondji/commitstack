@@ -3,8 +3,8 @@ package commitgraph_test
 import (
 	"testing"
 
-	"github.com/raymondji/commitstack/commitstack/commitgraph"
-	"github.com/raymondji/commitstack/libgit"
+	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
+	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/stretchr/testify/require"
 )
 

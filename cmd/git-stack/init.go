@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/raymondji/commitstack/config"
-	"github.com/raymondji/commitstack/githost"
-	"github.com/raymondji/commitstack/githost/github"
-	"github.com/raymondji/commitstack/githost/gitlab"
-	"github.com/raymondji/commitstack/libgit"
+	"github.com/raymondji/git-stack-cli/config"
+	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/githost/github"
+	"github.com/raymondji/git-stack-cli/githost/gitlab"
+	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +74,7 @@ var initCmd = &cobra.Command{
 				DefaultBranch: repo.DefaultBranch,
 			}
 		case githost.Github:
-			fmt.Println("commitstack requires a Github personal access token in order to manage pull requests on your behalf.")
+			fmt.Println("`git stack` requires a Github personal access token in order to manage pull requests on your behalf.")
 			fmt.Println()
 			fmt.Println("'Fine-grained Tokens' have limitations with accessing repositories that you do not own, we recommend using 'Tokens (classic)' instead.")
 			fmt.Println()

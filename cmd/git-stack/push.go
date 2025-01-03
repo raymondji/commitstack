@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/commitstack/commitstack"
-	"github.com/raymondji/commitstack/concurrent"
-	"github.com/raymondji/commitstack/githost"
-	"github.com/raymondji/commitstack/slices"
+	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/slices"
 	"github.com/spf13/cobra"
 )
 

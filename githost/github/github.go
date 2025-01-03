@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v68/github"
-	"github.com/raymondji/commitstack/githost/internal"
+	"github.com/raymondji/git-stack-cli/githost/internal"
 )
 
 type githubClient struct {

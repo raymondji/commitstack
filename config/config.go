@@ -13,7 +13,7 @@ import (
 type Config struct {
 	Theme ThemeConfig `json:"theme"`
 
-	// Keys are the git repo path, e.g. "raymondji/commitstack"
+	// Keys are the git repo path, e.g. "raymondji/git-stack-cli"
 	Repositories map[string]RepoConfig `json:"repositories"`
 }
 
@@ -90,5 +90,5 @@ func getConfigFilePath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get user home directory: %w", err)
 	}
-	return filepath.Join(homeDir, ".commitstack.json"), nil
+	return filepath.Join(homeDir, ".git-stack.json"), nil
 }

@@ -3,10 +3,10 @@ package githost
 import (
 	"fmt"
 
-	"github.com/raymondji/commitstack/config"
-	"github.com/raymondji/commitstack/githost/github"
-	"github.com/raymondji/commitstack/githost/gitlab"
-	"github.com/raymondji/commitstack/githost/internal"
+	"github.com/raymondji/git-stack-cli/config"
+	"github.com/raymondji/git-stack-cli/githost/github"
+	"github.com/raymondji/git-stack-cli/githost/gitlab"
+	"github.com/raymondji/git-stack-cli/githost/internal"
 )
 
 type (

@@ -3,8 +3,8 @@ package commitstack_test
 import (
 	"testing"
 
-	"github.com/raymondji/commitstack/commitstack"
-	"github.com/raymondji/commitstack/libgit"
+	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/stretchr/testify/require"
 )
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/raymondji/commitstack/sampleusage"
+	"github.com/raymondji/git-stack-cli/sampleusage"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func init() {
 
 var learnCmd = &cobra.Command{
 	Use:   "learn",
-	Short: "Learn how to use Commitstack through interactive tutorials",
+	Short: "Learn how to use git stack through interactive tutorials",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {
@@ -34,9 +34,9 @@ var learnCmd = &cobra.Command{
 		var sample sampleusage.Sample
 		switch learnChapterFlag {
 		case 0:
-			fmt.Println("Welcome to Commitstack! The following tutorial(s) will explain the core functionality and show how to use various sample commands.")
+			fmt.Println("Welcome to git stack! The following tutorial(s) will explain the core functionality and show how to use various sample commands.")
 			fmt.Println()
-			fmt.Println("Recommended: Commitstack can execute the sample commands in the tutorial automatically and show you their output live. To continue with this option, run:")
+			fmt.Println("Recommended: git stack can execute the sample commands in the tutorial automatically and show you their output live. To continue with this option, run:")
 			fmt.Println(deps.theme.TertiaryColor.Render("git stack learn --chapter 1 --mode=exec"))
 			fmt.Println()
 			fmt.Println("Alternative: you can also view the text-only version and follow along if desired by copying the commands and running them yourself. To continue with this option, run:")

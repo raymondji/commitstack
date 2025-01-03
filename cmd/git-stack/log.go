@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/raymondji/commitstack/commitstack"
+	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/spf13/cobra"
 )
 

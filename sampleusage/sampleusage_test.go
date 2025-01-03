@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/raymondji/commitstack/config"
-	"github.com/raymondji/commitstack/githost"
-	"github.com/raymondji/commitstack/libgit"
-	"github.com/raymondji/commitstack/sampleusage"
+	"github.com/raymondji/git-stack-cli/config"
+	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/sampleusage"
 	"github.com/stretchr/testify/require"
 )
 
