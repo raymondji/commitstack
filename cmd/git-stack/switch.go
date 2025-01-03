@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/huh"
@@ -45,10 +44,7 @@ var switchCmd = &cobra.Command{
 		var opts []huh.Option[string]
 		if switchBranchFlag {
 			stack, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
-			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
-				fmt.Println(err.Error())
-				return nil
-			} else if err != nil {
+			if err != nil {
 				return err
 			}
 

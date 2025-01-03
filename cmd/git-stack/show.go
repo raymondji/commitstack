@@ -51,10 +51,7 @@ var showCmd = &cobra.Command{
 		var stack commitstack.Stack
 		if len(args) == 0 {
 			stack, err = commitstack.GetCurrent(inference.InferredStacks, currBranch)
-			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
-				fmt.Println(err.Error())
-				return nil
-			} else if err != nil {
+			if err != nil {
 				return err
 			}
 		} else {

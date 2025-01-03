@@ -70,10 +70,12 @@ func printProblems(inference commitstack.InferenceResult) {
 		}
 	}
 	sort.Strings(validationErrMessages)
-	fmt.Println()
-	fmt.Println("Invalid stacks:")
-	for _, msg := range validationErrMessages {
-		fmt.Printf("  %s\n", msg)
+	if len(validationErrMessages) > 0 {
+		fmt.Println()
+		fmt.Println("Invalid stacks:")
+		for _, msg := range validationErrMessages {
+			fmt.Printf("  %s\n", msg)
+		}
 	}
 
 	if len(inference.InferenceErrors) > 0 {

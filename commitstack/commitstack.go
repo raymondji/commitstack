@@ -125,8 +125,6 @@ func (s Stack) IsCurrent(currentBranch string) bool {
 	return false
 }
 
-var ErrUnableToInferCurrentStack = errors.New("unable to infer current stack")
-
 func GetCurrent(stacks []Stack, currentBranch string) (Stack, error) {
 	var currStacks []Stack
 	for _, s := range stacks {
@@ -135,10 +133,17 @@ func GetCurrent(stacks []Stack, currentBranch string) (Stack, error) {
 		}
 	}
 
-	if len(currStacks) != 1 {
-		return Stack{}, ErrUnableToInferCurrentStack
-	} else {
+	switch len(currStacks) {
+	case 0:
+		return Stack{}, errors.New("unable to infer current stack")
+	case 1:
 		return currStacks[0], nil
+	default:
+		var names []string
+		for _, c := range currStacks {
+			names = append(names, c.Name())
+		}
+		return Stack{}, fmt.Errorf("currently within multiple stacks: %s", strings.Join(names, ", "))
 	}
 }
 
