@@ -233,7 +233,8 @@ func TestInferStacks(t *testing.T) {
 						},
 						ValidationErrors: []error{
 							commitstack.DivergenceError{
-								StackNames: []string{"feat/pt2", "feat/pt3"},
+								StackName:       "feat/pt2",
+								OtherStackNames: []string{"feat/pt3"},
 							},
 						},
 					},
@@ -253,7 +254,8 @@ func TestInferStacks(t *testing.T) {
 						},
 						ValidationErrors: []error{
 							commitstack.DivergenceError{
-								StackNames: []string{"feat/pt2", "feat/pt3"},
+								StackName:       "feat/pt3",
+								OtherStackNames: []string{"feat/pt2"},
 							},
 						},
 					},
