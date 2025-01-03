@@ -26,7 +26,7 @@ var pushCmd = &cobra.Command{
 		git, defaultBranch, host := deps.git, deps.repoCfg.DefaultBranch, deps.host
 
 		ctx := context.Background()
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
+		stacks, err := commitstack.InferStacks(git, defaultBranch)
 		if err != nil {
 			return err
 		}

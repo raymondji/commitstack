@@ -23,7 +23,7 @@ var appendCmd = &cobra.Command{
 		}
 
 		if currBranch != defaultBranch {
-			stacks, err := commitstack.ComputeAll(git, defaultBranch)
+			stacks, err := commitstack.InferStacks(git, defaultBranch)
 			if err != nil {
 				return err
 			}

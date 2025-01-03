@@ -1,10 +1,12 @@
-package commitstack
+package commitgraph
 
 import (
 	"fmt"
+
+	"github.com/raymondji/git-stack-cli/libgit"
 )
 
-type node struct {
+type Node struct {
 	Author        string
 	Subject       string
 	Date          string
@@ -16,29 +18,24 @@ type node struct {
 	Parents map[string]struct{}
 }
 
-func (n node) IsSource() bool {
+func (n Node) IsSource() bool {
 	return len(n.Parents) == 0
 }
 
-type directedAcyclicGraph struct {
+type DAG struct {
 	// Keys are hashes
-	Nodes map[string]node
+	Nodes map[string]Node
 }
 
-func computeDAG(git Git, defaultBranch string) (directedAcyclicGraph, error) {
-	log, err := git.LogAll(defaultBranch)
-	if err != nil {
-		return directedAcyclicGraph{}, err
-	}
-
-	dag := directedAcyclicGraph{
-		Nodes: map[string]node{},
+func Compute(log libgit.Log) (DAG, error) {
+	dag := DAG{
+		Nodes: map[string]Node{},
 	}
 	for _, commit := range log.Commits {
 		if _, ok := dag.Nodes[commit.Hash]; ok {
-			return directedAcyclicGraph{}, fmt.Errorf("duplicate commit in log, hash: %v", commit.Hash)
+			return DAG{}, fmt.Errorf("duplicate commit in log, hash: %v", commit.Hash)
 		}
-		dag.Nodes[commit.Hash] = node{
+		dag.Nodes[commit.Hash] = Node{
 			Author:        commit.Author,
 			Date:          commit.Date,
 			Subject:       commit.Subject,

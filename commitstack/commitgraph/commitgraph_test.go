@@ -1,9 +1,9 @@
-package commitstack_test
+package commitgraph_test
 
 import (
 	"testing"
 
-	"github.com/raymondji/commitstack/commitstack/commitgraph"
+	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/stretchr/testify/require"
 )
@@ -171,11 +171,7 @@ func TestCompute(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			fg := &FakeGit{
-				Log: c.log,
-			}
-
-			got, err := commitgraph.Compute(fg, "main")
+			got, err := commitgraph.Compute(c.log)
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 		})

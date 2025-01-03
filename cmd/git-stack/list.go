@@ -17,7 +17,7 @@ var listCmd = &cobra.Command{
 		}
 		git, defaultBranch, theme := deps.git, deps.repoCfg.DefaultBranch, deps.theme
 
-		stacks, err := commitstack.ComputeAll(git, defaultBranch)
+		stacks, err := commitstack.InferStacks(git, defaultBranch)
 		if err != nil {
 			return err
 		}

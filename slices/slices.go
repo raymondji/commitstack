@@ -24,3 +24,7 @@ func Filter[T any](s []T, predicate func(T) bool) []T {
 func IndexFunc[S ~[]E, E any](s S, f func(E) bool) int {
 	return slices.IndexFunc(s, f)
 }
+
+func Clone[S ~[]E, E any](s S) S {
+	return slices.Clone(s)
+}

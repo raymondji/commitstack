@@ -7,19 +7,17 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
+	"github.com/raymondji/git-stack-cli/libgit"
 )
 
-type Branch struct {
-	Current bool
-	Name    string
-}
-
 type Commit struct {
-	Author      string
-	Subject     string
-	Date        string
-	Hash        string
-	LocalBranch *Branch
+	Hash          string
+	Author        string
+	Subject       string
+	Date          string
+	LocalBranches []string
 }
 
 type DivergenceError struct {
@@ -31,7 +29,8 @@ func (e DivergenceError) Error() string {
 }
 
 type BranchCollisionError struct {
-	Branches []string
+	StackName string
+	Branches  []string
 }
 
 func (e BranchCollisionError) Error() string {
@@ -52,17 +51,51 @@ func (e MergeCommitError) Error() string {
 	return fmt.Sprintf("Encountered merge commit %v", e.MergeCommitHash)
 }
 
-type Stacks struct {
-	Entries []Stack
-	Errors  []error
+type Git interface {
+	GetBranchesContainingCommit(commitHash string) ([]string, error)
+}
+
+type Stack struct {
+	Commits []Commit // Ordered from top to bottom, guaranteed to not be empty
+
+	// Validation errors indicate that we were able to infer a commit stack, but the stack isn't valid
+	ValidationErrors []error
+}
+
+// Guaranteed to return at least one branch
+func (s Stack) LocalBranches() []string {
+	var branches []string
+	for _, c := range s.Commits {
+		if len(c.LocalBranches) == 0 {
+			continue
+		}
+		// TODO: is there a better way to handle multiple branches better?
+		branches = append(branches, c.LocalBranches[0])
+	}
+	assert(len(branches) > 0, "commitstack must contain at least one branch")
+	return branches
+}
+
+// Name returns a valid git reference (e.g. a branch ref or commit hash)
+func (s Stack) Name() string {
+	return s.LocalBranches()[0]
+}
+
+func (s Stack) IsCurrent(currentBranch string) bool {
+	for _, c := range s.Commits {
+		if slices.Contains(c.LocalBranches, currentBranch) {
+			return true
+		}
+	}
+	return false
 }
 
 var ErrUnableToInferCurrentStack = errors.New("unable to infer current stack")
 
-func (stacks Stacks) GetCurrent() (Stack, error) {
+func GetCurrent(currentBranch string, stacks []Stack) (Stack, error) {
 	var currStacks []Stack
-	for _, s := range stacks.Entries {
-		if s.Current() {
+	for _, s := range stacks {
+		if s.IsCurrent(currentBranch) {
 			currStacks = append(currStacks, s)
 		}
 	}
@@ -74,84 +107,66 @@ func (stacks Stacks) GetCurrent() (Stack, error) {
 	}
 }
 
-type Stack struct {
-	Commits []Commit // Ordered from top to bottom, guaranteed to not be empty
-	Error   error
+type InferenceResult struct {
+	InferredStacks  []Stack
+	InferenceErrors []error
 }
 
-// Guaranteed to return at least one branch
-func (s Stack) LocalBranches() []Branch {
-	var branches []Branch
-	for _, c := range s.Commits {
-		if c.LocalBranch == nil {
-			continue
-		}
-		branches = append(branches, *c.LocalBranch)
-	}
-	assert(len(branches) > 0, "commitstack must contain at least one branch")
-	return branches
-}
-
-func (s Stack) Name() string {
-	return s.LocalBranches()[0].Name
-}
-
-func (s Stack) Current() bool {
-	for _, b := range s.LocalBranches() {
-		if b.Current {
-			return true
-		}
-	}
-	return false
-}
-
-func ComputeAll(git Git, defaultBranch string) (Stacks, error) {
-	graph, err := computeDAG(git, defaultBranch)
+// InferStacks tries to infer all commit stacks from the log and returns an inference result
+// containing the stacks it was able to infer and inference errors it encountered.
+// If Infer encounters other kinds of errors, it will return (Inference{}, error)
+func InferStacks(git Git, log libgit.Log) (InferenceResult, error) {
+	graph, err := commitgraph.Compute(log)
 	if err != nil {
-		return Stacks{}, err
+		return InferenceResult{}, err
 	}
 
-	currBranch, err := git.GetCurrentBranch()
-	if err != nil {
-		return Stacks{}, err
-	}
-
-	var result Stacks
+	var allStacks []Stack
+	var inferenceErrs []error
 	for _, n := range graph.Nodes {
 		if !n.IsSource() {
 			continue
 		}
 
-		stacks, err := buildStacks(git, graph, currBranch, n, Stack{})
-		if errors.Is(err, errNoBranchesInStack) {
-			fmt.Println(err.Error())
-			continue
-		} else if err != nil {
-			result.Errors = append(result.Errors, err)
+		stacks, err := inferStacks(git, graph, n, Stack{}, 500)
+		if err != nil {
+			inferenceErrs = append(inferenceErrs, err)
 			continue
 		}
 
-		if len(stacks) == 1 {
-			result.Entries = append(result.Entries, stacks[0])
-		} else {
+		// Validate the stacks
+		if len(stacks) != 1 {
 			err := DivergenceError{}
 			for _, s := range stacks {
 				err.StackNames = append(err.StackNames, s.Name())
 			}
 			sort.Strings(err.StackNames)
 
-			var stacksWithErr []Stack
-			for _, s := range stacks {
-				s.Error = err
-				stacksWithErr = append(stacksWithErr, s)
+			for i, s := range stacks {
+				s.ValidationErrors = append(s.ValidationErrors, err)
+				stacks[i] = s
 			}
-			result.Errors = append(result.Errors, err)
-			result.Entries = append(result.Entries, stacksWithErr...)
 		}
+		for i, s := range stacks {
+			for _, c := range s.Commits {
+				if len(c.LocalBranches) > 1 {
+					s.ValidationErrors = append(s.ValidationErrors, BranchCollisionError{
+						StackName: s.Name(),
+						Branches:  c.LocalBranches,
+					})
+					stacks[i] = s
+				}
+			}
+		}
+
+		allStacks = append(allStacks, stacks...)
 	}
 
-	sortStacks(result.Entries)
-	return result, nil
+	sortStacks(allStacks)
+	return InferenceResult{
+		InferredStacks:  allStacks,
+		InferenceErrors: inferenceErrs,
+	}, nil
 }
 
 func sortStacks(stacks []Stack) {
@@ -166,22 +181,20 @@ func sortStacks(stacks []Stack) {
 	})
 }
 
-var errNoBranchesInStack = errors.New("no branches")
+// inferStacks returns all stacks that start from currNode. This will never return an empty slice unless it's returning an error.
+// An error is returned if inferStacks hits a terminal condition that prevents it from continuing.
+func inferStacks(git Git, graph commitgraph.DAG, currNode commitgraph.Node, prevStack Stack, remainingRecursionDepth int) ([]Stack, error) {
+	if remainingRecursionDepth < 0 {
+		return nil, fmt.Errorf("failed to infer stacks, exceeded max recursion depth")
+	}
 
-// buildStacks returns all stacks that start from currNode. This will never return an empty slice unless it's returning an error.
-func buildStacks(git Git, graph directedAcyclicGraph, currBranch string, currNode node, prevStack Stack) ([]Stack, error) {
-	currStack, err := addNodeToStack(git, currBranch, currNode, prevStack)
+	currStack, err := appendToStack(git, currNode, prevStack)
 	if err != nil {
 		return nil, err
 	}
 
 	// Base case
 	if len(currNode.Children) == 0 {
-		if len(currStack.LocalBranches()) == 0 {
-			return nil, fmt.Errorf("%w, no branch tags in stack: %v",
-				errNoBranchesInStack, currStack)
-		}
-
 		// Order from top to bottom
 		slices.Reverse(currStack.Commits)
 		return []Stack{currStack}, nil
@@ -189,7 +202,8 @@ func buildStacks(git Git, graph directedAcyclicGraph, currBranch string, currNod
 
 	var stacks []Stack
 	for c := range currNode.Children {
-		got, err := buildStacks(git, graph, currBranch, graph.Nodes[c], currStack)
+		nextNode := graph.Nodes[c]
+		got, err := inferStacks(git, graph, nextNode, currStack, remainingRecursionDepth-1)
 		if err != nil {
 			return nil, err
 		}
@@ -198,36 +212,8 @@ func buildStacks(git Git, graph directedAcyclicGraph, currBranch string, currNod
 	return stacks, nil
 }
 
-func addNodeToStack(git Git, currBranch string, currNode node, prevStack Stack) (Stack, error) {
-	slog.Debug("addNodeToStack", "currBranch", currBranch, "currNode", currNode.Hash, "parents", currNode.Parents)
-
-	currStack := Stack{}
-	// Deep copy
-	currStack.Commits = append(currStack.Commits, prevStack.Commits...)
-
-	c := Commit{
-		Author:  currNode.Author,
-		Date:    currNode.Date,
-		Subject: currNode.Subject,
-		Hash:    currNode.Hash,
-	}
-	switch len(currNode.LocalBranches) {
-	case 0:
-		currStack.Commits = append(currStack.Commits, c)
-	case 1:
-		b := Branch{
-			Name: currNode.LocalBranches[0],
-		}
-		if b.Name == currBranch {
-			b.Current = true
-		}
-		c.LocalBranch = &b
-		currStack.Commits = append(currStack.Commits, c)
-	default:
-		return Stack{}, BranchCollisionError{
-			Branches: currNode.LocalBranches,
-		}
-	}
+func appendToStack(git Git, currNode commitgraph.Node, prevStack Stack) (Stack, error) {
+	slog.Debug("appendToStack", "currNode", currNode.Hash, "parents", currNode.Parents)
 
 	if len(currNode.Parents) > 1 {
 		got, err := git.GetBranchesContainingCommit(currNode.Hash)
@@ -244,7 +230,17 @@ func addNodeToStack(git Git, currBranch string, currNode node, prevStack Stack) 
 		}
 	}
 
-	return currStack, nil
+	c := Commit{
+		Author:        currNode.Author,
+		Date:          currNode.Date,
+		Subject:       currNode.Subject,
+		Hash:          currNode.Hash,
+		LocalBranches: currNode.LocalBranches,
+	}
+	sort.Strings(c.LocalBranches)
+	return Stack{
+		Commits: append(slices.Clone(prevStack.Commits), c),
+	}, nil
 }
 
 func assert(condition bool, msg string) {
