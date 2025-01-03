@@ -41,7 +41,12 @@ var listCmd = &cobra.Command{
 				name = "  " + s.Name()
 			}
 
-			fmt.Printf("%s (%d branches)\n", name, len(s.LocalBranches()))
+			all := s.AllBranches()
+			if len(all) == 1 {
+				fmt.Printf("%s (1 branch)\n", name)
+			} else {
+				fmt.Printf("%s (%d branches)\n", name, len(s.AllBranches()))
+			}
 		}
 
 		return nil

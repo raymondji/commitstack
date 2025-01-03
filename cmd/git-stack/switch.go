@@ -53,7 +53,7 @@ var switchCmd = &cobra.Command{
 			}
 
 			formTitle = "Choose branch"
-			for _, b := range stack.LocalBranches() {
+			for _, b := range stack.AllBranches() {
 				opts = append(opts, huh.NewOption(b, b))
 			}
 		} else {

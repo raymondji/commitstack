@@ -50,19 +50,22 @@ var pushCmd = &cobra.Command{
 		}
 
 		wantTargets := map[string]string{}
-		lb := s.LocalBranches()
-		for i, b := range lb {
-			if i == len(lb)-1 {
+		branches, err := s.UniqueBranches()
+		if err != nil {
+			return err
+		}
+		for i, b := range branches {
+			if i == len(branches)-1 {
 				wantTargets[b] = defaultBranch
 			} else {
-				wantTargets[b] = lb[i+1]
+				wantTargets[b] = branches[i+1]
 			}
 		}
 
 		pushStack := func() ([]githost.PullRequest, error) {
 			// For safety, reset the target branch on any existing MRs if they don't match.
 			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
-			prs, err := concurrent.Map(ctx, lb, func(ctx context.Context, branch string) (githost.PullRequest, error) {
+			prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
 				pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
@@ -93,8 +96,7 @@ var pushCmd = &cobra.Command{
 			})
 
 			// Push all branches.
-			localBranches := s.LocalBranches()
-			err = concurrent.ForEach(ctx, localBranches, func(ctx context.Context, branch string) error {
+			err = concurrent.ForEach(ctx, branches, func(ctx context.Context, branch string) error {
 				_, err := git.PushForceWithLease(branch)
 				return err
 			})
@@ -105,7 +107,7 @@ var pushCmd = &cobra.Command{
 			// Create any new PRs
 			prs, err = concurrent.Map(
 				ctx,
-				localBranches,
+				branches,
 				func(ctx context.Context, branch string) (githost.PullRequest, error) {
 					if pr, ok := prsBySourceBranch[branch]; ok {
 						return pr, nil

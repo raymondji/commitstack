@@ -50,7 +50,7 @@ var fixupCmd = &cobra.Command{
 			branchToFix = args[0]
 		} else {
 			var opts []huh.Option[string]
-			for _, b := range stack.LocalBranches() {
+			for _, b := range stack.AllBranches() {
 				opts = append(opts, huh.NewOption(b, b))
 			}
 			form := huh.NewForm(

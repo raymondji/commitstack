@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stack-cli/commitstack"
@@ -74,7 +76,7 @@ var showCmd = &cobra.Command{
 		if showPRsFlag {
 			var actionErr error
 			action := func() {
-				prs, err := concurrent.Map(ctx, stack.LocalBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
+				prs, err := concurrent.Map(ctx, stack.AllBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
 					pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
@@ -108,25 +110,35 @@ var showCmd = &cobra.Command{
 			fmt.Printf("On stack %s\n", stack.Name())
 		}
 		fmt.Println("Branches in stack:")
-		for i, b := range stack.LocalBranches() {
-			var name, suffix string
+		for i, c := range stack.Commits {
+			var prefix, name, suffix string
+			switch len(c.LocalBranches) {
+			case 0:
+				continue
+			case 1:
+				name = c.LocalBranches[0]
+			default:
+				name = fmt.Sprintf("%s", strings.Join(c.LocalBranches, ", "))
+			}
 			if i == 0 {
 				suffix = "(top)"
 			}
-			if b == currBranch {
-				name = "* " + theme.PrimaryColor.Render(b)
+			if slices.Contains(c.LocalBranches, currBranch) {
+				prefix = "*"
+				name = theme.PrimaryColor.Render(name)
 			} else {
-				name = "  " + b
+				prefix = " "
 			}
 
-			fmt.Printf("%s %s\n", name, suffix)
+			fmt.Printf("%s %s %s\n", prefix, name, suffix)
 			if showPRsFlag {
-				if pr, ok := prsBySrcBranch[b]; ok {
-					fmt.Printf("  └── %s\n", pr.WebURL)
-					fmt.Println()
-				} else {
-					fmt.Println()
+				for _, b := range c.LocalBranches {
+					if pr, ok := prsBySrcBranch[b]; ok {
+						fmt.Printf("  └── %s\n", pr.WebURL)
+					}
 				}
+
+				fmt.Println()
 			}
 		}
 

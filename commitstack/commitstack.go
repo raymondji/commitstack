@@ -73,23 +73,47 @@ type Stack struct {
 	ValidationErrors []error
 }
 
-// Guaranteed to return at least one branch
-func (s Stack) LocalBranches() []string {
-	var branches []string
+// AllBranches returns all branches associated with all commits in the stack.
+// Guaranteed to return at least one branch.
+func (s Stack) AllBranches() []string {
+	var out []string
 	for _, c := range s.Commits {
 		if len(c.LocalBranches) == 0 {
 			continue
 		}
-		// TODO: is there a better way to handle multiple branches better?
-		branches = append(branches, c.LocalBranches[0])
+		out = append(out, c.LocalBranches...)
 	}
-	assert(len(branches) > 0, "commitstack must contain at least one branch")
-	return branches
+	assert(len(out) > 0, "commitstack must contain at least one branch")
+	return out
+}
+
+// UniqueBranches returns a list of branch names where
+// each branch name must be associated with a unique commit.
+// If any commits are associated with multiple branches, this returns an error.
+// Guaranteed to return at least one branch.
+func (s Stack) UniqueBranches() ([]string, error) {
+	var out []string
+	for _, c := range s.Commits {
+		switch len(c.LocalBranches) {
+		case 0:
+			continue
+		case 1:
+			out = append(out, c.LocalBranches[0])
+		default:
+			assert(len(s.ValidationErrors) > 0, "stack should have a branch collision validation error")
+			return nil, fmt.Errorf("stack contains multiple branches")
+		}
+	}
+	return out, nil
 }
 
 // Name returns a valid git reference (e.g. a branch ref or commit hash)
 func (s Stack) Name() string {
-	return s.LocalBranches()[0]
+	tip := s.Commits[0]
+	if len(tip.LocalBranches) > 0 {
+		return tip.LocalBranches[0]
+	}
+	return tip.Hash
 }
 
 func (s Stack) IsCurrent(currentBranch string) bool {
