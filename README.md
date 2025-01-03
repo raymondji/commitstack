@@ -3,9 +3,9 @@
 A minimal Git CLI subcommand for stacking pull requests. Works with Gitlab and Github.
 
 Core commands:
-- `git stack list`: view all your stacks
-- `git stack show`: view branches in a stack
-- `git stack push`: open MRs/PRs for the branches in the current stack
+- `git stack list`: list all stacks
+- `git stack show`: view your current stack
+- `git stack push`: push branches in the current stack and open MRs/PRs
 
 ## What is stacking?
 
