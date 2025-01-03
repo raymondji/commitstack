@@ -27,7 +27,7 @@ Another reason you might opt for `git stack` is if you prefer a tool that feels 
 - `git stack` is designed to let existing Git concepts and functionality do the heavy lifting, with minimal new commands or abstractions to learn.
 - `git stack` is also stateless, so there's no external state that can get out of sync with Git. `git stack` instead infers stacks from the structure of your commits and branches.
 
-On the flipside, one reason `git stack` might not be a good fit is if you prefer to avoid `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches, and `git stack` embraces that. Moreover, keeping a linear commit history is essential for `git stack` to be able to infer stacks.
+On the flipside, one reason `git stack` might not be a good fit is if you prefer to avoid `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches, and `git stack` doesn't provide any alternative mechanisms. Moreover, `git stack` requires a linear commit histories in order to infer stacks.
 
 ## Installation
 
