@@ -1,50 +1,44 @@
-package commitgraph
+package commitstack
 
 import (
 	"fmt"
-
-	"github.com/raymondji/git-stack-cli/libgit"
 )
 
-type Git interface {
-	LogAll(notReachableFrom string) (libgit.Log, error)
-}
-
-type Node struct {
+type node struct {
 	Author        string
 	Subject       string
 	Date          string
 	Hash          string
 	LocalBranches []string
-	// Keys are hashes. All keys must be present in the DAG.
+	// Keys are hashes. All keys must be present in the DirectedAcyclicGraph.
 	Children map[string]struct{}
-	// Keys are hashes. All keys must be present in the DAG.
+	// Keys are hashes. All keys must be present in the DirectedAcyclicGraph.
 	Parents map[string]struct{}
 }
 
-func (n Node) IsSource() bool {
+func (n node) IsSource() bool {
 	return len(n.Parents) == 0
 }
 
-type DAG struct {
+type directedAcyclicGraph struct {
 	// Keys are hashes
-	Nodes map[string]Node
+	Nodes map[string]node
 }
 
-func Compute(git Git, defaultBranch string) (DAG, error) {
+func computeDAG(git Git, defaultBranch string) (directedAcyclicGraph, error) {
 	log, err := git.LogAll(defaultBranch)
 	if err != nil {
-		return DAG{}, err
+		return directedAcyclicGraph{}, err
 	}
 
-	dag := DAG{
-		Nodes: map[string]Node{},
+	dag := directedAcyclicGraph{
+		Nodes: map[string]node{},
 	}
 	for _, commit := range log.Commits {
 		if _, ok := dag.Nodes[commit.Hash]; ok {
-			return DAG{}, fmt.Errorf("duplicate commit in log, hash: %v", commit.Hash)
+			return directedAcyclicGraph{}, fmt.Errorf("duplicate commit in log, hash: %v", commit.Hash)
 		}
-		dag.Nodes[commit.Hash] = Node{
+		dag.Nodes[commit.Hash] = node{
 			Author:        commit.Author,
 			Date:          commit.Date,
 			Subject:       commit.Subject,

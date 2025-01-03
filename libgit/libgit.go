@@ -20,8 +20,7 @@ type Git interface {
 	GetRootDir() (string, error)
 	CommitFixup(commitHash string, add bool) (string, error)
 	CommitEmpty(msg string) error
-	Add() error
-	TagForce(tag string) error
+	GetBranchesContainingCommit(commitHash string) ([]string, error)
 	GetCurrentBranch() (string, error)
 	GetCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
@@ -227,22 +226,6 @@ func (g git) Commit(msg string) error {
 	return nil
 }
 
-func (g git) Add() error {
-	_, err := exec.Run("git", exec.WithArgs("add", "."))
-	if err != nil {
-		return fmt.Errorf("failed to git add, err: %v", err)
-	}
-	return nil
-}
-
-func (g git) TagForce(tag string) error {
-	_, err := exec.Run("git", exec.WithArgs("tag", "--force", tag))
-	if err != nil {
-		return fmt.Errorf("failed to tag, err: %v", err)
-	}
-	return nil
-}
-
 func (g git) GetCurrentBranch() (string, error) {
 	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--abbrev-ref", "HEAD"))
 	if err != nil {
@@ -266,24 +249,6 @@ func (g git) PushForceWithLease(branchName string) (string, error) {
 	}
 
 	return fmt.Sprintf("force pushing branch %s\n%s", branchName, output.Stdout), nil
-}
-
-func (g git) PushTagForce(tag string) error {
-	_, err := exec.Run("git", exec.WithArgs("push", "--force", "origin", tag))
-	if err != nil {
-		return fmt.Errorf("failed to push tag to origin, tag: %v, err: %v", tag, err)
-	}
-
-	return nil
-}
-
-func (g git) Fetch(repo string, refspec string) error {
-	_, err := exec.Run("git", exec.WithArgs("fetch", repo, refspec))
-	if err != nil {
-		return fmt.Errorf("failed to fetch, err: %v", err)
-	}
-
-	return nil
 }
 
 type RebaseOpts struct {
@@ -323,6 +288,23 @@ func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 		return "", fmt.Errorf("failed to rebase, err: %v", err)
 	}
 	return output.Stdout, nil
+}
+
+func (g git) GetBranchesContainingCommit(commitHash string) ([]string, error) {
+	output, err := exec.Run("git", exec.WithArgs("branch", "--contains", commitHash, "--format='%(refname:short)'"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to find branches containing commit %s, err: %v", commitHash, err)
+	}
+
+	var branches []string
+	for _, line := range output.Lines() {
+		if line == "" {
+			continue
+		}
+		branches = append(branches, line)
+	}
+
+	return branches, nil
 }
 
 func (g git) CreateBranch(name string) error {

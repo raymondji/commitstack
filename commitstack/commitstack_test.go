@@ -1,6 +1,7 @@
 package commitstack_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/raymondji/git-stack-cli/commitstack"
@@ -8,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCompute(t *testing.T) {
+func TestComputeAll(t *testing.T) {
 	cases := map[string]struct {
 		currBranch      string
 		log             libgit.Log
@@ -111,43 +112,12 @@ func TestCompute(t *testing.T) {
 			want: commitstack.Stacks{
 				Errors: []error{
 					commitstack.MergeCommitError{
-						MergeCommitHash: "c3",
-						PartialStack: commitstack.Stack{
-							Commits: []commitstack.Commit{
-								{
-									Hash: "c3",
-									LocalBranch: &commitstack.Branch{
-										Name: "feat/pt3",
-									},
-								},
-								{
-									Hash: "c2",
-									LocalBranch: &commitstack.Branch{
-										Name:    "feat/pt2",
-										Current: true,
-									},
-								},
-							},
-						},
+						MergeCommitHash:    "c3",
+						ContainingBranches: []string{},
 					},
 					commitstack.MergeCommitError{
-						MergeCommitHash: "c3",
-						PartialStack: commitstack.Stack{
-							Commits: []commitstack.Commit{
-								{
-									Hash: "c3",
-									LocalBranch: &commitstack.Branch{
-										Name: "feat/pt3",
-									},
-								},
-								{
-									Hash: "c1",
-									LocalBranch: &commitstack.Branch{
-										Name: "feat/pt1",
-									},
-								},
-							},
-						},
+						MergeCommitHash:    "c3",
+						ContainingBranches: []string{},
 					},
 				},
 			},
@@ -256,7 +226,7 @@ func TestCompute(t *testing.T) {
 								},
 							},
 						},
-						Error: commitstack.SharedCommitError{
+						Error: commitstack.DivergenceError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
@@ -278,13 +248,13 @@ func TestCompute(t *testing.T) {
 								},
 							},
 						},
-						Error: commitstack.SharedCommitError{
+						Error: commitstack.DivergenceError{
 							StackNames: []string{"feat/pt2", "feat/pt3"},
 						},
 					},
 				},
 				Errors: []error{
-					commitstack.SharedCommitError{
+					commitstack.DivergenceError{
 						StackNames: []string{"feat/pt2", "feat/pt3"},
 					},
 				},
@@ -311,8 +281,9 @@ func TestCompute(t *testing.T) {
 }
 
 type FakeGit struct {
-	Log           libgit.Log
-	CurrentBranch string
+	Log                            libgit.Log
+	CurrentBranch                  string
+	CommitHashToContainingBranches map[string][]string
 }
 
 func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
@@ -321,4 +292,12 @@ func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
 
 func (fg *FakeGit) GetCurrentBranch() (string, error) {
 	return fg.CurrentBranch, nil
+}
+
+func (fg *FakeGit) GetBranchesContainingCommit(commit string) ([]string, error) {
+	if got, ok := fg.CommitHashToContainingBranches[commit]; !ok {
+		return nil, fmt.Errorf("No entry found for commit %s", commit)
+	} else {
+		return got, nil
+	}
 }

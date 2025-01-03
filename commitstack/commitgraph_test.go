@@ -1,9 +1,9 @@
-package commitgraph_test
+package commitstack_test
 
 import (
 	"testing"
 
-	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
+	"github.com/raymondji/commitstack/commitstack/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/stretchr/testify/require"
 )
@@ -190,12 +190,4 @@ func toDAG(nodes ...commitgraph.Node) commitgraph.DAG {
 		dag.Nodes[n.Hash] = n
 	}
 	return dag
-}
-
-type FakeGit struct {
-	Log libgit.Log
-}
-
-func (fg *FakeGit) LogAll(notReachableFrom string) (libgit.Log, error) {
-	return fg.Log, nil
 }

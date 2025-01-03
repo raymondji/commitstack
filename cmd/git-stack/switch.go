@@ -34,12 +34,11 @@ var switchCmd = &cobra.Command{
 		var opts []huh.Option[string]
 		if switchBranchFlag {
 			stack, err := stacks.GetCurrent()
-			if errors.Is(err, commitstack.ErrNotInAStack) {
-				fmt.Println("Not in a stack")
+			if errors.Is(err, commitstack.ErrUnableToInferCurrentStack) {
+				fmt.Println(err.Error())
 				printProblems(stacks)
 				return nil
 			} else if err != nil {
-				printProblems(stacks)
 				return err
 			}
 

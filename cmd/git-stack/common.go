@@ -64,7 +64,7 @@ Unmerged paths:
 func printProblems(stacks commitstack.Stacks) {
 	if len(stacks.Errors) > 0 {
 		fmt.Println()
-		fmt.Println("Unable to infer all stacks:")
+		fmt.Println("Invalid stacks:")
 		for _, err := range stacks.Errors {
 			fmt.Printf("  %s\n", err.Error())
 		}
