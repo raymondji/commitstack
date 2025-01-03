@@ -51,7 +51,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 			fmt.Sprintf("git rebase %s --update-refs", defaultBranch),
 			"Or to avoid having to remember --update-refs, you can do:",
 		),
-		shellCmd(fmt.Sprintf(`git stack rebase %s --no-edit`, defaultBranch)),
+		shellCmd(fmt.Sprintf(`git stack rebase %s`, defaultBranch)),
 		multiline(
 			"Great, we've got the basics down for one stack. How do we deal with multiple stacks?",
 			"Let's head back to our default branch and create a second stack.",
