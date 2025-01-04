@@ -11,10 +11,12 @@ import (
 
 var fixupAddFlag bool
 var fixupRebaseFlag bool
+var fixupInteractiveRebaseFlag bool
 
 func init() {
-	fixupCmd.Flags().BoolVarP(&fixupAddFlag, "add", "a", false, "Equivalent to git commit -a")
-	fixupCmd.Flags().BoolVarP(&fixupRebaseFlag, "rebase", "r", false, "Perform a git rebase after")
+	fixupCmd.Flags().BoolVarP(&fixupAddFlag, "add", "a", false, "Use git commit -a")
+	fixupCmd.Flags().BoolVarP(&fixupRebaseFlag, "rebase", "r", false, "Automatically perform a git rebase")
+	fixupCmd.Flags().BoolVarP(&fixupInteractiveRebaseFlag, "interactive", "i", false, "Use interactive rebase. Must be used with --rebase")
 }
 
 var fixupCmd = &cobra.Command{
@@ -23,6 +25,10 @@ var fixupCmd = &cobra.Command{
 	Short:   "Create a commit to fixup a branch in the current stack",
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if fixupInteractiveRebaseFlag && !fixupRebaseFlag {
+			return fmt.Errorf("--interactive must be used with --rebase")
+		}
+
 		deps, err := initDeps()
 		if err != nil {
 			return err
@@ -82,7 +88,7 @@ var fixupCmd = &cobra.Command{
 
 		if fixupRebaseFlag {
 			res, err := git.Rebase(defaultBranch, libgit.RebaseOpts{
-				Interactive: true,
+				Interactive: fixupInteractiveRebaseFlag,
 				Autosquash:  true,
 				UpdateRefs:  true,
 				KeepBase:    true,

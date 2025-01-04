@@ -35,6 +35,9 @@ var rootCmd = &cobra.Command{
 			benchmarkCheckpoint = time.Now()
 		}
 	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		benchmarkPoint("rootCmd", "done")
+	},
 }
 
 func main() {

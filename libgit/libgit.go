@@ -203,7 +203,7 @@ func (g git) GetRootDir() (string, error) {
 }
 
 func (g git) CommitFixup(commitHash string, add bool) (string, error) {
-	args := []string{"commit", "--fixup", commitHash}
+	args := []string{"commit", "-m", fmt.Sprintf("fixup! %s", commitHash)}
 	if add {
 		args = append(args, "-a")
 	}
@@ -279,6 +279,7 @@ func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 			// Hack(raymond): --autosquash only works with interactive rebase, so use
 			// GIT_SEQUENCE_EDITOR=true to accept the changes automatically.
 			env = append(env, "GIT_SEQUENCE_EDITOR=true")
+			args = append(args, "-i")
 		}
 		args = append(args, "--autosquash")
 	}
