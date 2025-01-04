@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.20.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.21.0
 ```
 
 ## Getting started
@@ -67,49 +67,49 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 ╰──────────────────────────────────────────────────╯
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Let&#39;s start things off on the default branch:    │
+│ Let's start things off on the default branch:    │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git checkout main
-Your branch is ahead of &#39;origin/main&#39; by 1 commit.
-  (use &#34;git push&#34; to publish your local commits)
+> git checkout main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Next, let&#39;s create our first branch:             │
+│ Next, let's create our first branch:             │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git checkout -b myfirststack
-&gt; echo &#39;hello world&#39; &gt; myfirststack.txt
-&gt; git add .
-&gt; git commit -m &#39;hello world&#39;
-[myfirststack 65e0091] hello world
- 1 file changed, 1 insertion(&#43;)
+> git checkout -b myfirststack
+> echo 'hello world' > myfirststack.txt
+> git add .
+> git commit -m 'hello world'
+[myfirststack be3a243] hello world
+ 1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Now let&#39;s stack a second branch on top of our    │
+│ Now let's stack a second branch on top of our    │
 │ first:                                           │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git checkout -b myfirststack-pt2
-&gt; echo &#39;have a break&#39; &gt;&gt; myfirststack.txt
-&gt; git commit -am &#39;break&#39;
-[myfirststack-pt2 dbb3ab3] break
- 1 file changed, 1 insertion(&#43;)
-&gt; echo &#39;have a kitkat&#39; &gt;&gt; myfirststack.txt
-&gt; git commit -am &#39;kitkat&#39;
-[myfirststack-pt2 aff5b26] kitkat
- 1 file changed, 1 insertion(&#43;)
+> git checkout -b myfirststack-pt2
+> echo 'have a break' >> myfirststack.txt
+> git commit -am 'break'
+[myfirststack-pt2 d4d7cc5] break
+ 1 file changed, 1 insertion(+)
+> echo 'have a kitkat' >> myfirststack.txt
+> git commit -am 'kitkat'
+[myfirststack-pt2 0515451] kitkat
+ 1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ So far we&#39;ve only used standard Git commands.    │
-│ Let&#39;s see what git stack can do for us already.  │
+│ So far we've only used standard Git commands.    │
+│ Let's see what git stack can do for us already.  │
 │                                                  │
 │ Our current stack has two branches in it, which  │
 │ we can see with:                                 │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack show
+> git stack show
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
@@ -120,12 +120,12 @@ Branches in stack:
 │ can see with:                                    │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack show --log
+> git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* aff5b26 (HEAD -&gt; myfirststack-pt2) kitkat (top)
-  dbb3ab3 break      
-  65e0091 (myfirststack) hello world      
+* 0515451 (HEAD -> myfirststack-pt2) kitkat (top)
+  d4d7cc5 break      
+  be3a243 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -134,22 +134,22 @@ Commits in stack:
 │ for you.                                         │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/83
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/84
+> git stack push
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/86
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/85
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack show --prs
+> git stack show --prs
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/83
+  └── https://github.com/raymondji/git-stack-cli/pull/86
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/84
+  └── https://github.com/raymondji/git-stack-cli/pull/85
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -159,32 +159,32 @@ Branches in stack:
 │ you can do:                                      │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack rebase main
+> git stack rebase main
 Successfully rebased myfirststack-pt2 on main
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Great, we&#39;ve got the basics down for one stack.  │
+│ Great, we've got the basics down for one stack.  │
 │ How do we deal with multiple stacks?             │
-│ Let&#39;s head back to our default branch and create │
+│ Let's head back to our default branch and create │
 │ a second stack.                                  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git checkout main
-Your branch is ahead of &#39;origin/main&#39; by 1 commit.
-  (use &#34;git push&#34; to publish your local commits)
-&gt; git checkout -b mysecondstack
-&gt; echo &#39;buy one get one free&#39; &gt; mysecondstack.txt
-&gt; git add .
-&gt; git commit -m &#39;My second stack&#39;
-[mysecondstack befeabc] My second stack
- 1 file changed, 1 insertion(&#43;)
+> git checkout main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+> git checkout -b mysecondstack
+> echo 'buy one get one free' > mysecondstack.txt
+> git add .
+> git commit -m 'My second stack'
+[mysecondstack ad861fe] My second stack
+ 1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To view all the stacks:                          │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-&gt; git stack list
+> git stack list
   dev (1 branch)
   myfirststack-pt2 (2 branches)
 * mysecondstack (1 branch)
@@ -192,9 +192,9 @@ Your branch is ahead of &#39;origin/main&#39; by 1 commit.
 │                                                  │
 │ Nice! All done chapter 1 of the tutorial.        │
 │                                                  │
-│ In chapter 2 we&#39;ll see how to make changes to    │
+│ In chapter 2 we'll see how to make changes to    │
 │ earlier branches in the stack.                   │
-│ Once you&#39;re ready, continue the tutorial using:  │
+│ Once you're ready, continue the tutorial using:  │
 │ git stack learn --chapter 2                      │
 │                                                  │
 │ To cleanup all the branches/PRs that were        │
