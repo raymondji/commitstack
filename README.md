@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.22.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.23.0
 ```
 
 ## Getting started
@@ -71,7 +71,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 1 commit.
+Your branch is ahead of 'origin/main' by 3 commits.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -82,7 +82,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack d35c4c1] hello world
+[myfirststack c9738bf] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -94,11 +94,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 f4a8aa9] break
+[myfirststack-pt2 5fff99a] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 9d7d56b] kitkat
+[myfirststack-pt2 91edb39] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -123,9 +123,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 9d7d56b (HEAD -> myfirststack-pt2) kitkat (top)
-  f4a8aa9 break      
-  d35c4c1 (myfirststack) hello world      
+* 91edb39 (HEAD -> myfirststack-pt2) kitkat (top)
+  5fff99a break      
+  c9738bf (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -135,8 +135,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/87
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/88
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/92
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/91
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -146,10 +146,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/88
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/87
+  └── https://github.com/raymondji/git-stack-cli/pull/92
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/88
+  └── https://github.com/raymondji/git-stack-cli/pull/91
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -170,13 +170,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 1 commit.
+Your branch is ahead of 'origin/main' by 3 commits.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 2b1cb19] My second stack
+[mysecondstack 11d2e37] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
