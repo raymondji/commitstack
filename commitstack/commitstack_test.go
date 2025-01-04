@@ -63,12 +63,6 @@ func TestInferStacks(t *testing.T) {
 								LocalBranches: []string{"dev", "dev2"},
 							},
 						},
-						ValidationErrors: []error{
-							commitstack.BranchCollisionError{
-								StackName: "dev",
-								Branches:  []string{"dev", "dev2"},
-							},
-						},
 					},
 				},
 			},

@@ -13,10 +13,11 @@ import (
 )
 
 type Commit struct {
-	Hash          string
-	Author        string
-	Subject       string
-	Date          string
+	Hash    string
+	Author  string
+	Subject string
+	Date    string
+	// Branches are sorted in lexical order, imposing a total order
 	LocalBranches []string
 }
 
@@ -33,17 +34,6 @@ func (e DivergenceError) Error() string {
 	} else {
 		return fmt.Sprintf("Stack %s has diverged from stacks %s", e.StackName, strings.Join(e.OtherStackNames, ", "))
 	}
-}
-
-type BranchCollisionError struct {
-	StackName string
-	Branches  []string
-}
-
-func (e BranchCollisionError) Error() string {
-	return fmt.Sprintf(
-		"Stack %s contains multiple branches (%v) pointing to the same commit",
-		e.StackName, strings.Join(e.Branches, ", "))
 }
 
 type MergeCommitError struct {
@@ -73,9 +63,9 @@ type Stack struct {
 	ValidationErrors []error
 }
 
-// AllBranches returns all branches associated with all commits in the stack.
+// OrderedBranches returns all branches associated with all commits in the stack.
 // Guaranteed to return at least one branch.
-func (s Stack) AllBranches() []string {
+func (s Stack) OrderedBranches() []string {
 	var out []string
 	for _, c := range s.Commits {
 		if len(c.LocalBranches) == 0 {
@@ -85,26 +75,6 @@ func (s Stack) AllBranches() []string {
 	}
 	assert(len(out) > 0, "commitstack must contain at least one branch")
 	return out
-}
-
-// SingleBranchPerCommit returns a list of branch names where
-// each branch name must be associated with a unique commit.
-// If any commits are associated with multiple branches, this returns an error.
-// Guaranteed to return at least one branch.
-func (s Stack) SingleBranchPerCommit() ([]string, error) {
-	var out []string
-	for _, c := range s.Commits {
-		switch len(c.LocalBranches) {
-		case 0:
-			continue
-		case 1:
-			out = append(out, c.LocalBranches[0])
-		default:
-			assert(len(s.ValidationErrors) > 0, "stack should have a branch collision validation error")
-			return nil, fmt.Errorf("stack contains multiple branches")
-		}
-	}
-	return out, nil
 }
 
 // Name returns a valid git reference (e.g. a branch ref or commit hash)
@@ -190,17 +160,6 @@ func InferStacks(git Git, log libgit.Log) (InferenceResult, error) {
 					OtherStackNames: otherStackNames,
 				})
 				stacks[i] = s
-			}
-		}
-		for i, s := range stacks {
-			for _, c := range s.Commits {
-				if len(c.LocalBranches) > 1 {
-					s.ValidationErrors = append(s.ValidationErrors, BranchCollisionError{
-						StackName: s.Name(),
-						Branches:  c.LocalBranches,
-					})
-					stacks[i] = s
-				}
 			}
 		}
 

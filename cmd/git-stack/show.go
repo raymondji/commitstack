@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
@@ -97,7 +96,7 @@ var showCmd = &cobra.Command{
 		if showPRsFlag {
 			var actionErr error
 			action := func() {
-				prs, err := concurrent.Map(ctx, stack.AllBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
+				prs, err := concurrent.Map(ctx, stack.OrderedBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
 					pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
@@ -150,9 +149,15 @@ var showCmd = &cobra.Command{
 				var branchCol string
 				if len(c.LocalBranches) > 0 {
 					var branchParts []string
+					const headMarker = "HEAD ->"
 					for _, b := range c.LocalBranches {
 						if b == currBranch {
-							branchParts = append(branchParts, fmt.Sprintf("%s %s", theme.PrimaryColor.Render("HEAD ->"), theme.SecondaryColor.Render(b)))
+							branchParts = append(
+								[]string{
+									fmt.Sprintf("%s %s", theme.PrimaryColor.Render(headMarker), theme.SecondaryColor.Render(b)),
+								},
+								branchParts...,
+							)
 						} else {
 							branchParts = append(branchParts, theme.SecondaryColor.Render(b))
 						}
@@ -169,44 +174,36 @@ var showCmd = &cobra.Command{
 		} else {
 			fmt.Println("Branches in stack:")
 			for i, c := range stack.Commits {
-				var prefix, branchesSegment, suffix string
 				if len(c.LocalBranches) == 0 && c.Hash == currCommit {
 					fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
 					continue
 				} else if len(c.LocalBranches) == 0 {
 					continue
-				} else {
-					var names []string
-					for _, b := range c.LocalBranches {
-						if b == currBranch {
-							names = append(names, theme.PrimaryColor.Render(b))
-						} else {
-							names = append(names, b)
-						}
+				}
+				for j, branch := range c.LocalBranches {
+					var prefix, branchesSegment, suffix string
+					if i == 0 && j == 0 {
+						suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 					}
-					branchesSegment = strings.Join(names, ", ")
-				}
-				if i == 0 {
-					suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-				}
-				if slices.Contains(c.LocalBranches, currBranch) {
-					prefix = "*"
-				} else {
-					prefix = " "
-				}
+					if branch == currBranch {
+						prefix = "*"
+						branchesSegment = theme.PrimaryColor.Render(branch)
+					} else {
+						prefix = " "
+						branchesSegment = branch
+					}
 
-				fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
-				if showPRsFlag {
-					for _, b := range c.LocalBranches {
-						if pr, ok := prsBySrcBranch[b]; ok {
+					fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
+					if showPRsFlag {
+						if pr, ok := prsBySrcBranch[branch]; ok {
 							fmt.Printf("  └── %s\n", pr.WebURL)
 						} else {
 							fmt.Printf("  └── Not created yet\n")
 						}
-					}
 
-					if i != len(stack.Commits)-1 {
-						fmt.Println()
+						if i != len(stack.Commits)-1 {
+							fmt.Println()
+						}
 					}
 				}
 			}
