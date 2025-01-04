@@ -114,7 +114,7 @@ var showCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			fmt.Printf("On stack %s\n", stack.Name())
+			fmt.Printf("In stack %s\n", stack.Name())
 		}
 
 		if showLogFlag {
