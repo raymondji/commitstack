@@ -18,8 +18,8 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize config for the current git repo",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		git, err := libgit.New()
-		if err != nil {
+		git := libgit.New()
+		if err := git.ValidateGitInstall(); err != nil {
 			return err
 		}
 

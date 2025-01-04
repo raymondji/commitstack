@@ -20,10 +20,7 @@ type deps struct {
 }
 
 func initDeps() (deps, error) {
-	git, err := libgit.New()
-	if err != nil {
-		return deps{}, err
-	}
+	git := libgit.New()
 	benchmarkPoint("initDeps", "done initiating git")
 
 	remote, err := git.GetRemote()

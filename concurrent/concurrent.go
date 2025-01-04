@@ -6,6 +6,21 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+func Run(ctx context.Context, funcs ...func(ctx context.Context) error) error {
+	g, ctx := errgroup.WithContext(ctx)
+	for _, f := range funcs {
+		g.Go(func() error {
+			return f(ctx)
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ForEach[T any](
 	ctx context.Context,
 	values []T,

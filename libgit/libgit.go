@@ -15,6 +15,7 @@ import (
 var minGitVersion = version{major: 2, minor: 38}
 
 type Git interface {
+	ValidateGitInstall() error
 	IsRepoClean() (bool, error)
 	GetRemote() (Remote, error)
 	GetRootDir() (string, error)
@@ -33,24 +34,8 @@ type Git interface {
 
 type git struct{}
 
-func New() (Git, error) {
-	ok, err := exec.InPath("git")
-	if err != nil {
-		return git{}, err
-	}
-	if !ok {
-		return git{}, fmt.Errorf("git is not installed")
-	}
-
-	g := git{}
-	v, err := g.getVersion()
-	if err != nil {
-		return git{}, fmt.Errorf("failed to get git version")
-	}
-	if v.lessThan(minGitVersion) {
-		return git{}, fmt.Errorf("the minimum supported git version is %s, yours is %s", minGitVersion, v)
-	}
-	return g, nil
+func New() Git {
+	return git{}
 }
 
 type Upstream struct {
@@ -69,6 +54,25 @@ func (v version) lessThan(other version) bool {
 
 func (v version) String() string {
 	return fmt.Sprintf("%d.%d.0", v.major, v.minor)
+}
+
+func (g git) ValidateGitInstall() error {
+	ok, err := exec.InPath("git")
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("git is not installed")
+	}
+
+	v, err := g.getVersion()
+	if err != nil {
+		return fmt.Errorf("failed to get git version")
+	}
+	if v.lessThan(minGitVersion) {
+		return fmt.Errorf("the minimum supported git version is %s, yours is %s", minGitVersion, v)
+	}
+	return nil
 }
 
 func (g git) getVersion() (version, error) {
