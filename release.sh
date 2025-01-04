@@ -15,6 +15,7 @@ readme/generate.sh
 git add .
 git commit -am "Release $CLI_VERSION"
 git push
+
 git tag "$CLI_VERSION"
 git push origin "$CLI_VERSION"
 go install "github.com/raymondji/git-stack-cli/cmd/git-stack@$CLI_VERSION"
