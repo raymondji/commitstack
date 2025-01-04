@@ -38,7 +38,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.24.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.25.0
 ```
 
 ## Getting started
@@ -73,7 +73,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 2 commits.
+Your branch is ahead of 'origin/main' by 1 commit.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -84,7 +84,7 @@ Your branch is ahead of 'origin/main' by 2 commits.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 6f4dd2b] hello world
+[myfirststack 7b47e39] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -96,11 +96,11 @@ Your branch is ahead of 'origin/main' by 2 commits.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 fc0124e] break
+[myfirststack-pt2 65cb2d4] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 9c10216] kitkat
+[myfirststack-pt2 070a945] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -125,9 +125,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 9c10216 (HEAD -> myfirststack-pt2) kitkat (top)
-  fc0124e break      
-  6f4dd2b (myfirststack) hello world      
+* 070a945 (HEAD -> myfirststack-pt2) kitkat (top)
+  65cb2d4 break      
+  7b47e39 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -137,8 +137,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/94
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/93
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/96
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/95
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -148,10 +148,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/93
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/94
+  └── https://github.com/raymondji/git-stack-cli/pull/96
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/93
+  └── https://github.com/raymondji/git-stack-cli/pull/95
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -172,13 +172,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 2 commits.
+Your branch is ahead of 'origin/main' by 1 commit.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack a11db9b] My second stack
+[mysecondstack 3bfd59a] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -226,4 +226,4 @@ Merge commits still pose a problem. It's easy to reason about a linear series of
 ## Attribution
 
 Some code is adapted from sections of https://github.com/aviator-co/av (MIT license). A copy of av's license is included at `attribution/aviator-co/av/LICENSE`.
-- `exec.go` is adapted from https://github.com/aviator-co/av/blob/fbcb5bfc0f19c8a7924e309cb1e86678a9761daa/internal/git/git.go#L178
+- `exec.go` is adapted from [aviator-co/av/internal/git/git.go](https://github.com/aviator-co/av/blob/fbcb5bfc0f19c8a7924e309cb1e86678a9761daa/internal/git/git.go#L178)
