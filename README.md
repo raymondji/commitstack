@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.19.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.20.0
 ```
 
 ## Getting started
@@ -71,7 +71,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 &gt; git checkout main
-Your branch is ahead of &#39;origin/main&#39; by 5 commits.
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
   (use &#34;git push&#34; to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -82,7 +82,7 @@ Your branch is ahead of &#39;origin/main&#39; by 5 commits.
 &gt; echo &#39;hello world&#39; &gt; myfirststack.txt
 &gt; git add .
 &gt; git commit -m &#39;hello world&#39;
-[myfirststack 67e46e0] hello world
+[myfirststack 65e0091] hello world
  1 file changed, 1 insertion(&#43;)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -94,11 +94,11 @@ Your branch is ahead of &#39;origin/main&#39; by 5 commits.
 &gt; git checkout -b myfirststack-pt2
 &gt; echo &#39;have a break&#39; &gt;&gt; myfirststack.txt
 &gt; git commit -am &#39;break&#39;
-[myfirststack-pt2 befdc2b] break
+[myfirststack-pt2 dbb3ab3] break
  1 file changed, 1 insertion(&#43;)
 &gt; echo &#39;have a kitkat&#39; &gt;&gt; myfirststack.txt
 &gt; git commit -am &#39;kitkat&#39;
-[myfirststack-pt2 8e97c25] kitkat
+[myfirststack-pt2 aff5b26] kitkat
  1 file changed, 1 insertion(&#43;)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -123,9 +123,9 @@ Branches in stack:
 &gt; git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 8e97c25 (HEAD -&gt; myfirststack-pt2) kitkat (top)
-  befdc2b break      
-  67e46e0 (myfirststack) hello world      
+* aff5b26 (HEAD -&gt; myfirststack-pt2) kitkat (top)
+  dbb3ab3 break      
+  65e0091 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -135,8 +135,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 &gt; git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/82
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/81
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/83
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/84
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -146,10 +146,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/81
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/82
+  └── https://github.com/raymondji/git-stack-cli/pull/83
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/81
+  └── https://github.com/raymondji/git-stack-cli/pull/84
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -170,13 +170,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 &gt; git checkout main
-Your branch is ahead of &#39;origin/main&#39; by 5 commits.
+Your branch is ahead of &#39;origin/main&#39; by 1 commit.
   (use &#34;git push&#34; to publish your local commits)
 &gt; git checkout -b mysecondstack
 &gt; echo &#39;buy one get one free&#39; &gt; mysecondstack.txt
 &gt; git add .
 &gt; git commit -m &#39;My second stack&#39;
-[mysecondstack 7e4c183] My second stack
+[mysecondstack befeabc] My second stack
  1 file changed, 1 insertion(&#43;)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
