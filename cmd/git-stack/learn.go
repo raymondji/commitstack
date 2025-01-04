@@ -12,9 +12,9 @@ var learnChapterFlag int
 var learnModeFlag string
 
 const (
-	learnModePrint   string = "print"
-	learnModeExec    string = "exec"
-	learnModeCleanup string = "cleanup"
+	learnModePrint string = "print"
+	learnModeExec  string = "exec"
+	learnModeClean string = "clean"
 )
 
 func init() {
@@ -66,7 +66,7 @@ var learnCmd = &cobra.Command{
 			if err := sample.Execute(); err != nil {
 				return err
 			}
-		case learnModeCleanup:
+		case learnModeClean:
 			if err := sample.Cleanup(); err != nil {
 				return err
 			}
