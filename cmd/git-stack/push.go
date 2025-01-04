@@ -16,8 +16,9 @@ import (
 )
 
 var pushCmd = &cobra.Command{
-	Use:   "push",
-	Short: "Push all branches in the current stack and create/update pull requests",
+	Use:     "push",
+	Aliases: []string{"p"},
+	Short:   "Push all branches in the current stack and create/update pull requests",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {

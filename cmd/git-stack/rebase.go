@@ -17,10 +17,11 @@ func init() {
 }
 
 var rebaseCmd = &cobra.Command{
-	Use:   "rebase [newbase]",
-	Short: "Rebase the current stack",
-	Long:  "A convenience wrapper around git rebase, with some nicer defaults for stacked branches.",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "rebase [newbase]",
+	Aliases: []string{"r"},
+	Short:   "Rebase the current stack",
+	Long:    "A convenience wrapper around git rebase, with some nicer defaults for stacked branches.",
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {

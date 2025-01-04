@@ -24,9 +24,10 @@ func init() {
 }
 
 var showCmd = &cobra.Command{
-	Use:   "show [stack]",
-	Short: "Show information about the current or specified stack",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "show [stack]",
+	Aliases: []string{"sh"},
+	Short:   "Show information about the current or specified stack",
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if showPRsFlag && showLogFlag {
 			return fmt.Errorf("--log and --prs are incompatible")

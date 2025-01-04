@@ -18,9 +18,10 @@ func init() {
 }
 
 var fixupCmd = &cobra.Command{
-	Use:   "fixup [branch]",
-	Short: "Create a commit to fixup a branch in the current stack",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "fixup [branch]",
+	Aliases: []string{"f"},
+	Short:   "Create a commit to fixup a branch in the current stack",
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {
