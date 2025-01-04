@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 SAMPLE_FILE=$(mktemp)
 go run ./cmd/git-stack learn --chapter 1 --mode=exec > "$SAMPLE_FILE"
