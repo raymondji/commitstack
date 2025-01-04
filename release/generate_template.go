@@ -6,17 +6,17 @@ import (
 	"log"
 	"os"
 	"text/template"
+
+	"github.com/raymondji/git-stack-cli/version"
 )
 
 var (
 	tmpl                 = flag.String("template", "", "Which template to generate")
-	version              = flag.String("version", "", "Version of the CLI (required)")
 	sampleOutputFilePath = flag.String("sample-output", "", "Path to the sample output file (required)")
 )
 
 const (
-	templateVersion = "version"
-	templateReadme  = "readme"
+	templateReadme = "readme"
 )
 
 func main() {
@@ -27,22 +27,7 @@ func main() {
 	}
 
 	switch *tmpl {
-	case templateVersion:
-		if *version == "" {
-			log.Fatal("Error: --version is required")
-		}
-
-		if err := generateTemplate("version/version.go.tmpl", "version/version.go", map[string]string{
-			"Version": *version,
-		}); err != nil {
-			log.Fatalf("Failed to generate version file: %v", err)
-		}
-
-		log.Println("Generated version/version.go")
 	case templateReadme:
-		if *version == "" {
-			log.Fatal("Error: --version is required")
-		}
 		if *sampleOutputFilePath == "" {
 			log.Fatal("Error: --sample-output is required")
 		}
@@ -53,7 +38,7 @@ func main() {
 		}
 
 		if err := generateTemplate("README.md.tmpl", "README.md", map[string]string{
-			"Version":      *version,
+			"Version":      version.Version,
 			"SampleOutput": sampleOutputString,
 		}); err != nil {
 			log.Fatalf("Failed to generate README file: %v", err)
