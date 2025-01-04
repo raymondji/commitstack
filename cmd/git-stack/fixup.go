@@ -36,11 +36,11 @@ var fixupCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		currBranch, err := git.GetCurrentBranch()
+		currCommit, err := git.GetShortCommitHash("HEAD")
 		if err != nil {
 			return err
 		}
-		stack, err := commitstack.GetCurrent(stacks.InferredStacks, currBranch)
+		stack, err := commitstack.GetCurrent(stacks.InferredStacks, currCommit)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ var fixupCmd = &cobra.Command{
 			}
 		}
 
-		hash, err := git.GetCommitHash(branchToFix)
+		hash, err := git.GetShortCommitHash(branchToFix)
 		if err != nil {
 			return err
 		}

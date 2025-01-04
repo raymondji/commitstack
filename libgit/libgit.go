@@ -22,7 +22,7 @@ type Git interface {
 	CommitEmpty(msg string) error
 	GetBranchesContainingCommit(commitHash string) ([]string, error)
 	GetCurrentBranch() (string, error)
-	GetCommitHash(branch string) (string, error)
+	GetShortCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string, startPoint string) error
@@ -234,8 +234,8 @@ func (g git) GetCurrentBranch() (string, error) {
 	return output.Stdout, nil
 }
 
-func (g git) GetCommitHash(branch string) (string, error) {
-	output, err := exec.Run("git", exec.WithArgs("rev-parse", branch))
+func (g git) GetShortCommitHash(branch string) (string, error) {
+	output, err := exec.Run("git", exec.WithArgs("rev-parse", "--short", branch))
 	if err != nil {
 		return "", fmt.Errorf("failed to get commit hash for branch %s, err: %v", branch, err)
 	}

@@ -42,6 +42,10 @@ var showCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		currCommit, err := git.GetShortCommitHash("HEAD")
+		if err != nil {
+			return err
+		}
 		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
@@ -56,7 +60,7 @@ var showCmd = &cobra.Command{
 
 		var stack commitstack.Stack
 		if len(args) == 0 {
-			stack, err = commitstack.GetCurrent(inference.InferredStacks, currBranch)
+			stack, err = commitstack.GetCurrent(inference.InferredStacks, currCommit)
 			if err != nil {
 				return err
 			}
@@ -115,25 +119,45 @@ var showCmd = &cobra.Command{
 
 		if showLogFlag {
 			fmt.Println("Commits in stack:")
-			for _, c := range stack.Commits {
-				var hereMarker string
-				if slices.Contains(c.LocalBranches, currBranch) {
-					hereMarker = "*"
+			for i, c := range stack.Commits {
+				var hereMarker, topMarker string
+				if i == 0 {
+					topMarker = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 				} else {
-					hereMarker = " "
+					topMarker = strings.Repeat(" ", 6)
 				}
-				var branchCol string
-				if len(c.LocalBranches) > 0 {
-					branchCol = fmt.Sprintf("(%s) ", theme.SecondaryColor.Render(strings.Join(c.LocalBranches, ", ")))
+				if currCommit == c.Hash {
+					hereMarker = "* "
+				} else {
+					hereMarker = "  "
 				}
 
-				fmt.Printf("%s %s %s%s\n", hereMarker, theme.PrimaryColor.Render(c.Hash), branchCol, c.Subject)
+				var branchCol string
+				if len(c.LocalBranches) > 0 {
+					var branchParts []string
+					for _, b := range c.LocalBranches {
+						if b == currBranch {
+							branchParts = append(branchParts, fmt.Sprintf("%s %s", theme.PrimaryColor.Render("HEAD ->"), theme.SecondaryColor.Render(b)))
+						} else {
+							branchParts = append(branchParts, theme.SecondaryColor.Render(b))
+						}
+					}
+					branchCol = fmt.Sprintf("(%s) ", strings.Join(branchParts, ", "))
+				} else if currCommit == c.Hash {
+					branchCol = fmt.Sprintf("(%s) ", theme.PrimaryColor.Render("HEAD"))
+				}
+
+				commitHash := theme.QuaternaryColor.Render(c.Hash)
+				fmt.Printf("%s%s %s%s%s\n", hereMarker, commitHash, branchCol, c.Subject, topMarker)
 			}
 		} else {
 			fmt.Println("Branches in stack:")
 			for i, c := range stack.Commits {
 				var prefix, branchesSegment, suffix string
-				if len(c.LocalBranches) == 0 {
+				if len(c.LocalBranches) == 0 && c.Hash == currCommit {
+					fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
+					continue
+				} else if len(c.LocalBranches) == 0 {
 					continue
 				} else {
 					var names []string
@@ -147,7 +171,7 @@ var showCmd = &cobra.Command{
 					branchesSegment = strings.Join(names, ", ")
 				}
 				if i == 0 {
-					suffix = "(top)"
+					suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 				}
 				if slices.Contains(c.LocalBranches, currBranch) {
 					prefix = "*"
@@ -155,7 +179,7 @@ var showCmd = &cobra.Command{
 					prefix = " "
 				}
 
-				fmt.Printf("%s %s %s\n", prefix, branchesSegment, suffix)
+				fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
 				if showPRsFlag {
 					for _, b := range c.LocalBranches {
 						if pr, ok := prsBySrcBranch[b]; ok {

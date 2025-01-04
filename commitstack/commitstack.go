@@ -116,19 +116,19 @@ func (s Stack) Name() string {
 	return tip.Hash
 }
 
-func (s Stack) IsCurrent(currentBranch string) bool {
+func (s Stack) IsCurrent(currCommit string) bool {
 	for _, c := range s.Commits {
-		if slices.Contains(c.LocalBranches, currentBranch) {
+		if c.Hash == currCommit {
 			return true
 		}
 	}
 	return false
 }
 
-func GetCurrent(stacks []Stack, currentBranch string) (Stack, error) {
+func GetCurrent(stacks []Stack, currCommit string) (Stack, error) {
 	var currStacks []Stack
 	for _, s := range stacks {
-		if s.IsCurrent(currentBranch) {
+		if s.IsCurrent(currCommit) {
 			currStacks = append(currStacks, s)
 		}
 	}

@@ -17,7 +17,7 @@ var listCmd = &cobra.Command{
 		}
 		git, defaultBranch, theme := deps.git, deps.repoCfg.DefaultBranch, deps.theme
 
-		currBranch, err := git.GetCurrentBranch()
+		currCommit, err := git.GetShortCommitHash("HEAD")
 		if err != nil {
 			return err
 		}
@@ -34,8 +34,8 @@ var listCmd = &cobra.Command{
 		}()
 
 		for _, s := range inference.InferredStacks {
-			var name string
-			if s.IsCurrent(currBranch) {
+			var name, suffix string
+			if s.IsCurrent(currCommit) {
 				name = "* " + theme.PrimaryColor.Render(s.Name())
 			} else {
 				name = "  " + s.Name()
@@ -43,10 +43,12 @@ var listCmd = &cobra.Command{
 
 			all := s.AllBranches()
 			if len(all) == 1 {
-				fmt.Printf("%s (1 branch)\n", name)
+				suffix = theme.TertiaryColor.Render("(1 branch)")
 			} else {
-				fmt.Printf("%s (%d branches)\n", name, len(s.AllBranches()))
+				suffix = theme.TertiaryColor.Render(fmt.Sprintf("(%d branches)", len(s.AllBranches())))
 			}
+
+			fmt.Printf("%s %s\n", name, suffix)
 		}
 
 		return nil

@@ -45,7 +45,11 @@ var switchCmd = &cobra.Command{
 
 		var currStack *commitstack.Stack
 		if switchBranchFlag {
-			stack, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+			currCommit, err := git.GetShortCommitHash("HEAD")
+			if err != nil {
+				return err
+			}
+			stack, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
 			if err != nil {
 				return err
 			}

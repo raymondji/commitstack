@@ -18,9 +18,10 @@ type Config struct {
 }
 
 type ThemeConfig struct {
-	PrimaryColor   string `json:"primaryColor"`
-	SecondaryColor string `json:"secondaryColor"`
-	TertiaryColor  string `json:"tertiaryColor"`
+	PrimaryColor    string `json:"primaryColor"`
+	SecondaryColor  string `json:"secondaryColor"`
+	TertiaryColor   string `json:"tertiaryColor"`
+	QuaternaryColor string `json:"quarternaryColor"`
 }
 
 type RepoConfig struct {

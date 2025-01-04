@@ -26,10 +26,6 @@ var pushCmd = &cobra.Command{
 		git, defaultBranch, host := deps.git, deps.repoCfg.DefaultBranch, deps.host
 
 		ctx := context.Background()
-		currBranch, err := git.GetCurrentBranch()
-		if err != nil {
-			return err
-		}
 		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
@@ -38,7 +34,11 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+		currCommit, err := git.GetShortCommitHash("HEAD")
+		if err != nil {
+			return err
+		}
+		s, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
 		if err != nil {
 			return err
 		}

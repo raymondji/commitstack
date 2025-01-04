@@ -28,10 +28,6 @@ var rebaseCmd = &cobra.Command{
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
-		currBranch, err := git.GetCurrentBranch()
-		if err != nil {
-			return err
-		}
 		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
@@ -40,7 +36,15 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := commitstack.GetCurrent(inference.InferredStacks, currBranch)
+		currCommit, err := git.GetShortCommitHash("HEAD")
+		if err != nil {
+			return err
+		}
+		s, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
+		if err != nil {
+			return err
+		}
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
