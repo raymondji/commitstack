@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"log"
 	"os"
+	"text/template"
 )
 
 var (
