@@ -6,7 +6,6 @@ import (
 
 	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/concurrent"
-	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +23,7 @@ var listCmd = &cobra.Command{
 		benchmarkPoint("listCmd", "got deps")
 
 		var currCommit string
-		var log libgit.Log
+		var inference commitstack.InferenceResult
 		err = concurrent.Run(
 			context.Background(),
 			func(ctx context.Context) error {
@@ -33,21 +32,18 @@ var listCmd = &cobra.Command{
 				return err
 			},
 			func(ctx context.Context) error {
-				var err error
-				log, err = git.LogAll(defaultBranch)
+				log, err := git.LogAll(defaultBranch)
+				if err != nil {
+					return err
+				}
+				inference, err = commitstack.InferStacks(git, log)
 				return err
 			},
 		)
 		if err != nil {
 			return err
 		}
-		benchmarkPoint("listCmd", "got git log and git commit")
-
-		inference, err := commitstack.InferStacks(git, log)
-		if err != nil {
-			return err
-		}
-		benchmarkPoint("listCmd", "done stack inference")
+		benchmarkPoint("listCmd", "got curr commit and stack inference")
 		defer func() {
 			printProblems(inference)
 		}()

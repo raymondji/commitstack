@@ -38,23 +38,35 @@ var showCmd = &cobra.Command{
 			return err
 		}
 		git, defaultBranch, host, theme := deps.git, deps.repoCfg.DefaultBranch, deps.host, deps.theme
+		benchmarkPoint("listCmd", "got deps")
 
-		currBranch, err := git.GetCurrentBranch()
+		var currBranch, currCommit string
+		var inference commitstack.InferenceResult
+		err = concurrent.Run(
+			context.Background(),
+			func(ctx context.Context) error {
+				var err error
+				currCommit, err = git.GetShortCommitHash("HEAD")
+				return err
+			},
+			func(ctx context.Context) error {
+				var err error
+				currBranch, err = git.GetCurrentBranch()
+				return err
+			},
+			func(ctx context.Context) error {
+				log, err := git.LogAll(defaultBranch)
+				if err != nil {
+					return err
+				}
+				inference, err = commitstack.InferStacks(git, log)
+				return err
+			},
+		)
 		if err != nil {
 			return err
 		}
-		currCommit, err := git.GetShortCommitHash("HEAD")
-		if err != nil {
-			return err
-		}
-		log, err := git.LogAll(defaultBranch)
-		if err != nil {
-			return err
-		}
-		inference, err := commitstack.InferStacks(git, log)
-		if err != nil {
-			return err
-		}
+		benchmarkPoint("listCmd", "got curr commit, curr branch, and stack inference")
 		defer func() {
 			printProblems(inference)
 		}()
@@ -78,6 +90,7 @@ var showCmd = &cobra.Command{
 				return fmt.Errorf("no stack named: %s", wantStack)
 			}
 		}
+		benchmarkPoint("listCmd", "got desired stack")
 
 		ctx := context.Background()
 		prsBySrcBranch := map[string]githost.PullRequest{}
@@ -112,6 +125,7 @@ var showCmd = &cobra.Command{
 			if actionErr != nil {
 				return actionErr
 			}
+			benchmarkPoint("listCmd", "fetched pull requests")
 		}
 
 		if len(args) == 0 {
@@ -151,6 +165,7 @@ var showCmd = &cobra.Command{
 				commitHash := theme.QuaternaryColor.Render(c.Hash)
 				fmt.Printf("%s%s %s%s%s\n", hereMarker, commitHash, branchCol, c.Subject, topMarker)
 			}
+			benchmarkPoint("listCmd", "done printing log")
 		} else {
 			fmt.Println("Branches in stack:")
 			for i, c := range stack.Commits {
@@ -195,6 +210,7 @@ var showCmd = &cobra.Command{
 					}
 				}
 			}
+			benchmarkPoint("listCmd", "done printing branches")
 		}
 
 		return nil
