@@ -9,6 +9,11 @@ if [ -z "$CLI_VERSION" ]; then
   exit 1
 fi
 
+if git rev-parse "$CLI_VERSION" >/dev/null 2>&1; then
+  echo "Tag '$CLI_VERSION' already exists."
+  exit 1
+fi
+
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "Error: Your working directory has uncommitted changes. Please commit or stash them before running this script."
   exit 1
