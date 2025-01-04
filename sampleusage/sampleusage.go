@@ -71,7 +71,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 			"git stack learn --chapter 2",
 			"",
 			"To cleanup all the branches/PRs that were created, run:",
-			"git stack learn --chapter 1 --cleanup",
+			"git stack learn --chapter 1 --mode=clean",
 		),
 	)
 	branchesToCleanup := []string{
