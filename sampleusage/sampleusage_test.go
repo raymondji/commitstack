@@ -16,9 +16,7 @@ func TestBasics(t *testing.T) {
 		t.Skip()
 	}
 
-	git, err := libgit.New()
-	require.NoError(t, err)
-
+	git := libgit.New()
 	remote, err := git.GetRemote()
 	require.NoError(t, err)
 

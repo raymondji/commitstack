@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.16.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.17.0
 ```
 
 ## Getting started
