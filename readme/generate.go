@@ -11,43 +11,29 @@ import (
 )
 
 var (
-	tmpl                 = flag.String("template", "", "Which template to generate")
 	sampleOutputFilePath = flag.String("sample-output", "", "Path to the sample output file (required)")
-)
-
-const (
-	templateReadme = "readme"
 )
 
 func main() {
 	flag.Parse()
 
-	if *tmpl == "" {
-		log.Fatal("Error: --template is required")
+	if *sampleOutputFilePath == "" {
+		log.Fatal("Error: --sample-output is required")
 	}
 
-	switch *tmpl {
-	case templateReadme:
-		if *sampleOutputFilePath == "" {
-			log.Fatal("Error: --sample-output is required")
-		}
-
-		sampleOutputString, err := readFileContents(*sampleOutputFilePath)
-		if err != nil {
-			log.Fatalf("Failed to read sample output file: %v", err)
-		}
-
-		if err := generateTemplate("README.md.tmpl", "README.md", map[string]string{
-			"Version":      version.Version,
-			"SampleOutput": sampleOutputString,
-		}); err != nil {
-			log.Fatalf("Failed to generate README file: %v", err)
-		}
-
-		log.Println("Generated README.md")
-	default:
-		log.Fatal("Error: invalid template", *tmpl)
+	sampleOutputString, err := readFileContents(*sampleOutputFilePath)
+	if err != nil {
+		log.Fatalf("Failed to read sample output file: %v", err)
 	}
+
+	if err := generateTemplate("README.md.tmpl", "README.md", map[string]string{
+		"Version":      version.Version,
+		"SampleOutput": sampleOutputString,
+	}); err != nil {
+		log.Fatalf("Failed to generate README file: %v", err)
+	}
+
+	log.Println("Generated README.md")
 }
 
 func readFileContents(filePath string) (string, error) {
