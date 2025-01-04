@@ -13,14 +13,14 @@ https://graphite.dev/guides/stacked-diffs has a good overview on what it is and 
 
 ## Where does native Git fall short with stacking?
 
-Stacking natively with Git is completely doable, but cumbersome.
+Stacking branches natively with Git is completely doable, but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
 ## How does `git stack` compare to `<other stacking tool>`?
 
-There are two main areas where `git stack` differs from most of the existing tools:
-- `git stack` is designed to feel like a minimal addition to the Git CLI. It works with existing Git concepts and functionalty (like `--update-refs`), and aims to unintrusively fill in the gaps. Unlike most stacking tools, it's also stateless, so there's no need to keep state in sync between Git and `git stack`. Instead, it works by automatically inferring stacks from the structure of your commits.
+There are two main areas where `git stack` differs from most existing tools:
+- `git stack` is designed to feel like a minimal addition to the Git CLI. It works with existing Git concepts and functionality (like `--update-refs`), and aims to unintrusively fill in the gaps. Unlike most stacking tools, it's also stateless, so there's no need to keep state in sync between Git and `git stack`. Instead, it works by automatically inferring stacks from the structure of your commits.
 - `git stack` integrates with Gitlab (and Github). I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github. Besides `git stack`, some other projects I've found with Gitlab support include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the new [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. They all work pretty differently and have different feature sets.
 
 ## Limitations
