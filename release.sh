@@ -3,9 +3,8 @@ set -e
 
 go build ./...
 go test ./...
-go install ./cmd/git-stack
 
-CLI_VERSION=$(git stack version)
+CLI_VERSION=$(go run ./cmd/git-stack version)
 if git rev-parse "$CLI_VERSION" >/dev/null 2>&1; then
   echo "Tag '$CLI_VERSION' already exists."
   exit 1
