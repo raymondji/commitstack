@@ -20,7 +20,7 @@ git stack learn --chapter 1 --mode=exec > "$SAMPLE_FILE"
 git checkout main
 git stack learn --chapter 1 --mode=clean
 
-go run release/generate_template.go --template readme --version "$CLI_VERSION" --sample-output "$SAMPLE_FILE"
+go run release/generate_template.go --template readme --sample-output "$SAMPLE_FILE"
 git add .
 git commit -m "Release $CLI_VERSION"
 git push
