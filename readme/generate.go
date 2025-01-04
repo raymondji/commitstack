@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("Failed to read sample output file: %v", err)
 	}
 
-	if err := generateTemplate("README.md.tmpl", "README.md", map[string]string{
+	if err := generateTemplate("README.md.tmpl", "readme/README.md", map[string]string{
 		"Version":      version.Version,
 		"SampleOutput": sampleOutputString,
 	}); err != nil {
