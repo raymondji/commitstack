@@ -18,18 +18,23 @@ var listCmd = &cobra.Command{
 		}
 		git, defaultBranch, theme := deps.git, deps.repoCfg.DefaultBranch, deps.theme
 
+		benchmarkPoint("listCmd", "got deps")
 		currCommit, err := git.GetShortCommitHash("HEAD")
 		if err != nil {
 			return err
 		}
+		benchmarkPoint("listCmd", "got current commit")
 		log, err := git.LogAll(defaultBranch)
 		if err != nil {
 			return err
 		}
+		benchmarkPoint("listCmd", "done git log")
+
 		inference, err := commitstack.InferStacks(git, log)
 		if err != nil {
 			return err
 		}
+		benchmarkPoint("listCmd", "done stack inference")
 		defer func() {
 			printProblems(inference)
 		}()
@@ -51,6 +56,7 @@ var listCmd = &cobra.Command{
 
 			fmt.Printf("%s %s\n", name, suffix)
 		}
+		benchmarkPoint("listCmd", "done")
 
 		return nil
 	},

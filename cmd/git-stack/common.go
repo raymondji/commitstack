@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/config"
@@ -23,16 +24,20 @@ func initDeps() (deps, error) {
 	if err != nil {
 		return deps{}, err
 	}
+	benchmarkPoint("initDeps", "done initiating git")
 
 	remote, err := git.GetRemote()
 	if err != nil {
 		return deps{}, err
 	}
+	benchmarkPoint("initDeps", "got git remote")
 
 	cfg, err := config.Load()
 	if err != nil {
 		return deps{}, fmt.Errorf("failed to load config, err: %v", err.Error())
 	}
+	benchmarkPoint("initDeps", "loaded config")
+
 	repoCfg, ok := cfg.Repositories[remote.URLPath]
 	if !ok {
 		return deps{}, fmt.Errorf(
@@ -46,13 +51,15 @@ func initDeps() (deps, error) {
 		return deps{}, err
 	}
 
-	return deps{
+	out := deps{
 		theme:   config.NewTheme(cfg.Theme),
 		git:     git,
 		host:    host,
 		repoCfg: repoCfg,
 		remote:  remote,
-	}, nil
+	}
+	benchmarkPoint("initDeps", "done")
+	return out, nil
 }
 
 // TODO: try to format this similar to git status.
@@ -85,4 +92,18 @@ func printProblems(inference commitstack.InferenceResult) {
 			fmt.Printf("  %s\n", err.Error())
 		}
 	}
+}
+
+var (
+	benchmarkCheckpoint time.Time
+)
+
+func benchmarkPoint(section string, msg string) {
+	if !benchmarkFlag {
+		return
+	}
+
+	elapsed := time.Since(benchmarkCheckpoint)
+	benchmarkCheckpoint = time.Now()
+	fmt.Printf("[benchmark:%s] %s - %v\n", section, msg, elapsed)
 }

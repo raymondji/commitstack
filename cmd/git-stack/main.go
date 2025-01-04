@@ -2,17 +2,17 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
 
-func main() {
-	var rootCmd = &cobra.Command{
-		Use:          "stack",
-		Short:        "CLI for managing stacked Git branches",
-		SilenceUsage: true,
-	}
+var (
+	benchmarkFlag bool
+)
 
+func init() {
+	rootCmd.PersistentFlags().BoolVar(&benchmarkFlag, "benchmark", false, "Benchmark commands")
 	rootCmd.AddCommand(
 		initCmd,
 		switchCmd,
@@ -24,7 +24,20 @@ func main() {
 		learnCmd,
 		versionCmd,
 	)
+}
 
+var rootCmd = &cobra.Command{
+	Use:          "stack",
+	Short:        "CLI for managing stacked Git branches",
+	SilenceUsage: true,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if benchmarkFlag {
+			benchmarkCheckpoint = time.Now()
+		}
+	},
+}
+
+func main() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
