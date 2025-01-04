@@ -19,6 +19,8 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
+go build ./...
+go test ./...
 go run release/generate_template.go --template version --version "$CLI_VERSION"
 go install ./cmd/git-stack
 git stash save # learn command requires a clean repo
