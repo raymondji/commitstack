@@ -61,7 +61,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 ```
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ Welcome to `git stack`!                          │
+│ Welcome to git stack!                            │
 │ Here is a quick tutorial on how to use the CLI.  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
@@ -81,7 +81,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack c538f6e] hello world
+[myfirststack 6105a03] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -93,24 +93,23 @@ Your branch is up to date with 'origin/main'.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 c5a18db] break
+[myfirststack-pt2 bc182f6] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 5475cd6] kitkat
+[myfirststack-pt2 33cc702] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ So far everything we've done has been normal     │
-│ Git. Let's see what `git stack` can do for us    │
-│ already.                                         │
+│ So far we've only used standard Git commands.    │
+│ Let's see what git stack can do for us already.  │
 │                                                  │
 │ Our current stack has two branches in it, which  │
 │ we can see with:                                 │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack show
-On stack myfirststack-pt2
+In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
   myfirststack
@@ -121,47 +120,50 @@ Branches in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack show --log
-* 5475cd6 (myfirststack-pt2) kitkat
-  c5a18db break
-  c538f6e (myfirststack) hello world
+In stack myfirststack-pt2
+Commits in stack:
+* 33cc702 (HEAD -> myfirststack-pt2) kitkat (top)
+  bc182f6 break
+  6105a03 (myfirststack) hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
 │ as separate PRs.                                 │
-│ `git stack` automatically sets the target        │
-│ branches for you.                                │
+│ git stack automatically sets the target branches │
+│ for you.                                         │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/110
-Pushed myfirststack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/109
+Pushed myfirststack-pt2: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/142
+Pushed myfirststack: https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/141
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack show --prs
-On stack myfirststack-pt2
+In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/110
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/142
 
   myfirststack
-  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/109
-
+  └── https://gitlab.com/raymondji/git-stacked-gitlab-test/-/merge_requests/141
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ To pull in the latest changes from the default   │
-│ branch into the stack, run:                      │
+│ To sync the latest changes from the default      │
+│ branch into the stack, you can run:              │
+│ git rebase main --update-refs                    │
+│ Or to avoid having to remember --update-refs,    │
+│ you can do:                                      │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack pull
-Pulling from main into the current stack myfirststack-pt2
-Current branch myfirststack-pt2 is up to date.
+> git stack rebase main
+Successfully rebased myfirststack-pt2 on main
 ╭──────────────────────────────────────────────────╮
 │                                                  │
-│ One stack is nice, but how do we deal with       │
-│ multiple stacks?                                 │
+│ Great, we've got the basics down for one stack.  │
+│ How do we deal with multiple stacks?             │
 │ Let's head back to our default branch and create │
 │ a second stack.                                  │
 │                                                  │
@@ -172,7 +174,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 0b070c1] My second stack
+[mysecondstack a1088be] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -182,11 +184,19 @@ Your branch is up to date with 'origin/main'.
 ╰──────────────────────────────────────────────────╯
 > git stack list
   myfirststack-pt2 (2 branches)
-* mysecondstack (1 branches)
+* mysecondstack (1 branch)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ Nice! All done chapter 1 of the tutorial.        │
-│ ...                                              │
+│                                                  │
+│ In chapter 2 we'll see how to make changes to    │
+│ earlier branches in the stack.                   │
+│ Once you're ready, continue the tutorial using:  │
+│ git stack learn --chapter 2                      │
+│                                                  │
+│ To cleanup all the branches/PRs that were        │
+│ created, run:                                    │
+│ git stack learn --chapter 1 --cleanup            │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 ```
