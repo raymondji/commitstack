@@ -28,7 +28,6 @@ func main() {
 
 	switch *tmpl {
 	case templateVersion:
-		fmt.Println("got args", *version)
 		if *version == "" {
 			log.Fatal("Error: --version is required")
 		}
