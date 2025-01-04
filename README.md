@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.21.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.22.0
 ```
 
 ## Getting started
@@ -82,7 +82,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack be3a243] hello world
+[myfirststack d35c4c1] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -94,11 +94,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 d4d7cc5] break
+[myfirststack-pt2 f4a8aa9] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 0515451] kitkat
+[myfirststack-pt2 9d7d56b] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -123,9 +123,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 0515451 (HEAD -> myfirststack-pt2) kitkat (top)
-  d4d7cc5 break      
-  be3a243 (myfirststack) hello world      
+* 9d7d56b (HEAD -> myfirststack-pt2) kitkat (top)
+  f4a8aa9 break      
+  d35c4c1 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -135,8 +135,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/86
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/85
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/87
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/88
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -146,10 +146,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/85
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/86
+  └── https://github.com/raymondji/git-stack-cli/pull/87
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/85
+  └── https://github.com/raymondji/git-stack-cli/pull/88
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -176,7 +176,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack ad861fe] My second stack
+[mysecondstack 2b1cb19] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -199,7 +199,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 │ To cleanup all the branches/PRs that were        │
 │ created, run:                                    │
-│ git stack learn --chapter 1 --cleanup            │
+│ git stack learn --chapter 1 --mode=clean         │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 
