@@ -36,7 +36,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.22.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.19.0
 ```
 
 ## Getting started
@@ -59,7 +59,149 @@ git stack learn
 This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 
 ```
-hello world
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Welcome to git stack!                            │
+│ Here is a quick tutorial on how to use the CLI.  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Let&#39;s start things off on the default branch:    │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git checkout main
+Your branch is ahead of &#39;origin/main&#39; by 5 commits.
+  (use &#34;git push&#34; to publish your local commits)
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Next, let&#39;s create our first branch:             │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git checkout -b myfirststack
+&gt; echo &#39;hello world&#39; &gt; myfirststack.txt
+&gt; git add .
+&gt; git commit -m &#39;hello world&#39;
+[myfirststack 67e46e0] hello world
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 myfirststack.txt
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Now let&#39;s stack a second branch on top of our    │
+│ first:                                           │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git checkout -b myfirststack-pt2
+&gt; echo &#39;have a break&#39; &gt;&gt; myfirststack.txt
+&gt; git commit -am &#39;break&#39;
+[myfirststack-pt2 befdc2b] break
+ 1 file changed, 1 insertion(&#43;)
+&gt; echo &#39;have a kitkat&#39; &gt;&gt; myfirststack.txt
+&gt; git commit -am &#39;kitkat&#39;
+[myfirststack-pt2 8e97c25] kitkat
+ 1 file changed, 1 insertion(&#43;)
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ So far we&#39;ve only used standard Git commands.    │
+│ Let&#39;s see what git stack can do for us already.  │
+│                                                  │
+│ Our current stack has two branches in it, which  │
+│ we can see with:                                 │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack show
+In stack myfirststack-pt2
+Branches in stack:
+* myfirststack-pt2 (top)
+  myfirststack
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Our current stack has 3 commits in it, which we  │
+│ can see with:                                    │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack show --log
+In stack myfirststack-pt2
+Commits in stack:
+* 8e97c25 (HEAD -&gt; myfirststack-pt2) kitkat (top)
+  befdc2b break      
+  67e46e0 (myfirststack) hello world      
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ We can easily push all branches in the stack up  │
+│ as separate PRs.                                 │
+│ git stack automatically sets the target branches │
+│ for you.                                         │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack push
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/82
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/81
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ We can quickly view the PRs in the stack using:  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack show --prs
+In stack myfirststack-pt2
+Branches in stack:
+* myfirststack-pt2 (top)
+  └── https://github.com/raymondji/git-stack-cli/pull/82
+
+  myfirststack
+  └── https://github.com/raymondji/git-stack-cli/pull/81
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ To sync the latest changes from the default      │
+│ branch into the stack, you can run:              │
+│ git rebase main --update-refs                    │
+│ Or to avoid having to remember --update-refs,    │
+│ you can do:                                      │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack rebase main
+Successfully rebased myfirststack-pt2 on main
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Great, we&#39;ve got the basics down for one stack.  │
+│ How do we deal with multiple stacks?             │
+│ Let&#39;s head back to our default branch and create │
+│ a second stack.                                  │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git checkout main
+Your branch is ahead of &#39;origin/main&#39; by 5 commits.
+  (use &#34;git push&#34; to publish your local commits)
+&gt; git checkout -b mysecondstack
+&gt; echo &#39;buy one get one free&#39; &gt; mysecondstack.txt
+&gt; git add .
+&gt; git commit -m &#39;My second stack&#39;
+[mysecondstack 7e4c183] My second stack
+ 1 file changed, 1 insertion(&#43;)
+ create mode 100644 mysecondstack.txt
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ To view all the stacks:                          │
+│                                                  │
+╰──────────────────────────────────────────────────╯
+&gt; git stack list
+  dev (1 branch)
+  myfirststack-pt2 (2 branches)
+* mysecondstack (1 branch)
+╭──────────────────────────────────────────────────╮
+│                                                  │
+│ Nice! All done chapter 1 of the tutorial.        │
+│                                                  │
+│ In chapter 2 we&#39;ll see how to make changes to    │
+│ earlier branches in the stack.                   │
+│ Once you&#39;re ready, continue the tutorial using:  │
+│ git stack learn --chapter 2                      │
+│                                                  │
+│ To cleanup all the branches/PRs that were        │
+│ created, run:                                    │
+│ git stack learn --chapter 1 --cleanup            │
+│                                                  │
+╰──────────────────────────────────────────────────╯
 
 ```
 
