@@ -17,6 +17,6 @@ git stash save # learn command requires a clean repo
 
 SAMPLE_FILE=$(mktemp)
 git stack learn --chapter 1 --mode=exec > "$SAMPLE_FILE"
-git stash pop
+git stash pop || true
 go run release/generate_template.go --template readme --version "$CLI_VERSION" --sample-output "$SAMPLE_FILE"
 echo "Release generation complete!"
