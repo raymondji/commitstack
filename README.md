@@ -27,7 +27,7 @@ There are two main areas where `git stack` differs from most existing tools:
 
 ## Limitations
 
-- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is no problem).
+- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is not a problem).
 
 ## Installation
 
@@ -84,7 +84,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack d949292] hello world
+[myfirststack b90c8f0] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -96,11 +96,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 e41bd13] break
+[myfirststack-pt2 f80b88c] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 5fda4e4] kitkat
+[myfirststack-pt2 4863be8] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -125,9 +125,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 5fda4e4 (HEAD -> myfirststack-pt2) kitkat (top)
-  e41bd13 break      
-  d949292 (myfirststack) hello world      
+* 4863be8 (HEAD -> myfirststack-pt2) kitkat (top)
+  f80b88c break      
+  b90c8f0 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -137,8 +137,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/128
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/129
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/130
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/131
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -148,10 +148,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/129
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/128
+  └── https://github.com/raymondji/git-stack-cli/pull/130
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/129
+  └── https://github.com/raymondji/git-stack-cli/pull/131
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -178,7 +178,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 16b67a3] My second stack
+[mysecondstack 05ed192] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
