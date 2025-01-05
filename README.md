@@ -11,7 +11,7 @@ Core commands:
 
 ## What is stacking?
 
-https://www.stacking.dev has a good overview on what it is and why you might want to do it.
+https://graphite.dev/blog/stacked-prs has a good overview on what it is and why you might want to do it.
 
 ## Where does native Git fall short with stacking?
 
@@ -73,7 +73,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 3 commits.
+Your branch is ahead of 'origin/main' by 4 commits.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -84,7 +84,7 @@ Your branch is ahead of 'origin/main' by 3 commits.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 1ddb894] hello world
+[myfirststack 90a5059] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -96,11 +96,11 @@ Your branch is ahead of 'origin/main' by 3 commits.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 717c1d8] break
+[myfirststack-pt2 0912298] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 043a3fe] kitkat
+[myfirststack-pt2 bdf6344] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -125,9 +125,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 043a3fe (HEAD -> myfirststack-pt2) kitkat (top)
-  717c1d8 break      
-  1ddb894 (myfirststack) hello world      
+* bdf6344 (HEAD -> myfirststack-pt2) kitkat (top)
+  0912298 break      
+  90a5059 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -137,8 +137,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/117
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/118
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/119
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/120
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -148,10 +148,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/118
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/117
+  └── https://github.com/raymondji/git-stack-cli/pull/119
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/118
+  └── https://github.com/raymondji/git-stack-cli/pull/120
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -172,13 +172,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 3 commits.
+Your branch is ahead of 'origin/main' by 4 commits.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack e9eff2f] My second stack
+[mysecondstack d4a4aba] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
