@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/slices"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +31,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		inference, err := commitstack.InferStacks(git, log)
+		stacks, err := inference.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -39,21 +39,21 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
+		s, err := inference.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}
-		if len(s.ValidationErrors) > 0 {
-			fmt.Printf("the current stack %s is invalid, please resolve errors\n", s.Name())
-			printProblems(inference)
-			return nil
-		}
-		defer func() {
-			printProblems(inference)
-		}()
 
 		wantTargets := map[string]string{}
-		branches := s.TotalOrderedBranches()
+		branches, err := s.TotalOrderedBranches()
+		if err != nil {
+			return err
+		}
+		if len(s.DivergesFrom()) > 0 {
+			fmt.Println("error: cannot push divergent stacks")
+			printProblems([]inference.Stack{s})
+			return nil
+		}
 		for i, b := range branches {
 			if i == len(branches)-1 {
 				wantTargets[b] = defaultBranch

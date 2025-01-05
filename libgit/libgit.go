@@ -21,7 +21,7 @@ type Git interface {
 	GetRootDir() (string, error)
 	CommitFixup(commitHash string, add bool) (string, error)
 	CommitEmpty(msg string) error
-	GetBranchesContainingCommit(commitHash string) ([]string, error)
+	GetMergedBranches(ref string) ([]string, error)
 	GetCurrentBranch() (string, error)
 	GetShortCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
@@ -295,10 +295,10 @@ func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g git) GetBranchesContainingCommit(commitHash string) ([]string, error) {
-	output, err := exec.Run("git", exec.WithArgs("branch", "--contains", commitHash, "--format='%(refname:short)'"))
+func (g git) GetMergedBranches(ref string) ([]string, error) {
+	output, err := exec.Run("git", exec.WithArgs("branch", "--merged", ref, "--format=%(refname:short)"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to find branches containing commit %s, err: %v", commitHash, err)
+		return nil, fmt.Errorf("failed to find branches merged into %s, err: %v", ref, err)
 	}
 
 	var branches []string

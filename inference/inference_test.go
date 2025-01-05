@@ -1,10 +1,10 @@
-package commitstack_test
+package inference_test
 
 import (
 	"testing"
 
-	"github.com/raymondji/git-stack-cli/commitstack"
-	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
+	"github.com/raymondji/git-stack-cli/inference"
+	"github.com/raymondji/git-stack-cli/inference/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/stretchr/testify/require"
 )
@@ -13,7 +13,7 @@ func TestInferStacks(t *testing.T) {
 	cases := map[string]struct {
 		log                            libgit.Log
 		commitHashToContainingBranches map[string][]string
-		want                           []commitstack.Stack
+		want                           []inference.Stack
 		// Keys are stack names
 		wantTotalOrderedBranches    map[string][]string
 		wantTotalOrderedBranchesErr map[string]struct{}
@@ -34,10 +34,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "dev",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -64,10 +64,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "dev2",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -99,10 +99,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "feat/pt3",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c2": {
 							Node: commitgraph.Node{
 								Hash:          "c2",
@@ -148,10 +148,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "featC",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c3": {
 							Node: commitgraph.Node{
 								Hash:          "c3",
@@ -218,10 +218,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "feat3",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c6": {
 							Node: commitgraph.Node{
 								Hash:          "c6",
@@ -299,10 +299,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "featA/pt2",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c4": {
 							Node: commitgraph.Node{
 								Hash:          "c4",
@@ -331,7 +331,7 @@ func TestInferStacks(t *testing.T) {
 				},
 				{
 					Name: "featB/pt1",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -369,10 +369,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []commitstack.Stack{
+			want: []inference.Stack{
 				{
 					Name: "featB",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c2": {
 							Node: commitgraph.Node{
 								Hash:          "c2",
@@ -396,7 +396,7 @@ func TestInferStacks(t *testing.T) {
 				},
 				{
 					Name: "featC",
-					Commits: map[string]*commitstack.Commit{
+					Commits: map[string]*inference.Commit{
 						"c3": {
 							Node: commitgraph.Node{
 								Hash:          "c3",
@@ -428,11 +428,11 @@ func TestInferStacks(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			got, err := commitstack.InferStacks(c.log)
+			got, err := inference.InferStacks(c.log)
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 
-			stacksMap := map[string]commitstack.Stack{}
+			stacksMap := map[string]inference.Stack{}
 			for _, s := range got {
 				stacksMap[s.Name] = s
 			}

@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ var switchCmd = &cobra.Command{
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
 		var currCommit string
-		var inference commitstack.InferenceResult
+		var stacks []inference.Stack
 		err = concurrent.Run(
 			context.Background(),
 			func(ctx context.Context) error {
@@ -42,7 +43,7 @@ var switchCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				inference, err = commitstack.InferStacks(git, log)
+				stacks, err = inference.InferStacks(log)
 				return err
 			},
 		)
@@ -50,13 +51,10 @@ var switchCmd = &cobra.Command{
 			return err
 		}
 		benchmarkPoint("switchCmd", "got curr commit and stack inference")
-		defer func() {
-			printProblems(inference)
-		}()
 
-		var currStack *commitstack.Stack
+		var currStack *inference.Stack
 		if switchBranchFlag {
-			stack, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
+			stack, err := inference.GetCurrent(stacks, currCommit)
 			if err != nil {
 				return err
 			}
@@ -67,14 +65,25 @@ var switchCmd = &cobra.Command{
 		var formTitle string
 		var opts []huh.Option[string]
 		if switchBranchFlag {
+			branches, err := currStack.TotalOrderedBranches()
+			var errNoTotalOrder inference.NoTotalOrderError
+			if errors.As(err, &errNoTotalOrder) {
+				// TODO: check for this specific error type
+				fmt.Printf("Warning: stack %s does not have a total order\n", currStack.Name)
+				fmt.Println("Branches are displayed in lexicographic order")
+				branches = currStack.Branches()
+			} else if err != nil {
+				return err
+			}
+
 			formTitle = "Choose branch"
-			for _, b := range currStack.TotalOrderedBranches() {
+			for _, b := range branches {
 				opts = append(opts, huh.NewOption(b, b))
 			}
 		} else {
 			formTitle = "Choose stack"
-			for _, s := range inference.InferredStacks {
-				opts = append(opts, huh.NewOption(s.Name(), s.Name()))
+			for _, s := range stacks {
+				opts = append(opts, huh.NewOption(s.Name, s.Name))
 			}
 		}
 

@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
+	"slices"
 
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -40,12 +40,18 @@ var showCmd = &cobra.Command{
 		benchmarkPoint("listCmd", "got deps")
 
 		var currBranch, currCommit string
-		var inference commitstack.InferenceResult
+		var stacks []inference.Stack
+		var mergedBranches []string
 		err = concurrent.Run(
 			context.Background(),
 			func(ctx context.Context) error {
 				var err error
 				currCommit, err = git.GetShortCommitHash("HEAD")
+				return err
+			},
+			func(ctx context.Context) error {
+				var err error
+				mergedBranches, err = git.GetMergedBranches(defaultBranch)
 				return err
 			},
 			func(ctx context.Context) error {
@@ -58,7 +64,7 @@ var showCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				inference, err = commitstack.InferStacks(git, log)
+				stacks, err = inference.InferStacks(log)
 				return err
 			},
 		)
@@ -66,21 +72,22 @@ var showCmd = &cobra.Command{
 			return err
 		}
 		benchmarkPoint("listCmd", "got curr commit, curr branch, and stack inference")
-		defer func() {
-			printProblems(inference)
-		}()
 
-		var stack commitstack.Stack
+		var stack inference.Stack
 		if len(args) == 0 {
-			stack, err = commitstack.GetCurrent(inference.InferredStacks, currCommit)
+			if slices.Contains(mergedBranches, currBranch) {
+				fmt.Printf("error: the current branch is not a valid stack (it's merged into %s)\n", defaultBranch)
+				return nil
+			}
+			stack, err = inference.GetCurrent(stacks, currCommit)
 			if err != nil {
 				return err
 			}
 		} else {
 			wantStack := args[0]
 			var found bool
-			for _, s := range inference.InferredStacks {
-				if s.Name() == wantStack {
+			for _, s := range stacks {
+				if s.Name == wantStack {
 					stack = s
 					found = true
 				}
@@ -89,14 +96,34 @@ var showCmd = &cobra.Command{
 				return fmt.Errorf("no stack named: %s", wantStack)
 			}
 		}
+		defer func() {
+			printProblems([]inference.Stack{stack})
+		}()
 		benchmarkPoint("listCmd", "got desired stack")
 
+		if len(args) == 0 {
+			fmt.Printf("In stack %s\n", stack.Name)
+		}
+		totalOrder := true
+		branches, err := stack.TotalOrderedBranches()
+		var errNoTotalOrder inference.NoTotalOrderError
+		if errors.As(err, &errNoTotalOrder) {
+			// TODO: check for this specific error type
+			fmt.Printf("Warning: stack %s does not have a total order\n", stack.Name)
+			fmt.Println("Branches are displayed in reverse lexicographic order.")
+			fmt.Println()
+
+			branches = stack.Branches()
+			totalOrder = false
+		} else if err != nil {
+			return err
+		}
 		ctx := context.Background()
 		prsBySrcBranch := map[string]githost.PullRequest{}
 		if showPRsFlag {
 			var actionErr error
 			action := func() {
-				prs, err := concurrent.Map(ctx, stack.TotalOrderedBranches(), func(ctx context.Context, branch string) (githost.PullRequest, error) {
+				prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
 					pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
@@ -127,83 +154,78 @@ var showCmd = &cobra.Command{
 			benchmarkPoint("listCmd", "fetched pull requests")
 		}
 
-		if len(args) == 0 {
-			fmt.Printf("In stack %s\n", stack.Name())
-		}
-
 		if showLogFlag {
-			fmt.Println("Commits in stack:")
-			for i, c := range stack.Commits {
-				var hereMarker, topMarker string
-				if i == 0 {
-					topMarker = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-				} else {
-					topMarker = strings.Repeat(" ", 6)
-				}
-				if currCommit == c.Hash {
-					hereMarker = "* "
-				} else {
-					hereMarker = "  "
-				}
+			return errors.New("unimplemented")
+			// fmt.Println("Commits in stack:")
+			// for i, c := range stack.Commits {
+			// 	var hereMarker, topMarker string
+			// 	if i == 0 {
+			// 		topMarker = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
+			// 	} else {
+			// 		topMarker = strings.Repeat(" ", 6)
+			// 	}
+			// 	if currCommit == c.Hash {
+			// 		hereMarker = "* "
+			// 	} else {
+			// 		hereMarker = "  "
+			// 	}
 
-				var branchCol string
-				if len(c.LocalBranches) > 0 {
-					var branchParts []string
-					const headMarker = "HEAD ->"
-					for _, b := range c.LocalBranches {
-						if b == currBranch {
-							branchParts = append(
-								[]string{
-									fmt.Sprintf("%s %s", theme.PrimaryColor.Render(headMarker), theme.SecondaryColor.Render(b)),
-								},
-								branchParts...,
-							)
-						} else {
-							branchParts = append(branchParts, theme.SecondaryColor.Render(b))
-						}
-					}
-					branchCol = fmt.Sprintf("(%s) ", strings.Join(branchParts, ", "))
-				} else if currCommit == c.Hash {
-					branchCol = fmt.Sprintf("(%s) ", theme.PrimaryColor.Render("HEAD"))
-				}
+			// 	var branchCol string
+			// 	if len(c.LocalBranches) > 0 {
+			// 		var branchParts []string
+			// 		const headMarker = "HEAD ->"
+			// 		for _, b := range c.LocalBranches {
+			// 			if b == currBranch {
+			// 				branchParts = append(
+			// 					[]string{
+			// 						fmt.Sprintf("%s %s", theme.PrimaryColor.Render(headMarker), theme.SecondaryColor.Render(b)),
+			// 					},
+			// 					branchParts...,
+			// 				)
+			// 			} else {
+			// 				branchParts = append(branchParts, theme.SecondaryColor.Render(b))
+			// 			}
+			// 		}
+			// 		branchCol = fmt.Sprintf("(%s) ", strings.Join(branchParts, ", "))
+			// 	} else if currCommit == c.Hash {
+			// 		branchCol = fmt.Sprintf("(%s) ", theme.PrimaryColor.Render("HEAD"))
+			// 	}
 
-				commitHash := theme.QuaternaryColor.Render(c.Hash)
-				fmt.Printf("%s%s %s%s%s\n", hereMarker, commitHash, branchCol, c.Subject, topMarker)
-			}
-			benchmarkPoint("listCmd", "done printing log")
+			// 	commitHash := theme.QuaternaryColor.Render(c.Hash)
+			// 	fmt.Printf("%s%s %s%s%s\n", hereMarker, commitHash, branchCol, c.Subject, topMarker)
+			// }
+			// benchmarkPoint("listCmd", "done printing log")
 		} else {
 			fmt.Println("Branches in stack:")
-			for i, c := range stack.Commits {
-				if len(c.LocalBranches) == 0 && c.Hash == currCommit {
-					fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
-					continue
-				} else if len(c.LocalBranches) == 0 {
-					continue
+			for i, branch := range branches {
+				// if len(c.LocalBranches) == 0 && c.Hash == currCommit {
+				// 	fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
+				// 	continue
+				// } else if len(c.LocalBranches) == 0 {
+				// 	continue
+				// }
+				var prefix, branchesSegment, suffix string
+				if i == 0 && totalOrder {
+					suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 				}
-				for j, branch := range c.LocalBranches {
-					var prefix, branchesSegment, suffix string
-					if i == 0 && j == 0 {
-						suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-					}
-					if branch == currBranch {
-						prefix = "*"
-						branchesSegment = theme.PrimaryColor.Render(branch)
+				if branch == currBranch {
+					prefix = "*"
+					branchesSegment = theme.PrimaryColor.Render(branch)
+				} else {
+					prefix = " "
+					branchesSegment = branch
+				}
+
+				fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
+				if showPRsFlag {
+					if pr, ok := prsBySrcBranch[branch]; ok {
+						fmt.Printf("  └── %s\n", pr.WebURL)
 					} else {
-						prefix = " "
-						branchesSegment = branch
+						fmt.Printf("  └── Not created yet\n")
 					}
 
-					fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
-					if showPRsFlag {
-						if pr, ok := prsBySrcBranch[branch]; ok {
-							fmt.Printf("  └── %s\n", pr.WebURL)
-						} else {
-							fmt.Printf("  └── Not created yet\n")
-						}
-
-						if i != len(stack.Commits)-1 {
-							fmt.Println()
-						}
+					if i != len(stack.Commits)-1 {
+						fmt.Println()
 					}
 				}
 			}

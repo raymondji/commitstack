@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,8 @@ var listCmd = &cobra.Command{
 		benchmarkPoint("listCmd", "got deps")
 
 		var currCommit string
-		var inference commitstack.InferenceResult
+		var mergedBranches []string
+		var stacks []inference.Stack
 		err = concurrent.Run(
 			context.Background(),
 			func(ctx context.Context) error {
@@ -32,11 +33,16 @@ var listCmd = &cobra.Command{
 				return err
 			},
 			func(ctx context.Context) error {
+				var err error
+				mergedBranches, err = git.GetMergedBranches(defaultBranch)
+				return err
+			},
+			func(ctx context.Context) error {
 				log, err := git.LogAll(defaultBranch)
 				if err != nil {
 					return err
 				}
-				inference, err = commitstack.InferStacks(git, log)
+				stacks, err = inference.InferStacks(log)
 				return err
 			},
 		)
@@ -45,22 +51,25 @@ var listCmd = &cobra.Command{
 		}
 		benchmarkPoint("listCmd", "got curr commit and stack inference")
 		defer func() {
-			printProblems(inference)
+			printMergedBranches(mergedBranches)
+		}()
+		defer func() {
+			printProblems(stacks)
 		}()
 
-		for _, s := range inference.InferredStacks {
+		for _, s := range stacks {
 			var name, suffix string
 			if s.IsCurrent(currCommit) {
-				name = "* " + theme.PrimaryColor.Render(s.Name())
+				name = "* " + theme.PrimaryColor.Render(s.Name)
 			} else {
-				name = "  " + s.Name()
+				name = "  " + s.Name
 			}
 
-			all := s.TotalOrderedBranches()
+			all := s.Branches()
 			if len(all) == 1 {
 				suffix = theme.TertiaryColor.Render("(1 branch)")
 			} else {
-				suffix = theme.TertiaryColor.Render(fmt.Sprintf("(%d branches)", len(s.TotalOrderedBranches())))
+				suffix = theme.TertiaryColor.Render(fmt.Sprintf("(%d branches)", len(all)))
 			}
 
 			fmt.Printf("%s %s\n", name, suffix)

@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"sort"
+	"strings"
 	"time"
 
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/config"
 	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
+	"golang.org/x/exp/maps"
 )
 
 type deps struct {
@@ -66,28 +67,41 @@ Unmerged paths:
         both modified:   src/module1.py
         both added:      src/module2.py
 */
-func printProblems(inference commitstack.InferenceResult) {
-	validationErrMessages := []string{}
-	for _, s := range inference.InferredStacks {
-		for _, err := range s.ValidationErrors {
-			validationErrMessages = append(validationErrMessages, err.Error())
+func printProblems(stacks []inference.Stack) {
+	var invalidStackMsgs []string
+	for _, stack := range stacks {
+		got := stack.DivergesFrom()
+		if len(got) > 0 {
+			invalidStackMsgs = append(invalidStackMsgs, fmt.Sprintf(
+				"%s diverges from %s",
+				stack.Name,
+				strings.Join(maps.Keys(got), ", "),
+			))
 		}
 	}
-	sort.Strings(validationErrMessages)
-	if len(validationErrMessages) > 0 {
+	for _, stack := range stacks {
+		_, err := stack.TotalOrderedBranches()
+		if err != nil {
+			invalidStackMsgs = append(invalidStackMsgs, err.Error())
+		}
+	}
+	if len(invalidStackMsgs) > 0 {
 		fmt.Println()
 		fmt.Println("Invalid stacks:")
-		for _, msg := range validationErrMessages {
-			fmt.Printf("  %s\n", msg)
+		fmt.Println(strings.Repeat(" ", 2) + "(use `git merge` or `git rebase` to resolve)")
+		for _, msg := range invalidStackMsgs {
+			fmt.Println(strings.Repeat(" ", 8) + msg)
 		}
 	}
+}
 
-	if len(inference.InferenceErrors) > 0 {
+func printMergedBranches(branches []string) {
+	if len(branches) > 0 {
 		fmt.Println()
-		fmt.Println("Stack inference is ignoring incompatible commits:")
-		for _, err := range inference.InferenceErrors {
-			fmt.Printf("  %s\n", err.Error())
-		}
+		fmt.Println("Stack inference is ignoring branches merged into main:")
+	}
+	for _, b := range branches {
+		fmt.Println(strings.Repeat(" ", 8) + b)
 	}
 }
 

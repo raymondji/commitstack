@@ -1,4 +1,4 @@
-package commitstack
+package inference
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
+	"github.com/raymondji/git-stack-cli/inference/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
 )
 
@@ -26,19 +26,21 @@ type Commit struct {
 }
 
 type NoTotalOrderError struct {
-	MergeCommitHash    string
-	ContainingBranches []string
+	StackName string
 }
 
 func (e NoTotalOrderError) Error() string {
-	switch len(e.ContainingBranches) {
-	case 0:
-		return fmt.Sprintf("Merge commit %v", e.MergeCommitHash)
-	case 1:
-		return fmt.Sprintf("Merge commit %v is present in branch %v", e.MergeCommitHash, e.ContainingBranches[0])
-	default:
-		return fmt.Sprintf("Merge commit %v is present in branches %v", e.MergeCommitHash, strings.Join(e.ContainingBranches, ", "))
+	return fmt.Sprintf("%s does not have a total order", e.StackName)
+}
+
+func (s Stack) Branches() []string {
+	var branches []string
+	for _, c := range s.Commits {
+		branches = append(branches, c.LocalBranches...)
 	}
+	slices.Sort(branches)
+	slices.Reverse(branches)
+	return branches
 }
 
 // TotalOrderedBranches returns all branches associated with all commits in the stack.
@@ -71,7 +73,9 @@ func (s Stack) TotalOrderedBranches() ([]string, error) {
 		}
 	})
 	if noTotalOrder {
-		return nil, fmt.Errorf("TODO")
+		return nil, NoTotalOrderError{
+			StackName: s.Name,
+		}
 	}
 
 	var branches []string
