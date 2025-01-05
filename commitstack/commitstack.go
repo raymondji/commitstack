@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/raymondji/git-stack-cli/commitstack/commitgraph"
@@ -17,7 +16,10 @@ type Commit struct {
 	Author  string
 	Subject string
 	Date    string
-	// Branches are sorted in lexical order, imposing a total order
+	// Branches are sorted in reverse lexical order.
+	// Reverse order is used to better align with natural naming schemes,
+	// e.g. "myfeature-pt3" will be above "myfeature-pt2".
+	// Together with the commit order, this imposes a total order on the branches in a stack.
 	LocalBranches []string
 }
 
@@ -241,7 +243,8 @@ func appendToStack(git Git, currNode commitgraph.Node, prevStack Stack) (Stack, 
 		Hash:          currNode.Hash,
 		LocalBranches: currNode.LocalBranches,
 	}
-	sort.Strings(c.LocalBranches)
+	slices.Sort(c.LocalBranches)
+	slices.Reverse(c.LocalBranches)
 	return Stack{
 		Commits: append(slices.Clone(prevStack.Commits), c),
 	}, nil
