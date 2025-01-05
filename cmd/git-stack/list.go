@@ -56,11 +56,11 @@ var listCmd = &cobra.Command{
 				name = "  " + s.Name()
 			}
 
-			all := s.OrderedBranches()
+			all := s.TotalOrderedBranches()
 			if len(all) == 1 {
 				suffix = theme.TertiaryColor.Render("(1 branch)")
 			} else {
-				suffix = theme.TertiaryColor.Render(fmt.Sprintf("(%d branches)", len(s.OrderedBranches())))
+				suffix = theme.TertiaryColor.Render(fmt.Sprintf("(%d branches)", len(s.TotalOrderedBranches())))
 			}
 
 			fmt.Printf("%s %s\n", name, suffix)

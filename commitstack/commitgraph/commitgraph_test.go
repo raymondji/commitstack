@@ -17,7 +17,11 @@ func TestCompute(t *testing.T) {
 			log: libgit.Log{
 				Commits: nil,
 			},
-			want: toDAG(),
+			want: commitgraph.DAG{
+				Nodes:         map[string]commitgraph.Node{},
+				ParentEdges:   map[string]map[string]struct{}{},
+				ChildrenEdges: map[string]map[string]struct{}{},
+			},
 		},
 		"one": {
 			log: libgit.Log{
@@ -29,15 +33,47 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: toDAG(
-				commitgraph.Node{
-					Hash:          "c1",
-					Children:      map[string]struct{}{},
-					Parents:       map[string]struct{}{},
-					LocalBranches: []string{"b1"},
-				}),
+			want: commitgraph.DAG{
+				Nodes: map[string]commitgraph.Node{
+					"c1": {
+						Hash:          "c1",
+						LocalBranches: []string{"b1"},
+					},
+				},
+				ParentEdges: map[string]map[string]struct{}{
+					"c1": {},
+				},
+				ChildrenEdges: map[string]map[string]struct{}{
+					"c1": {},
+				},
+			},
 		},
-		"with single parent": {
+		"sorts branches": {
+			log: libgit.Log{
+				Commits: []libgit.Commit{
+					{
+						Hash:          "c1",
+						ParentHashes:  []string{"p1"},
+						LocalBranches: []string{"b", "b1"},
+					},
+				},
+			},
+			want: commitgraph.DAG{
+				Nodes: map[string]commitgraph.Node{
+					"c1": {
+						Hash:          "c1",
+						LocalBranches: []string{"b1", "b"},
+					},
+				},
+				ParentEdges: map[string]map[string]struct{}{
+					"c1": {},
+				},
+				ChildrenEdges: map[string]map[string]struct{}{
+					"c1": {},
+				},
+			},
+		},
+		"single parent": {
 			log: libgit.Log{
 				Commits: []libgit.Commit{
 					{
@@ -52,26 +88,32 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: toDAG(
-				commitgraph.Node{
-					Hash:     "c1",
-					Children: map[string]struct{}{},
-					Parents: map[string]struct{}{
-						"p1": {},
+			want: commitgraph.DAG{
+				Nodes: map[string]commitgraph.Node{
+					"c1": {
+						Hash:          "c1",
+						LocalBranches: []string{"feat/pt2"},
 					},
-					LocalBranches: []string{"feat/pt2"},
-				},
-				commitgraph.Node{
-					Hash: "p1",
-					Children: map[string]struct{}{
-						"c1": {},
+					"p1": {
+						Hash:          "p1",
+						LocalBranches: []string{"feat/pt1"},
 					},
-					Parents:       map[string]struct{}{},
-					LocalBranches: []string{"feat/pt1"},
 				},
-			),
+				ParentEdges: map[string]map[string]struct{}{
+					"c1": {
+						"p1": struct{}{},
+					},
+					"p1": {},
+				},
+				ChildrenEdges: map[string]map[string]struct{}{
+					"p1": {
+						"c1": struct{}{},
+					},
+					"c1": {},
+				},
+			},
 		},
-		"with multiple parents": {
+		"multiple parents": {
 			log: libgit.Log{
 				Commits: []libgit.Commit{
 					{
@@ -91,36 +133,42 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: toDAG(
-				commitgraph.Node{
-					Hash:     "c3",
-					Children: map[string]struct{}{},
-					Parents: map[string]struct{}{
-						"c1": {},
-						"c2": {},
+			want: commitgraph.DAG{
+				Nodes: map[string]commitgraph.Node{
+					"c3": {
+						Hash:          "c3",
+						LocalBranches: []string{"feat/pt3"},
 					},
-					LocalBranches: []string{"feat/pt3"},
+					"c2": {
+						Hash:          "c2",
+						LocalBranches: []string{"feat/pt2"},
+					},
+					"c1": {
+						Hash:          "c1",
+						LocalBranches: []string{"feat/pt1"},
+					},
 				},
-				commitgraph.Node{
-					Hash: "c2",
-					Children: map[string]struct{}{
-						"c3": {},
+				ParentEdges: map[string]map[string]struct{}{
+					"c3": {
+						"c2": struct{}{},
+						"c1": struct{}{},
 					},
-					Parents: map[string]struct{}{
-						"c1": {},
+					"c2": {
+						"c1": struct{}{},
 					},
-					LocalBranches: []string{"feat/pt2"},
+					"c1": {},
 				},
-				commitgraph.Node{
-					Hash: "c1",
-					Children: map[string]struct{}{
-						"c2": {},
-						"c3": {},
+				ChildrenEdges: map[string]map[string]struct{}{
+					"c3": {},
+					"c2": {
+						"c3": struct{}{},
 					},
-					Parents:       map[string]struct{}{},
-					LocalBranches: []string{"feat/pt1"},
+					"c1": {
+						"c2": struct{}{},
+						"c3": struct{}{},
+					},
 				},
-			),
+			},
 		},
 		"multiple sources": {
 			log: libgit.Log{
@@ -142,30 +190,36 @@ func TestCompute(t *testing.T) {
 					},
 				},
 			},
-			want: toDAG(
-				commitgraph.Node{
-					Hash:     "c3",
-					Children: map[string]struct{}{},
-					Parents: map[string]struct{}{
-						"c2": {},
+			want: commitgraph.DAG{
+				Nodes: map[string]commitgraph.Node{
+					"c3": {
+						Hash:          "c3",
+						LocalBranches: []string{"featA/pt2"},
 					},
-					LocalBranches: []string{"featA/pt2"},
-				},
-				commitgraph.Node{
-					Hash: "c2",
-					Children: map[string]struct{}{
-						"c3": {},
+					"c2": {
+						Hash:          "c2",
+						LocalBranches: []string{"featA/pt1"},
 					},
-					Parents:       map[string]struct{}{},
-					LocalBranches: []string{"featA/pt1"},
+					"c1": {
+						Hash:          "c1",
+						LocalBranches: []string{"featB/pt1"},
+					},
 				},
-				commitgraph.Node{
-					Hash:          "c1",
-					Children:      map[string]struct{}{},
-					LocalBranches: []string{"featB/pt1"},
-					Parents:       map[string]struct{}{},
+				ParentEdges: map[string]map[string]struct{}{
+					"c3": {
+						"c2": struct{}{},
+					},
+					"c2": {},
+					"c1": {},
 				},
-			),
+				ChildrenEdges: map[string]map[string]struct{}{
+					"c3": {},
+					"c2": {
+						"c3": struct{}{},
+					},
+					"c1": {},
+				},
+			},
 		},
 	}
 
@@ -176,14 +230,4 @@ func TestCompute(t *testing.T) {
 			require.Equal(t, c.want, got)
 		})
 	}
-}
-
-func toDAG(nodes ...commitgraph.Node) commitgraph.DAG {
-	dag := commitgraph.DAG{
-		Nodes: map[string]commitgraph.Node{},
-	}
-	for _, n := range nodes {
-		dag.Nodes[n.Hash] = n
-	}
-	return dag
 }

@@ -53,7 +53,7 @@ var pushCmd = &cobra.Command{
 		}()
 
 		wantTargets := map[string]string{}
-		branches := s.OrderedBranches()
+		branches := s.TotalOrderedBranches()
 		for i, b := range branches {
 			if i == len(branches)-1 {
 				wantTargets[b] = defaultBranch

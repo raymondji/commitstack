@@ -68,7 +68,7 @@ var switchCmd = &cobra.Command{
 		var opts []huh.Option[string]
 		if switchBranchFlag {
 			formTitle = "Choose branch"
-			for _, b := range currStack.OrderedBranches() {
+			for _, b := range currStack.TotalOrderedBranches() {
 				opts = append(opts, huh.NewOption(b, b))
 			}
 		} else {
