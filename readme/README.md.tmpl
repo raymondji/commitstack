@@ -19,7 +19,7 @@ Stacking branches natively with Git is completely doable, but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
-## How does `git stack` compare to `<other stacking tool>`?
+## How does `git stack` compare to other options?
 
 There are two main areas where `git stack` differs from most existing tools:
 - `git stack` is designed to act as a minimal Git CLI extension and to feel as native as possible. It works with existing Git concepts and functionality (like `--update-refs`), and unlike most stacking tools, it's stateless. `git stack` automatically infers stacks from the structure of your commits, so there's no state that can get out of sync with Git.
