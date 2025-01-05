@@ -60,7 +60,7 @@ func TestInferStacks(t *testing.T) {
 						Commits: []commitstack.Commit{
 							{
 								Hash:          "c1",
-								LocalBranches: []string{"dev", "dev2"},
+								LocalBranches: []string{"dev2", "dev"},
 							},
 						},
 					},
