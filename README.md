@@ -19,7 +19,7 @@ Stacking branches natively with Git is completely doable, but cumbersome.
 - While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
 - Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
 
-## How does `git stack` compare to `<other stacking tool>`?
+## How does `git stack` compare to other options?
 
 There are two main areas where `git stack` differs from most existing tools:
 - `git stack` is designed to act as a minimal Git CLI extension and to feel as native as possible. It works with existing Git concepts and functionality (like `--update-refs`), and unlike most stacking tools, it's stateless. `git stack` automatically infers stacks from the structure of your commits, so there's no state that can get out of sync with Git.
@@ -84,7 +84,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack b90c8f0] hello world
+[myfirststack 360f9a6] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -96,11 +96,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 f80b88c] break
+[myfirststack-pt2 ce1113d] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 4863be8] kitkat
+[myfirststack-pt2 fb1c2f8] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -125,9 +125,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* 4863be8 (HEAD -> myfirststack-pt2) kitkat (top)
-  f80b88c break      
-  b90c8f0 (myfirststack) hello world      
+* fb1c2f8 (HEAD -> myfirststack-pt2) kitkat (top)
+  ce1113d break      
+  360f9a6 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -137,8 +137,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/130
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/131
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/133
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/132
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -148,10 +148,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/131
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/130
+  └── https://github.com/raymondji/git-stack-cli/pull/133
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/131
+  └── https://github.com/raymondji/git-stack-cli/pull/132
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -178,7 +178,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 05ed192] My second stack
+[mysecondstack fb4b4e0] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
