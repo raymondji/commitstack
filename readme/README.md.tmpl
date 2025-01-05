@@ -27,7 +27,7 @@ There are two main areas where `git stack` differs from most existing tools:
 
 ## Limitations
 
-- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is no problem).
+- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is not a problem).
 
 ## Installation
 
