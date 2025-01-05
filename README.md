@@ -2,7 +2,7 @@
 
 # git stack
 
-A minimal Git CLI subcommand for managing stacked branches/pull requests. Works with Gitlab and Github.
+A minimal Git CLI subcommand for managing stacked branches/MRs/PRs. Works with Gitlab and Github.
 
 Core commands:
 - `git stack list`: list all stacks
@@ -11,7 +11,7 @@ Core commands:
 
 ## What is stacking?
 
-https://graphite.dev/guides/stacked-diffs has a good overview on what it is and why you might want to do it.
+https://www.stacking.dev has a good overview on what it is and why you might want to do it.
 
 ## Where does native Git fall short with stacking?
 
@@ -22,12 +22,12 @@ Stacking branches natively with Git is completely doable, but cumbersome.
 ## How does `git stack` compare to `<other stacking tool>`?
 
 There are two main areas where `git stack` differs from most existing tools:
-- `git stack` is designed to feel like a minimal addition to the Git CLI. It works with existing Git concepts and functionality (like `--update-refs`), and aims to unintrusively fill in the gaps. Unlike most stacking tools, it's also stateless, so there's no state to keep in sync between Git and `git stack`. Instead, it works by automatically inferring stacks from the structure of your commits.
-- `git stack` integrates with Gitlab (and Github). I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github. Besides `git stack`, some other projects I've found with Gitlab support include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the new [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. They all work pretty differently and have different feature sets.
+- `git stack` functions as a minimal Git CLI extension and is designed to feel as native as possible. It works with existing Git concepts and functionality (like `--update-refs`), and aims to unintrusively fill in the gaps. Unlike most stacking tools, it's also stateless, so there's no state to sync between Git and `git stack`. Instead, `git stack` infers stacks automatically from the structure of your commits.
+- `git stack` integrates with both Gitlab and Github. I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github. Besides `git stack`, other options with Gitlab support include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the new [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command. Each one offers a distinct user experience and feature set.
 
 ## Limitations
 
-- `git stack` requires maintaining linear commit histories in your feature branches to be able to infer stacks. Thus it's effectively tied to using `git rebase`, which seemed reasonable given that `git rebase --update-refs` is the native way of updating stacked branches in Git. However, this means `git stack` is not compatible with `git merge` workflows (at least within feature branches, merging into `main` is no problem).
+- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is no problem).
 
 ## Installation
 
@@ -38,7 +38,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.26.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.27.0
 ```
 
 ## Getting started
@@ -73,7 +73,8 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 3 commits.
+  (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ Next, let's create our first branch:             │
@@ -83,7 +84,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 2a1a9e2] hello world
+[myfirststack 1ddb894] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -95,11 +96,11 @@ Your branch is up to date with 'origin/main'.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 487f96e] break
+[myfirststack-pt2 717c1d8] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 c011cff] kitkat
+[myfirststack-pt2 043a3fe] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -124,9 +125,9 @@ Branches in stack:
 > git stack show --log
 In stack myfirststack-pt2
 Commits in stack:
-* c011cff (HEAD -> myfirststack-pt2) kitkat (top)
-  487f96e break      
-  2a1a9e2 (myfirststack) hello world      
+* 043a3fe (HEAD -> myfirststack-pt2) kitkat (top)
+  717c1d8 break      
+  1ddb894 (myfirststack) hello world      
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -136,8 +137,8 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/112
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/111
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/117
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/118
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -147,10 +148,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/111
 In stack myfirststack-pt2
 Branches in stack:
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/112
+  └── https://github.com/raymondji/git-stack-cli/pull/117
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/111
+  └── https://github.com/raymondji/git-stack-cli/pull/118
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -171,12 +172,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 3 commits.
+  (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 8dd98c8] My second stack
+[mysecondstack e9eff2f] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
