@@ -11,7 +11,7 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"l"},
+	Aliases: []string{"li"},
 	Short:   "List all stacks",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
