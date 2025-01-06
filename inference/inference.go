@@ -145,6 +145,7 @@ func GetCurrent(stacks []Stack, currCommit string) (Stack, error) {
 		for _, s := range currStacks {
 			names = append(names, s.Name)
 		}
+		// TODO: add message to indicate you can rerun with `git stack [cmd] [stack]` to disambiguate
 		return Stack{}, fmt.Errorf("currently within multiple stacks: %s", strings.Join(names, ", "))
 	}
 }
