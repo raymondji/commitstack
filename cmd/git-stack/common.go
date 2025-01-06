@@ -114,7 +114,7 @@ func printMergedBranches(branches []string, defaultBranch string, theme config.T
 	})
 	if len(branches) > 0 {
 		fmt.Println()
-		fmt.Println("Stack inference is ignoring branches merged into main:")
+		fmt.Printf("Excluding branches merged into %s:\n", defaultBranch)
 		fmt.Println(strings.Repeat(" ", 2) + `(use "git commit ..." to add a commit on a branch for it to appear as a stack)`)
 		fmt.Println(strings.Repeat(" ", 2) + `(use "git branch -D <branch>" to remove unneeded branches)`)
 	}

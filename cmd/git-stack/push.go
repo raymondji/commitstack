@@ -149,6 +149,7 @@ var pushCmd = &cobra.Command{
 			return actionErr
 		}
 		for _, pr := range prs {
+			// TODO: print a hereMarker for the current branch
 			fmt.Printf("Pushed %s: %s\n", pr.SourceBranch, pr.WebURL)
 		}
 		return nil
