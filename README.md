@@ -2,11 +2,11 @@
 
 # git stack
 
-A minimal Git CLI subcommand for managing stacked branches/MRs/PRs. Works with Gitlab and Github.
+A minimal CLI for managing stacked PRs, designed to feel like a native Git feature. Works with Gitlab and Github.
 
 Core commands:
 - `git stack list`: list all stacks
-- `git stack show`: view your current stack
+- `git stack branch`: list branches in the current stack
 - `git stack push`: push branches in the current stack and open MRs/PRs
 
 ## What is stacking?
@@ -21,7 +21,7 @@ Stacking branches natively with Git is completely doable, but cumbersome.
 
 ## How does `git stack` compare to other stacking tools?
 
-There are two main areas where `git stack` differs from most existing tools:
+There are two main areas where `git stack` aims to differentiate itself:
 - `git stack` is designed to be as minimal as possible, and to hopefully feel like native Git CLI subcommand. It works with existing Git concepts and functionality (like `--update-refs`), and unlike most stacking tools, it's stateless. `git stack` works by automatically inferring stacks from the structure of your commits, so there's no state that can get out of sync with Git.
 - `git stack` integrates with both Gitlab and Github. I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github. Besides `git stack`, other options with Gitlab support include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the new [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command.
 
@@ -84,7 +84,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack c30f261] hello world
+[myfirststack 0f10b78] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -96,11 +96,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 22e06b3] break
+[myfirststack-pt2 1a2976e] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 e0f9f8d] kitkat
+[myfirststack-pt2 62a7d0b] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -111,23 +111,19 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │ we can see with:                                 │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack show
-In stack myfirststack-pt2
-Branches in stack:
+> git stack branch
 * myfirststack-pt2 (top)
-  myfirststack
+  myfirststack (bottom)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ Our current stack has 3 commits in it, which we  │
 │ can see with:                                    │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack show --log
-In stack myfirststack-pt2
-Commits in stack:
-* e0f9f8d (HEAD -> myfirststack-pt2) kitkat (top)
-  22e06b3 break      
-  c30f261 (myfirststack) hello world      
+> git stack log
+62a7d0b kitkat
+1a2976e break
+0f10b78 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -137,21 +133,20 @@ Commits in stack:
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/138
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/139
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/146
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/145
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack show --prs
-In stack myfirststack-pt2
-Branches in stack:
+> git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/138
+  └── https://github.com/raymondji/git-stack-cli/pull/146
 
-  myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/139
+  myfirststack (bottom)
+  └── https://github.com/raymondji/git-stack-cli/pull/145
+
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ To sync the latest changes from the default      │
@@ -178,7 +173,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 5cf2875] My second stack
+[mysecondstack 137fff0] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -187,7 +182,6 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack list
-  dev (1 branch)
   myfirststack-pt2 (2 branches)
 * mysecondstack (1 branch)
 ╭──────────────────────────────────────────────────╮
