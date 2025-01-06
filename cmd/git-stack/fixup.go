@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ var fixupCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := commitstack.InferStacks(git, log)
+		stacks, err := inference.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -41,7 +41,7 @@ var fixupCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stack, err := commitstack.GetCurrent(stacks.InferredStacks, currCommit)
+		stack, err := inference.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}
@@ -50,8 +50,13 @@ var fixupCmd = &cobra.Command{
 		if len(args) == 1 {
 			branchToFix = args[0]
 		} else {
+			branches, err := stack.TotalOrderedBranches()
+			if err != nil {
+				return err
+			}
+
 			var opts []huh.Option[string]
-			for _, b := range stack.OrderedBranches() {
+			for _, b := range branches {
 				opts = append(opts, huh.NewOption(b, b))
 			}
 			form := huh.NewForm(

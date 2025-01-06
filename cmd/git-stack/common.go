@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"sort"
+	"strings"
 	"time"
 
-	"github.com/raymondji/git-stack-cli/commitstack"
 	"github.com/raymondji/git-stack-cli/config"
 	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/slices"
+	"golang.org/x/exp/maps"
 )
 
 type deps struct {
@@ -66,28 +68,58 @@ Unmerged paths:
         both modified:   src/module1.py
         both added:      src/module2.py
 */
-func printProblems(inference commitstack.InferenceResult) {
-	validationErrMessages := []string{}
-	for _, s := range inference.InferredStacks {
-		for _, err := range s.ValidationErrors {
-			validationErrMessages = append(validationErrMessages, err.Error())
+func printProblems(stacks []inference.Stack, theme config.Theme) {
+	var divergentStacksMsgs []string
+	for _, stack := range stacks {
+		got := stack.DivergesFrom()
+		if len(got) > 0 {
+			divergentStacksMsgs = append(divergentStacksMsgs, fmt.Sprintf(
+				"%s has diverged from %s",
+				stack.Name,
+				strings.Join(maps.Keys(got), ", "),
+			))
 		}
 	}
-	sort.Strings(validationErrMessages)
-	if len(validationErrMessages) > 0 {
+	if len(divergentStacksMsgs) > 0 {
 		fmt.Println()
-		fmt.Println("Invalid stacks:")
-		for _, msg := range validationErrMessages {
-			fmt.Printf("  %s\n", msg)
+		fmt.Println("Divergent stacks:")
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git merge" to merge one branch into another)`)
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git stack rebase" to rebase one stack onto another)`)
+		for _, msg := range divergentStacksMsgs {
+			fmt.Println(strings.Repeat(" ", 8) + theme.QuaternaryColor.Render(msg))
 		}
 	}
 
-	if len(inference.InferenceErrors) > 0 {
-		fmt.Println()
-		fmt.Println("Stack inference is ignoring incompatible commits:")
-		for _, err := range inference.InferenceErrors {
-			fmt.Printf("  %s\n", err.Error())
+	var noTotalOrderMsgs []string
+	for _, stack := range stacks {
+		_, err := stack.TotalOrderedBranches()
+		if err != nil {
+			noTotalOrderMsgs = append(noTotalOrderMsgs, err.Error())
 		}
+	}
+	if len(noTotalOrderMsgs) > 0 {
+		fmt.Println()
+		fmt.Println("Partially ordered stacks:")
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git reset --hard <ref>..." to undo a merge commit)`)
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git log --oneline --graph" to visualize the commit history)`)
+		for _, msg := range noTotalOrderMsgs {
+			fmt.Println(strings.Repeat(" ", 8) + theme.QuaternaryColor.Render(msg))
+		}
+	}
+}
+
+func printMergedBranches(branches []string, defaultBranch string, theme config.Theme) {
+	branches = slices.Filter(branches, func(b string) bool {
+		return b != defaultBranch
+	})
+	if len(branches) > 0 {
+		fmt.Println()
+		fmt.Printf("Excluding branches merged into %s:\n", defaultBranch)
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git commit ..." to add a commit on a branch for it to appear as a stack)`)
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git branch -D <branch>" to remove unneeded branches)`)
+	}
+	for _, b := range branches {
+		fmt.Println(strings.Repeat(" ", 8) + theme.QuaternaryColor.Render(b))
 	}
 }
 

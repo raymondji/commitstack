@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/raymondji/git-stack-cli/commitstack"
+	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		inference, err := commitstack.InferStacks(git, log)
+		stacks, err := inference.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -41,7 +41,7 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := commitstack.GetCurrent(inference.InferredStacks, currCommit)
+		s, err := inference.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}
@@ -49,9 +49,9 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if currBranch != s.Name() {
-			return fmt.Errorf("must be on the tip of the stack to edit, currently checked out: %s, tip: %s",
-				currBranch, s.Name())
+		if currBranch != s.Name {
+			return fmt.Errorf("must be on the tip of the stack to rebase, currently checked out: %s, tip: %s",
+				currBranch, s.Name)
 		}
 
 		rebaseOpts := libgit.RebaseOpts{
@@ -68,7 +68,7 @@ var rebaseCmd = &cobra.Command{
 			return err
 		}
 		if !rebaseInteractiveFlag {
-			fmt.Printf("Successfully rebased %s on %s\n", s.Name(), newBase)
+			fmt.Printf("Successfully rebased %s on %s\n", s.Name, newBase)
 		}
 		return nil
 	},

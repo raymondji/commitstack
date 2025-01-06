@@ -21,7 +21,7 @@ type Git interface {
 	GetRootDir() (string, error)
 	CommitFixup(commitHash string, add bool) (string, error)
 	CommitEmpty(msg string) error
-	GetBranchesContainingCommit(commitHash string) ([]string, error)
+	GetMergedBranches(ref string) ([]string, error)
 	GetCurrentBranch() (string, error)
 	GetShortCommitHash(branch string) (string, error)
 	PushForceWithLease(branchName string) (string, error)
@@ -30,6 +30,7 @@ type Git interface {
 	DeleteBranchIfExists(name string) error
 	Checkout(name string) error
 	LogAll(notReachableFrom string) (Log, error)
+	LogOneline(from string, to string) error
 }
 
 type git struct{}
@@ -295,10 +296,10 @@ func (g git) Rebase(branch string, opts RebaseOpts) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g git) GetBranchesContainingCommit(commitHash string) ([]string, error) {
-	output, err := exec.Run("git", exec.WithArgs("branch", "--contains", commitHash, "--format='%(refname:short)'"))
+func (g git) GetMergedBranches(ref string) ([]string, error) {
+	output, err := exec.Run("git", exec.WithArgs("branch", "--merged", ref, "--format=%(refname:short)"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to find branches containing commit %s, err: %v", commitHash, err)
+		return nil, fmt.Errorf("failed to find branches merged into %s, err: %v", ref, err)
 	}
 
 	var branches []string
@@ -353,6 +354,23 @@ type Commit struct {
 	LocalBranches []string
 }
 
+func (g git) LogOneline(from string, to string) error {
+	_, err := exec.Run(
+		"git",
+		exec.WithArgs(
+			"log", "--oneline", fmt.Sprintf("%s..%s", from, to),
+		),
+		exec.WithOSStdout(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve git log: %v", err)
+	}
+	return nil
+}
+
+// Is there any advantage to using git rev-list --parents --branches instead?
+// Seems to be about the same, git git rev-list would need to do a separate
+// git branch call to map branch refs to commit hashes
 func (g git) LogAll(notReachableFrom string) (Log, error) {
 	output, err := exec.Run(
 		"git",
