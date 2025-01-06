@@ -174,6 +174,11 @@ func InferStacks(log libgit.Log) ([]Stack, error) {
 			Name:    c.LocalBranches[0],
 			Commits: map[string]*Commit{},
 		}
+		// TODO: Can we adapt djikstra's to reduce the time complexity?
+		// Although this is multi-source and multi-sink as-is.
+		// Can we transform this into a single-source problem
+		// by making `defaultBranch` the only source
+		// instead of starting from the leaf commits?
 		err := inferStack(k, 1, graph, stack, 250)
 		if err != nil {
 			return nil, err

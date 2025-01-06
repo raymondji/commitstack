@@ -353,6 +353,9 @@ type Commit struct {
 	LocalBranches []string
 }
 
+// Is there any advantage to using git rev-list --parents --branches instead?
+// Seems to be about the same, git git rev-list would need to do a separate
+// git branch call to map branch refs to commit hashes
 func (g git) LogAll(notReachableFrom string) (Log, error) {
 	output, err := exec.Run(
 		"git",
