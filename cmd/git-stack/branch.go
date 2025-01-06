@@ -159,7 +159,7 @@ var branchCmd = &cobra.Command{
 			// 	continue
 			// }
 			var hereMarker, branchesSegment, suffix string
-			if i == 0 && totalOrder {
+			if totalOrder && i == 0 {
 				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 			}
 			if branch == currBranch {
@@ -167,7 +167,7 @@ var branchCmd = &cobra.Command{
 				branchesSegment = theme.PrimaryColor.Render(branch)
 			} else {
 				hereMarker = " "
-				if i == 0 && branch != currBranch {
+				if totalOrder && i == 0 && branch != currBranch {
 					branchesSegment = theme.TertiaryColor.Render(branch)
 				} else {
 					branchesSegment = branch
