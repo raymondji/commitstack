@@ -45,7 +45,7 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 		),
 		shellCmd(`git stack push`),
 		"We can quickly view the PRs in the stack using:",
-		shellCmd(`git stack show --prs`),
+		shellCmd(`git stack branch --prs`),
 		multiline(
 			"To sync the latest changes from the default branch into the stack, you can run:",
 			fmt.Sprintf("git rebase %s --update-refs", defaultBranch),
