@@ -30,6 +30,7 @@ type Git interface {
 	DeleteBranchIfExists(name string) error
 	Checkout(name string) error
 	LogAll(notReachableFrom string) (Log, error)
+	LogOneline(from string, to string) error
 }
 
 type git struct{}
@@ -351,6 +352,20 @@ type Commit struct {
 	Hash          string
 	ParentHashes  []string
 	LocalBranches []string
+}
+
+func (g git) LogOneline(from string, to string) error {
+	_, err := exec.Run(
+		"git",
+		exec.WithArgs(
+			"log", "--oneline", fmt.Sprintf("%s..%s", from, to),
+		),
+		exec.WithOSStdout(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve git log: %v", err)
+	}
+	return nil
 }
 
 // Is there any advantage to using git rev-list --parents --branches instead?

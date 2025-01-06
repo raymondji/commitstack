@@ -14,14 +14,15 @@ var (
 func init() {
 	rootCmd.PersistentFlags().BoolVar(&benchmarkFlag, "benchmark", false, "Benchmark commands")
 	rootCmd.AddCommand(
+		branchCmd,
+		fixupCmd,
 		initCmd,
-		switchCmd,
+		learnCmd,
+		listCmd,
+		logCmd,
 		pushCmd,
 		rebaseCmd,
-		fixupCmd,
-		branchCmd,
-		listCmd,
-		learnCmd,
+		switchCmd,
 		versionCmd,
 	)
 }
