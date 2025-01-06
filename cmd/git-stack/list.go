@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: add flag to filter by stacks that contain branch X
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"li"},
