@@ -83,7 +83,7 @@ func printProblems(stacks []inference.Stack, theme config.Theme) {
 	if len(divergentStacksMsgs) > 0 {
 		fmt.Println()
 		fmt.Println("Divergent stacks:")
-		fmt.Println(strings.Repeat(" ", 2) + `(use "git stack merge" to merge one stack into another)`)
+		fmt.Println(strings.Repeat(" ", 2) + `(use "git merge" to merge one branch into another)`)
 		fmt.Println(strings.Repeat(" ", 2) + `(use "git stack rebase" to rebase one stack onto another)`)
 		for _, msg := range divergentStacksMsgs {
 			fmt.Println(strings.Repeat(" ", 8) + theme.QuaternaryColor.Render(msg))
