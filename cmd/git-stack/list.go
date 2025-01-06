@@ -51,10 +51,10 @@ var listCmd = &cobra.Command{
 		}
 		benchmarkPoint("listCmd", "got curr commit and stack inference")
 		defer func() {
-			printMergedBranches(mergedBranches)
+			printMergedBranches(mergedBranches, defaultBranch, theme)
 		}()
 		defer func() {
-			printProblems(stacks)
+			printProblems(stacks, theme)
 		}()
 
 		for _, s := range stacks {

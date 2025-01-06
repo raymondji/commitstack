@@ -97,7 +97,7 @@ var showCmd = &cobra.Command{
 			}
 		}
 		defer func() {
-			printProblems([]inference.Stack{stack})
+			printProblems([]inference.Stack{stack}, deps.theme)
 		}()
 		benchmarkPoint("listCmd", "got desired stack")
 

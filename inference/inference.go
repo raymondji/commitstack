@@ -27,10 +27,19 @@ type Commit struct {
 
 type NoTotalOrderError struct {
 	StackName string
+	// Each entry has length two
+	IncomparableBranchPairs [][]string
 }
 
 func (e NoTotalOrderError) Error() string {
-	return fmt.Sprintf("%s does not have a total order", e.StackName)
+	var msgs []string
+	assert(len(e.IncomparableBranchPairs) > 0, "must have at least 1 branch pair")
+	for _, pair := range e.IncomparableBranchPairs {
+		assert(len(pair) == 2, "branch pairs must have length 2")
+		msgs = append(msgs, fmt.Sprintf("branch %s does not contain %s, and vice versa", pair[0], pair[1]))
+	}
+	// Printing all of them might be too overwhelming
+	return fmt.Sprintf("%s: %s", e.StackName, msgs[0])
 }
 
 func (s Stack) Branches() []string {
@@ -54,7 +63,7 @@ func (s Stack) TotalOrderedBranches() ([]string, error) {
 	}
 
 	name := s.Name
-	var noTotalOrder bool
+	var incomparableBranchPairs [][]string
 	slices.SortFunc(branchCommits, func(a, b *Commit) int {
 		scoreA, ok := a.StackBranchScore[name]
 		assert(ok, "commit must be in stack")
@@ -66,15 +75,20 @@ func (s Stack) TotalOrderedBranches() ([]string, error) {
 		} else if scoreA > scoreB {
 			return 1
 		} else {
-			// TODO: get the commits with the lowest branch scores
-			// that have the same score.
-			noTotalOrder = true
+			// Arbitarily picking the first branch for now
+			incomparableBranchPairs = append(incomparableBranchPairs,
+				[]string{
+					a.LocalBranches[0],
+					b.LocalBranches[0],
+				},
+			)
 			return 0
 		}
 	})
-	if noTotalOrder {
+	if len(incomparableBranchPairs) > 0 {
 		return nil, NoTotalOrderError{
-			StackName: s.Name,
+			StackName:               s.Name,
+			IncomparableBranchPairs: incomparableBranchPairs,
 		}
 	}
 

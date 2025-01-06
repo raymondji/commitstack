@@ -51,7 +51,7 @@ var pushCmd = &cobra.Command{
 		}
 		if len(s.DivergesFrom()) > 0 {
 			fmt.Println("error: cannot push divergent stacks")
-			printProblems([]inference.Stack{s})
+			printProblems([]inference.Stack{s}, deps.theme)
 			return nil
 		}
 		for i, b := range branches {
