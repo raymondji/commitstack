@@ -149,48 +149,6 @@ var branchCmd = &cobra.Command{
 			benchmarkPoint("listCmd", "fetched pull requests")
 		}
 
-		// if branchLogFlag {
-		// fmt.Println("Commits in stack:")
-		// for i, c := range stack.Commits {
-		// 	var hereMarker, topMarker string
-		// 	if i == 0 {
-		// 		topMarker = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-		// 	} else {
-		// 		topMarker = strings.Repeat(" ", 6)
-		// 	}
-		// 	if currCommit == c.Hash {
-		// 		hereMarker = "* "
-		// 	} else {
-		// 		hereMarker = "  "
-		// 	}
-
-		// 	var branchCol string
-		// 	if len(c.LocalBranches) > 0 {
-		// 		var branchParts []string
-		// 		const headMarker = "HEAD ->"
-		// 		for _, b := range c.LocalBranches {
-		// 			if b == currBranch {
-		// 				branchParts = append(
-		// 					[]string{
-		// 						fmt.Sprintf("%s %s", theme.PrimaryColor.Render(headMarker), theme.SecondaryColor.Render(b)),
-		// 					},
-		// 					branchParts...,
-		// 				)
-		// 			} else {
-		// 				branchParts = append(branchParts, theme.SecondaryColor.Render(b))
-		// 			}
-		// 		}
-		// 		branchCol = fmt.Sprintf("(%s) ", strings.Join(branchParts, ", "))
-		// 	} else if currCommit == c.Hash {
-		// 		branchCol = fmt.Sprintf("(%s) ", theme.PrimaryColor.Render("HEAD"))
-		// 	}
-
-		// 	commitHash := theme.QuaternaryColor.Render(c.Hash)
-		// 	fmt.Printf("%s%s %s%s%s\n", hereMarker, commitHash, branchCol, c.Subject, topMarker)
-		// }
-		// benchmarkPoint("listCmd", "done printing log")
-		// } else {
-
 		// TODO: if no heremarker, e.g. if I'm on another branch,
 		// render all branch names without indentation. Looks less ugly
 		for i, branch := range branches {
