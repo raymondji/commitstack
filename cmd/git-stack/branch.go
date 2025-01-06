@@ -159,18 +159,19 @@ var branchCmd = &cobra.Command{
 			// 	continue
 			// }
 			var hereMarker, branchesSegment, suffix string
-			if i == 0 && totalOrder && len(branches) > 1 {
+			if i == 0 && totalOrder {
 				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-			}
-			if i == len(branches)-1 && totalOrder && len(branches) > 1 {
-				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("bottom"))
 			}
 			if branch == currBranch {
 				hereMarker = "*"
 				branchesSegment = theme.PrimaryColor.Render(branch)
 			} else {
 				hereMarker = " "
-				branchesSegment = branch
+				if i == 0 && branch != currBranch {
+					branchesSegment = theme.TertiaryColor.Render(branch)
+				} else {
+					branchesSegment = branch
+				}
 			}
 
 			fmt.Printf("%s %s%s\n", hereMarker, branchesSegment, suffix)
