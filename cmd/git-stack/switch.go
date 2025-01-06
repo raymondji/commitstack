@@ -19,7 +19,7 @@ func init() {
 
 var switchCmd = &cobra.Command{
 	Use:     "switch",
-	Aliases: []string{"sw"},
+	Aliases: []string{"s"},
 	Short:   "Switch stacks or branches within the current stack",
 	Args:    cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {

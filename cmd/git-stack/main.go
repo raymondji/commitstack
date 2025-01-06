@@ -19,7 +19,7 @@ func init() {
 		pushCmd,
 		rebaseCmd,
 		fixupCmd,
-		showCmd,
+		branchCmd,
 		listCmd,
 		learnCmd,
 		versionCmd,
