@@ -190,6 +190,9 @@ var branchCmd = &cobra.Command{
 		// }
 		// benchmarkPoint("listCmd", "done printing log")
 		// } else {
+
+		// TODO: if no heremarker, e.g. if I'm on another branch,
+		// render all branch names without indentation. Looks less ugly
 		for i, branch := range branches {
 			// if len(c.LocalBranches) == 0 && c.Hash == currCommit {
 			// 	fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
@@ -197,7 +200,7 @@ var branchCmd = &cobra.Command{
 			// } else if len(c.LocalBranches) == 0 {
 			// 	continue
 			// }
-			var prefix, branchesSegment, suffix string
+			var hereMarker, branchesSegment, suffix string
 			if i == 0 && totalOrder && len(branches) > 1 {
 				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
 			}
@@ -205,14 +208,14 @@ var branchCmd = &cobra.Command{
 				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("bottom"))
 			}
 			if branch == currBranch {
-				prefix = "*"
+				hereMarker = "*"
 				branchesSegment = theme.PrimaryColor.Render(branch)
 			} else {
-				prefix = " "
+				hereMarker = " "
 				branchesSegment = branch
 			}
 
-			fmt.Printf("%s %s%s\n", prefix, branchesSegment, suffix)
+			fmt.Printf("%s %s%s\n", hereMarker, branchesSegment, suffix)
 			if branchPRsFlag {
 				if pr, ok := prsBySrcBranch[branch]; ok {
 					fmt.Printf("  └── %s\n", pr.WebURL)
