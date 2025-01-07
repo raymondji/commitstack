@@ -7,7 +7,6 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/raymondji/git-stack-cli/concurrent"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +29,7 @@ var switchCmd = &cobra.Command{
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
 
 		var currCommit string
-		var stacks []inference.Stack
+		var stacks []stackparser.Stack
 		err = concurrent.Run(
 			context.Background(),
 			func(ctx context.Context) error {
@@ -43,18 +42,18 @@ var switchCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				stacks, err = inference.InferStacks(log)
+				stacks, err = stackparser.InferStacks(log)
 				return err
 			},
 		)
 		if err != nil {
 			return err
 		}
-		benchmarkPoint("switchCmd", "got curr commit and stack inference")
+		benchmarkPoint("switchCmd", "got curr commit and stack stackparser")
 
-		var currStack *inference.Stack
+		var currStack *stackparser.Stack
 		if switchBranchFlag {
-			stack, err := inference.GetCurrent(stacks, currCommit)
+			stack, err := stackparser.GetCurrent(stacks, currCommit)
 			if err != nil {
 				return err
 			}
@@ -66,7 +65,7 @@ var switchCmd = &cobra.Command{
 		var opts []huh.Option[string]
 		if switchBranchFlag {
 			branches, err := currStack.TotalOrderedBranches()
-			var errNoTotalOrder inference.NoTotalOrderError
+			var errNoTotalOrder stackparser.NoTotalOrderError
 			if errors.As(err, &errNoTotalOrder) {
 				// TODO: check for this specific error type
 				fmt.Printf("Warning: stack %s does not have a total order\n", currStack.Name)

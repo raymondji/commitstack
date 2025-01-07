@@ -10,7 +10,6 @@ import (
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/slices"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +30,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := inference.InferStacks(log)
+		stacks, err := stackparser.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -39,7 +38,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := inference.GetCurrent(stacks, currCommit)
+		s, err := stackparser.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}
@@ -51,7 +50,7 @@ var pushCmd = &cobra.Command{
 		}
 		if len(s.DivergesFrom()) > 0 {
 			fmt.Println("error: cannot push divergent stacks")
-			printProblems([]inference.Stack{s}, deps.theme)
+			printProblems([]stackparser.Stack{s}, deps.theme)
 			return nil
 		}
 		for i, b := range branches {

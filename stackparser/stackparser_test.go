@@ -1,11 +1,10 @@
-package inference_test
+package stackparser_test
 
 import (
 	"testing"
 
-	"github.com/raymondji/git-stack-cli/inference"
-	"github.com/raymondji/git-stack-cli/inference/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/stackparser/commitgraph"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +12,7 @@ func TestInferStacks(t *testing.T) {
 	cases := map[string]struct {
 		log                            libgit.Log
 		commitHashToContainingBranches map[string][]string
-		want                           []inference.Stack
+		want                           []stackparser.Stack
 		// Keys are stack names
 		wantTotalOrderedBranches    map[string][]string
 		wantTotalOrderedBranchesErr map[string]struct{}
@@ -34,10 +33,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "dev",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -64,10 +63,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "dev2",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -99,10 +98,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "feat/pt3",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c2": {
 							Node: commitgraph.Node{
 								Hash:          "c2",
@@ -148,10 +147,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "featC",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c3": {
 							Node: commitgraph.Node{
 								Hash:          "c3",
@@ -218,10 +217,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "feat3",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c6": {
 							Node: commitgraph.Node{
 								Hash:          "c6",
@@ -299,10 +298,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "featA/pt2",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c4": {
 							Node: commitgraph.Node{
 								Hash:          "c4",
@@ -331,7 +330,7 @@ func TestInferStacks(t *testing.T) {
 				},
 				{
 					Name: "featB/pt1",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c1": {
 							Node: commitgraph.Node{
 								Hash:          "c1",
@@ -369,10 +368,10 @@ func TestInferStacks(t *testing.T) {
 					},
 				},
 			},
-			want: []inference.Stack{
+			want: []stackparser.Stack{
 				{
 					Name: "featB",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c2": {
 							Node: commitgraph.Node{
 								Hash:          "c2",
@@ -396,7 +395,7 @@ func TestInferStacks(t *testing.T) {
 				},
 				{
 					Name: "featC",
-					Commits: map[string]*inference.Commit{
+					Commits: map[string]*stackparser.Commit{
 						"c3": {
 							Node: commitgraph.Node{
 								Hash:          "c3",
@@ -428,11 +427,11 @@ func TestInferStacks(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			got, err := inference.InferStacks(c.log)
+			got, err := stackparser.InferStacks(c.log)
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 
-			stacksMap := map[string]inference.Stack{}
+			stacksMap := map[string]stackparser.Stack{}
 			for _, s := range got {
 				stacksMap[s.Name] = s
 			}

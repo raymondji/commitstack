@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,7 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := inference.InferStacks(log)
+		stacks, err := stackparser.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -41,7 +40,7 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := inference.GetCurrent(stacks, currCommit)
+		s, err := stackparser.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}

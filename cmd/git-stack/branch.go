@@ -9,7 +9,6 @@ import (
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +37,7 @@ var branchCmd = &cobra.Command{
 		benchmarkPoint("listCmd", "got deps")
 
 		var currBranch, currCommit string
-		var stacks []inference.Stack
+		var stacks []stackparser.Stack
 		var mergedBranches []string
 		err = concurrent.Run(
 			context.Background(),
@@ -62,22 +61,22 @@ var branchCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				stacks, err = inference.InferStacks(log)
+				stacks, err = stackparser.InferStacks(log)
 				return err
 			},
 		)
 		if err != nil {
 			return err
 		}
-		benchmarkPoint("listCmd", "got curr commit, curr branch, and stack inference")
+		benchmarkPoint("listCmd", "got curr commit, curr branch, and stack stackparser")
 
-		var stack inference.Stack
+		var stack stackparser.Stack
 		if len(args) == 0 {
 			if slices.Contains(mergedBranches, currBranch) {
 				fmt.Printf("error: the current branch is not a valid stack (it's merged into %s)\n", defaultBranch)
 				return nil
 			}
-			stack, err = inference.GetCurrent(stacks, currCommit)
+			stack, err = stackparser.GetCurrent(stacks, currCommit)
 			if err != nil {
 				return err
 			}
@@ -95,13 +94,13 @@ var branchCmd = &cobra.Command{
 			}
 		}
 		defer func() {
-			printProblems([]inference.Stack{stack}, deps.theme)
+			printProblems([]stackparser.Stack{stack}, deps.theme)
 		}()
 		benchmarkPoint("listCmd", "got desired stack")
 
 		totalOrder := true
 		branches, err := stack.TotalOrderedBranches()
-		var errNoTotalOrder inference.NoTotalOrderError
+		var errNoTotalOrder stackparser.NoTotalOrderError
 		if errors.As(err, &errNoTotalOrder) {
 			// TODO: check for this specific error type
 			fmt.Printf("Warning: stack %s does not have a total order\n", stack.Name)

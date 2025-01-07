@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"github.com/raymondji/git-stack-cli/concurrent"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +23,7 @@ var logCmd = &cobra.Command{
 		benchmarkPoint("logCmd", "got deps")
 
 		var currBranch, currCommit string
-		var stacks []inference.Stack
+		var stacks []stackparser.Stack
 		var mergedBranches []string
 		err = concurrent.Run(
 			context.Background(),
@@ -48,22 +47,22 @@ var logCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				stacks, err = inference.InferStacks(log)
+				stacks, err = stackparser.InferStacks(log)
 				return err
 			},
 		)
 		if err != nil {
 			return err
 		}
-		benchmarkPoint("logCmd", "got curr commit, curr branch, and stack inference")
+		benchmarkPoint("logCmd", "got curr commit, curr branch, and stack stackparser")
 
-		var stack inference.Stack
+		var stack stackparser.Stack
 		if len(args) == 0 {
 			if slices.Contains(mergedBranches, currBranch) {
 				fmt.Printf("error: the current branch is not a valid stack (it's merged into %s)\n", defaultBranch)
 				return nil
 			}
-			stack, err = inference.GetCurrent(stacks, currCommit)
+			stack, err = stackparser.GetCurrent(stacks, currCommit)
 			if err != nil {
 				return err
 			}
@@ -81,7 +80,7 @@ var logCmd = &cobra.Command{
 			}
 		}
 		defer func() {
-			printProblems([]inference.Stack{stack}, deps.theme)
+			printProblems([]stackparser.Stack{stack}, deps.theme)
 		}()
 		benchmarkPoint("logCmd", "got desired stack")
 		if err := git.LogOneline(defaultBranch, stack.Name); err != nil {

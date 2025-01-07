@@ -1,4 +1,4 @@
-package inference
+package stackparser
 
 import (
 	"errors"
@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/raymondji/git-stack-cli/inference/commitgraph"
 	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/stackparser/commitgraph"
 )
 
 type Stack struct {
@@ -150,18 +150,13 @@ func GetCurrent(stacks []Stack, currCommit string) (Stack, error) {
 	}
 }
 
-type InferenceResult struct {
-	InferredStacks  []Stack
-	InferenceErrors []error
-}
-
 type dag struct {
 	commits     map[string]*Commit
 	parentEdges map[string]map[string]struct{}
 }
 
-// InferStacks tries to infer commit stacks from the log
-func InferStacks(log libgit.Log) ([]Stack, error) {
+// ParseStacks parses commit stacks from the git commit log
+func ParseStacks(log libgit.Log) ([]Stack, error) {
 	rawGraph, err := commitgraph.Compute(log)
 	if err != nil {
 		return nil, err

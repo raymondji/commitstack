@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,7 @@ var fixupCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := inference.InferStacks(log)
+		stacks, err := stackparser.InferStacks(log)
 		if err != nil {
 			return err
 		}
@@ -41,7 +40,7 @@ var fixupCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stack, err := inference.GetCurrent(stacks, currCommit)
+		stack, err := stackparser.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}

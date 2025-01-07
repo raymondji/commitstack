@@ -7,7 +7,6 @@ import (
 
 	"github.com/raymondji/git-stack-cli/config"
 	"github.com/raymondji/git-stack-cli/githost"
-	"github.com/raymondji/git-stack-cli/inference"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/raymondji/git-stack-cli/slices"
 	"golang.org/x/exp/maps"
@@ -68,7 +67,7 @@ Unmerged paths:
         both modified:   src/module1.py
         both added:      src/module2.py
 */
-func printProblems(stacks []inference.Stack, theme config.Theme) {
+func printProblems(stacks []stackparser.Stack, theme config.Theme) {
 	var divergentStacksMsgs []string
 	for _, stack := range stacks {
 		got := stack.DivergesFrom()
