@@ -11,6 +11,7 @@ import (
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
 	"github.com/raymondji/git-stack-cli/slices"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +31,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := stackparser.InferStacks(log)
+		stacks, err := stackparser.ParseStacks(log)
 		if err != nil {
 			return err
 		}

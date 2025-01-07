@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/raymondji/git-stack-cli/stackparser/commitgraph"
 	"github.com/stretchr/testify/require"
 )
@@ -427,7 +428,7 @@ func TestInferStacks(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			got, err := stackparser.InferStacks(c.log)
+			got, err := stackparser.ParseStacks(c.log)
 			require.NoError(t, err)
 			require.Equal(t, c.want, got)
 

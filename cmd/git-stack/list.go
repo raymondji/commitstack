@@ -43,7 +43,7 @@ var listCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				stacks, err = stackparser.InferStacks(log)
+				stacks, err = stackparser.ParseStacks(log)
 				return err
 			},
 		)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +43,7 @@ var switchCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				stacks, err = stackparser.InferStacks(log)
+				stacks, err = stackparser.ParseStacks(log)
 				return err
 			},
 		)

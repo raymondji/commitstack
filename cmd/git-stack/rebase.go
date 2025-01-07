@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/raymondji/git-stack-cli/libgit"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,7 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		stacks, err := stackparser.InferStacks(log)
+		stacks, err := stackparser.ParseStacks(log)
 		if err != nil {
 			return err
 		}
