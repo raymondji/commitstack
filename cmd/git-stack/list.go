@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/raymondji/git-stack-cli/concurrent"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
 )
 

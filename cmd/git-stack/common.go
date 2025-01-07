@@ -9,6 +9,7 @@ import (
 	"github.com/raymondji/git-stack-cli/githost"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/raymondji/git-stack-cli/slices"
+	"github.com/raymondji/git-stack-cli/stackparser"
 	"golang.org/x/exp/maps"
 )
 
