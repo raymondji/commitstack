@@ -2,17 +2,17 @@
 
 # git stack
 
-A minimal CLI that makes natively stacking branches more ergonomic. Integrates with Gitlab MRs and Github PRs.
+A minimal CLI that makes stacking branches natively more ergonomic. Integrates with Gitlab MRs and Github PRs.
 
 Core usage:
-- `git checkout -b myfeature`: create branches the way you normally would
+- `git checkout -b myfeature`: create branches how you normally would
 - `git stack list`: list all stacks
 - `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
 
 ## Status
 
-I've been using `git stack` productively for months and rarely encounter breaking bugs. But Git supports a huge number of usage patterns, so there's almost certainly a lot of bugs remaining.
+I built `git stack` for personal use and have been using it productively for months. I rarely encounter issues, but with how many different ways there are to use Git, there's almost certainly a lot of bugs remaining.
 
 ## What is stacking?
 
@@ -28,13 +28,15 @@ However, if you find it valuable to create small PRs, then stacking frequently c
 - It's not clear how to push all branches in a stack except listing them out individually
 - Once you've pushed your branches, you also need to manually set the target branches on Gitlab/Github. If you want to give reviewers context about other PRs in the stack, that's manual too.
 
-You could make things better with a lot of [git fu and custom git aliases](https://www.codetinkerer.com/2023/10/01/stacked-branches-with-vanilla-git.html), and I did that for a long time, or add a tool that provides a more cohesive experience.
+You can make things better with a lot of [git fu and custom git aliases](https://www.codetinkerer.com/2023/10/01/stacked-branches-with-vanilla-git.html), which I did too for a long time. Some things were still hard to automate, and eventually I rewrote my aliases/scripts into `git stack`.
 
 ## Why `git stack`?
 
-`git stack` aims to provide a minimal set of tools to make "native stacking" more ergonomic. There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can provide powerful features, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git features - it's completely stateless, and automatically infers stacks from your commit structure.
+`git stack` aims to add just enough functionality to make "native stacking" more ergonomic.
 
-In addition, `git stack` helps with the other half of the puzzle. It integrates with Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that many of the popular stacking tools support Github only.
+There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can innovate more on features and UX, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git. It's completely stateless, and works by automatically inferring stacks from your commit structure.
+
+In addition, `git stack` helps with the other half of the puzzle. It integrates with both Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that many of the popular stacking tools only support Github.
 
 ## Installation
 
@@ -80,7 +82,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 2 commits.
+Your branch is ahead of 'origin/main' by 1 commit.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -91,7 +93,7 @@ Your branch is ahead of 'origin/main' by 2 commits.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 64ac420] hello world
+[myfirststack 3c92ed9] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -103,11 +105,11 @@ Your branch is ahead of 'origin/main' by 2 commits.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 55d7813] break
+[myfirststack-pt2 c967b67] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 8bea2bc] kitkat
+[myfirststack-pt2 da48203] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -128,9 +130,9 @@ Your branch is ahead of 'origin/main' by 2 commits.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-8bea2bc kitkat
-55d7813 break
-64ac420 hello world
+da48203 kitkat
+c967b67 break
+3c92ed9 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -140,8 +142,8 @@ Your branch is ahead of 'origin/main' by 2 commits.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/155
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/156
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/157
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/158
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -149,10 +151,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/156
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/155
+  └── https://github.com/raymondji/git-stack-cli/pull/157
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/156
+  └── https://github.com/raymondji/git-stack-cli/pull/158
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -174,13 +176,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 2 commits.
+Your branch is ahead of 'origin/main' by 1 commit.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 6a7f651] My second stack
+[mysecondstack 3f23691] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
@@ -214,13 +216,13 @@ When working with Git we often think in terms of branches as the unit of work, a
 
 However, branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
 - Multiple branches can point to the same commit
-- Branches don't inherently have a notion of parent branches or children branches
+- Branches don't inherently have a notion of parent branches or child branches
 
 Under the hood, `git stack` therefore walks the commit graph to infer stacking relationships between branches. Commits serve this purpose well because:
 - Each commit is a unique entity
-- Commits do inherently have a notion of parent commits and children commits
+- Commits do inherently have a notion of parent commits and child commits
 
-`git stack` uses the commit relationships to try and establish a total order between branches in a stack, i.e. where each branch `i` contains branch `i-1`. If such an order exists, the stack is valid. If such an order doesn't exist, the stack is invalid and `git stack` prints a helpful message so you can decide how to resolve the bad state.
+`git stack` uses the commit relationships to try and establish a total order between branches in a stack, i.e. where each branch `i` contains branch `i-1`. If such an order exists, the stack is valid. If such an order doesn't exist, the stack is invalid and `git stack` prints a helpful error message so you can resolve the bad state.
 
 ## Attribution
 
