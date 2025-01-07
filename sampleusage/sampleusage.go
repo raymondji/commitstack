@@ -43,8 +43,8 @@ func Basics(git libgit.Git, host githost.Host, defaultBranch string, theme confi
 			"We can easily push all branches in the stack up as separate PRs.",
 			"git stack automatically sets the target branches for you.",
 		),
-		shellCmd(`git stack push`),
-		"We can quickly view the PRs in the stack using:",
+		shellCmd(`git stack push --create-prs`),
+		"We can quickly view the PRs at any point using:",
 		shellCmd(`git stack branch --prs`),
 		multiline(
 			"To sync the latest changes from the default branch into the stack, you can run:",
