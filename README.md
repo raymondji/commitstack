@@ -2,9 +2,10 @@
 
 # git stack
 
-A minimal CLI that makes stacking branches natively in Git more ergonomic. Integrates with Gitlab MRs and Github PRs.
+A minimal CLI that makes natively stacking branches more ergonomic. Integrates with Gitlab MRs and Github PRs.
 
 Core usage:
+- `git checkout -b myfeature`: create branches the way you normally would
 - `git stack list`: list all stacks
 - `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
@@ -23,11 +24,11 @@ However, if you find it valuable to create small PRs, then stacking frequently c
 - It's not clear how to push all branches in a stack except listing them out individually
 - Once you've pushed your branches, you also need to manually set the target branches on Gitlab/Github. If you want to give reviewers context about other PRs in the stack, that's manual too.
 
-You can make things better with a lot of [git fu and custom git aliases](https://www.codetinkerer.com/2023/10/01/stacked-branches-with-vanilla-git.html), and I did that for a long time, but some things are still hard to automate.
+You could make things better with a lot of [git fu and custom git aliases](https://www.codetinkerer.com/2023/10/01/stacked-branches-with-vanilla-git.html), and I did that for a long time, or add a tool that provides a more cohesive experience.
 
 ## Why `git stack`?
 
-`git stack` aims to provide just enough functionality to make stacking branches natively more ergonomic. There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can provide more powerful features, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git features - it's completely stateless, and automatically infers stacks from your commit structure.
+`git stack` aims to provide a minimal set of tools to make "native stacking" more ergonomic. There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can provide powerful features, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git features - it's completely stateless, and automatically infers stacks from your commit structure.
 
 In addition, `git stack` helps with the other half of the puzzle. It integrates with Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that many of the popular stacking tools support Github only.
 
@@ -86,7 +87,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 7d85725] hello world
+[myfirststack 867e569] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -98,11 +99,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 dbe8042] break
+[myfirststack-pt2 2304404] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 75cc7bf] kitkat
+[myfirststack-pt2 19ea7e9] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -123,9 +124,9 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-75cc7bf kitkat
-dbe8042 break
-7d85725 hello world
+19ea7e9 kitkat
+2304404 break
+867e569 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -135,8 +136,8 @@ dbe8042 break
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/152
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/151
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/153
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/154
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -144,10 +145,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/151
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/152
+  └── https://github.com/raymondji/git-stack-cli/pull/153
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/151
+  └── https://github.com/raymondji/git-stack-cli/pull/154
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -175,7 +176,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 3a73eb6] My second stack
+[mysecondstack 1308d7b] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
