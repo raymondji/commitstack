@@ -2,32 +2,34 @@
 
 # git stack
 
-A minimal CLI for managing stacked PRs, designed to feel like a native Git feature. Works with Gitlab and Github.
+A minimal CLI that makes stacking branches natively in Git more ergonomic. Integrates with Gitlab MRs and Github PRs.
 
-Core commands:
+Core usage:
 - `git stack list`: list all stacks
-- `git stack branch`: list branches in the current stack
+- `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
 
 ## What is stacking?
 
 https://graphite.dev/blog/stacked-prs has a good overview on what it is and why you might want to do it.
 
-## Where does native Git fall short with stacking?
+## What's hard about stacking branches in Git?
 
-Stacking branches natively with Git is completely doable, but cumbersome.
-- While modern Git has made updating stacked branches much easier with [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/), other tasks like keeping track of your stacks or pushing all branches in a stack are left to the user.
-- Moreover, stacking also typically involves additional manual steps on Gitlab/Github/etc, such as setting the correct target branch on each pull request.
+Stacking branches is natively supported in Git, and has been made better with recent additions like [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/). If you stack infrequently, I think the Git CLI provides a good enough out-of-the-box experience.
 
-## How does `git stack` compare to other stacking tools?
+However, if you find it valuable to create small PRs, then stacking frequently can be immensely helpful. In that case, I think the out-of-the-box experience falls short:
 
-There are two main areas where `git stack` aims to differentiate itself:
-- `git stack` is designed to be as minimal as possible, and to hopefully feel like native Git CLI subcommand. It works with existing Git concepts and functionality (like `--update-refs`), and unlike most stacking tools, it's stateless. `git stack` works by automatically inferring stacks from the structure of your commits, so there's no state that can get out of sync with Git.
-- `git stack` integrates with both Gitlab and Github. I was surprised to find most of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) only support Github. Besides `git stack`, other options with Gitlab support include [git-town](https://github.com/git-town/git-town), [git-spice](https://github.com/abhinav/git-spice) and the new [`glab stack`](https://docs.gitlab.com/ee/user/project/merge_requests/stacked_diffs.html) CLI command.
+- Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's up to you to A) figure out there's even a problem and B) reconcile your branches.
+- It's not clear how to push all branches in a stack except listing them out individually
+- Once you've pushed your branches, you also need to manually set the target branches on Gitlab/Github. If you want to give reviewers context about other PRs in the stack, that's manual too.
 
-## Limitations
+You can make things better with a lot of [git fu and custom git aliases](https://www.codetinkerer.com/2023/10/01/stacked-branches-with-vanilla-git.html), and I did that for a long time, but some things are still hard to automate.
 
-- `git stack` requires linear commit histories in feature branches in order to infer stacks, making it effectively tied to `git rebase`. `git rebase --update-refs` is the native way of updating stacked branches in Git, so this approach seems well aligned. However, this means `git stack` is not compatible with `git merge` workflows within feature branches (note: merging into `main` is not a problem).
+## Why `git stack`?
+
+`git stack` aims to provide just enough functionality to make stacking branches natively more ergonomic. There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can provide more powerful features, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git features - it's completely stateless, and automatically infers stacks from your commit structure.
+
+In addition, `git stack` helps with the other half of the puzzle. It integrates with Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that many of the popular stacking tools support Github only.
 
 ## Installation
 
@@ -66,19 +68,17 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 
 ## How does it work?
 
-When working with Git we often think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, as much as possible, `git stack` tries to frame stacks in terms of "stacks of branches".
+When working with Git we often think in terms of branches as the unit of work, and Gitlab/Github both tie pull requests to branches. Thus, `git stack` presents stacks as "stacks of branches".
 
 However, branches in Git don't inherently make sense as belonging to a "stack", i.e. where one branch is stacked on top of another branch. Branches in Git are just pointers to commits, so:
 - Multiple branches can point to the same commit
 - Branches don't inherently have a notion of parent branches or children branches
 
-Under the hood, `git stack` therefore thinks about stacks as "stacks of commits", not "stacks of branches". Commits serve this purpose much better than branches because:
+Under the hood, `git stack` therefore walks the commit graph to infer stacking relationships between branches. Commits serve this purpose well because:
 - Each commit is a unique entity
 - Commits do inherently have a notion of parent commits and children commits
 
-Merge commits still pose a problem. It's easy to reason about a linear series of commits as a stack, but merge commits have multiple parents. So, `git stack` takes the simple option of being incompatible with merge commits. If it encounters a merge commit, it will print an error message and otherwise ignore the commit.
-
-`git stack` doesn't persist any additional state to keep track of your stacks - it relies purely on parsing the structure of your commits to infer which commits form a stack (and in turn which branches form a stack). If `git stack` encounters a structure it can't parse (e.g. merge commits), it tries to print a helpful error and otherwise ignores the incompatible commit(s).
+`git stack` uses the commit relationships to try and establish a total order between branches in a stack, i.e. where each branch `i` contains branch `i-1`. If such an order exists, the stack is valid. If such an order doesn't exist, the stack is invalid and `git stack` prints a helpful message so you can decide how to resolve the bad state.
 
 ## Attribution
 
