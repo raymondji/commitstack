@@ -10,10 +10,21 @@ import (
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
+	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/raymondji/git-stack-cli/slices"
 	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
 )
+
+var pushSaferForceFlag bool
+var pushForceFlag bool
+var pushCreatePRsFlag bool
+
+func init() {
+	pushCmd.Flags().BoolVarP(&pushSaferForceFlag, "safer-force", "f", false, "see git push --force-with-lease and --force-if-includes")
+	pushCmd.Flags().BoolVarP(&pushForceFlag, "force", "F", false, "see git push --force")
+	pushCmd.Flags().BoolVarP(&pushCreatePRsFlag, "create-prs", "c", false, "Don't create new pull requests. Existing ones are always updated.")
+}
 
 var pushCmd = &cobra.Command{
 	Use:     "push",
@@ -63,8 +74,10 @@ var pushCmd = &cobra.Command{
 		}
 
 		pushStack := func() ([]githost.PullRequest, error) {
-			// For safety, reset the target branch on any existing MRs if they don't match.
-			// If any branches have been re-ordered, Gitlab can automatically merge MRs, which is not what we want here.
+			// Before pushing branches, reset the target branch on any existing MRs if they don't match what we want.
+			// If mergeRequestA is from branchA -> branchB, and the branches have been re-ordered to branchB -> branchA,
+			// Gitlab will automatically mark mergeRequestA as merged after we push branchA and branchB.
+			// We don't want this behaviour.
 			prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
 				pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
 				if errors.Is(err, githost.ErrDoesNotExist) {
@@ -97,7 +110,11 @@ var pushCmd = &cobra.Command{
 
 			// Push all branches.
 			err = concurrent.ForEach(ctx, branches, func(ctx context.Context, branch string) error {
-				_, err := git.PushForceWithLease(branch)
+				_, err := git.Push(branch, libgit.PushOpts{
+					Force:           pushForceFlag,
+					ForceWithLease:  pushSaferForceFlag,
+					ForceIfIncludes: pushSaferForceFlag,
+				})
 				return err
 			})
 			if err != nil {
@@ -105,22 +122,24 @@ var pushCmd = &cobra.Command{
 			}
 
 			// Create any new PRs
-			prs, err = concurrent.Map(
-				ctx,
-				branches,
-				func(ctx context.Context, branch string) (githost.PullRequest, error) {
-					if pr, ok := prsBySourceBranch[branch]; ok {
-						return pr, nil
-					}
+			if pushCreatePRsFlag {
+				prs, err = concurrent.Map(
+					ctx,
+					branches,
+					func(ctx context.Context, branch string) (githost.PullRequest, error) {
+						if pr, ok := prsBySourceBranch[branch]; ok {
+							return pr, nil
+						}
 
-					return host.CreatePullRequest(deps.remote.URLPath, githost.PullRequest{
-						Title:        branch,
-						SourceBranch: branch,
-						TargetBranch: wantTargets[branch],
+						return host.CreatePullRequest(deps.remote.URLPath, githost.PullRequest{
+							Title:        branch,
+							SourceBranch: branch,
+							TargetBranch: wantTargets[branch],
+						})
 					})
-				})
-			if err != nil {
-				return nil, fmt.Errorf("failed to create new PRs, errors: %v", err.Error())
+				if err != nil {
+					return nil, fmt.Errorf("failed to create new PRs, errors: %v", err.Error())
+				}
 			}
 
 			// Update PRs with correct target branches and stack info.

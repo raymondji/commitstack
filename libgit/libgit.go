@@ -24,7 +24,7 @@ type Git interface {
 	GetMergedBranches(ref string) ([]string, error)
 	GetCurrentBranch() (string, error)
 	GetShortCommitHash(branch string) (string, error)
-	PushForceWithLease(branchName string) (string, error)
+	Push(branchName string, opts PushOpts) (string, error)
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string, startPoint string) error
 	DeleteBranchIfExists(name string) error
@@ -247,13 +247,30 @@ func (g git) GetShortCommitHash(branch string) (string, error) {
 	return output.Stdout, nil
 }
 
-func (g git) PushForceWithLease(branchName string) (string, error) {
-	output, err := exec.Run("git", exec.WithArgs("push", "--force-with-lease", "origin", branchName))
-	if err != nil {
-		return "", fmt.Errorf("failed to force push branch %s: %w", branchName, err)
+type PushOpts struct {
+	Force           bool
+	ForceWithLease  bool
+	ForceIfIncludes bool
+}
+
+func (g git) Push(branchName string, opts PushOpts) (string, error) {
+	args := []string{"push", "origin", branchName}
+	if opts.Force {
+		args = append(args, "--force")
+	}
+	if opts.ForceWithLease {
+		args = append(args, "--force-with-lease")
+	}
+	if opts.ForceIfIncludes {
+		args = append(args, "--force-if-includes")
 	}
 
-	return fmt.Sprintf("force pushing branch %s\n%s", branchName, output.Stdout), nil
+	output, err := exec.Run("git", exec.WithArgs(args...))
+	if err != nil {
+		return "", fmt.Errorf("failed to push branch, args: %v, %w", args, err)
+	}
+
+	return output.Stdout, nil
 }
 
 type RebaseOpts struct {
