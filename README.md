@@ -2,17 +2,13 @@
 
 # git stack
 
-A minimal CLI that makes natively stacking branches more ergonomic. Integrates with Gitlab and Github.
+A minimal CLI that makes native stacked branches more ergonomic. Integrates with Gitlab and Github.
 
 Core usage:
 - `git checkout -b myfeature`: create branches how you normally would
 - `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
 - `git stack list`: list all stacks
-
-## Status
-
-I built `git stack` for personal use and have been using it productively for months. I rarely encounter issues, but with how many different ways there are to use Git, there's almost certainly a lot of bugs remaining.
 
 ## What is stacking?
 
@@ -82,7 +78,8 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ Next, let's create our first branch:             │
@@ -92,7 +89,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack eaad90e] hello world
+[myfirststack 043c2ef] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -104,11 +101,11 @@ Your branch is up to date with 'origin/main'.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 aa09d2b] break
+[myfirststack-pt2 a6e1660] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 2eed929] kitkat
+[myfirststack-pt2 d3e6725] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -129,9 +126,9 @@ Your branch is up to date with 'origin/main'.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-2eed929 kitkat
-aa09d2b break
-eaad90e hello world
+d3e6725 kitkat
+a6e1660 break
+043c2ef hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -141,8 +138,8 @@ eaad90e hello world
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/175
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/176
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/180
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/179
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -150,10 +147,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/176
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/175
+  └── https://github.com/raymondji/git-stack-cli/pull/180
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/176
+  └── https://github.com/raymondji/git-stack-cli/pull/179
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -175,12 +172,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 3b4f365] My second stack
+[mysecondstack 7c9c532] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮

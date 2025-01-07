@@ -8,3 +8,4 @@ git stack learn --chapter 1 --mode=exec > "$SAMPLE_FILE"
 git checkout "$ORIGINAL_BRANCH"
 git stack learn --chapter 1 --mode=clean
 go run ./readme/generate.go --sample-output "$SAMPLE_FILE"
+git commit -am "Update README"
