@@ -6,9 +6,9 @@ A minimal CLI that makes natively stacking branches more ergonomic. Integrates w
 
 Core usage:
 - `git checkout -b myfeature`: create branches how you normally would
-- `git stack list`: list all stacks
 - `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
+- `git stack list`: list all stacks
 
 ## Status
 
