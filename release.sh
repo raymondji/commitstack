@@ -11,8 +11,7 @@ if git rev-parse "$CLI_VERSION" >/dev/null 2>&1; then
 fi
 
 readme/generate.sh
-git add .
-git commit -am "Release $CLI_VERSION"
+git commit -am "Release $CLI_VERSION" --allow-empty
 git push
 
 git tag "$CLI_VERSION"
