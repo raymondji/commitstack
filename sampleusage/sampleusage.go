@@ -169,6 +169,9 @@ func (s Sample) cleanupBranches(repoPath string, names ...string) error {
 		if err := s.git.DeleteBranchIfExists(name); err != nil {
 			return err
 		}
+		if err := s.git.DeleteRemoteBranchIfExists(name); err != nil {
+			return err
+		}
 	}
 
 	return nil

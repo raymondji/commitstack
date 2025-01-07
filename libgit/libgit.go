@@ -28,6 +28,7 @@ type Git interface {
 	Rebase(branch string, opts RebaseOpts) (string, error)
 	CreateBranch(name string, startPoint string) error
 	DeleteBranchIfExists(name string) error
+	DeleteRemoteBranchIfExists(name string) error
 	Checkout(name string) error
 	LogAll(notReachableFrom string) (Log, error)
 	LogOneline(from string, to string) error
@@ -344,7 +345,18 @@ func (g git) DeleteBranchIfExists(name string) error {
 		if strings.Contains(err.Error(), "not found") {
 			return nil
 		}
-		return fmt.Errorf("failed to create branch, err: %v", err)
+		return fmt.Errorf("failed to delete branch, err: %v", err)
+	}
+	return nil
+}
+
+func (g git) DeleteRemoteBranchIfExists(name string) error {
+	_, err := exec.Run("git", exec.WithArgs("push", "origin", "--delete", name))
+	if err != nil {
+		if strings.Contains(err.Error(), "remote ref does not exist") {
+			return nil
+		}
+		return fmt.Errorf("failed to delete remote branch, err: %v", err)
 	}
 	return nil
 }
