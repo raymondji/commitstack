@@ -18,7 +18,7 @@ https://graphite.dev/blog/stacked-prs has a good overview on what it is and why 
 
 Stacking branches is natively supported in Git, and has been made better with recent additions like [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/). If you stack infrequently, I think the Git CLI provides a good enough out-of-the-box experience.
 
-However, if you stack frequently (or would like to, e.g. to create small PRs), I think the out-of-the-box experience falls short:
+However, if you stack frequently (or would like to, e.g. to create [small PRs](https://graphite.dev/guides/best-practices-managing-pr-size#why-pull-request-size-matters)), I think the out-of-the-box experience falls short:
 
 - Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's even a problem.
 - It's not clear how to push all branches in a stack except listing them out individually.
