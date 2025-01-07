@@ -18,7 +18,7 @@ https://graphite.dev/blog/stacked-prs has a good overview on what it is and why 
 
 Stacking branches is natively supported in Git, and has been made better with recent additions like [`--update-refs`](https://andrewlock.net/working-with-stacked-branches-in-git-is-easier-with-update-refs/). If you stack infrequently, I think the Git CLI provides a good enough out-of-the-box experience.
 
-However, if you stack frequently (or would like to, e.g. to create small PRs), I think the out-of-the-box experience falls short:
+However, if you stack frequently (or would like to, e.g. to create [small PRs](https://graphite.dev/guides/best-practices-managing-pr-size#why-pull-request-size-matters)), I think the out-of-the-box experience falls short:
 
 - Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's even a problem.
 - It's not clear how to push all branches in a stack except listing them out individually.
@@ -89,7 +89,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 0914c58] hello world
+[myfirststack b31d694] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -101,11 +101,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 5c589a5] break
+[myfirststack-pt2 5ed8e78] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 d2572ef] kitkat
+[myfirststack-pt2 525e5d7] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -126,9 +126,9 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-d2572ef kitkat
-5c589a5 break
-0914c58 hello world
+525e5d7 kitkat
+5ed8e78 break
+b31d694 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -138,8 +138,8 @@ d2572ef kitkat
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/188
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/187
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/189
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/190
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -147,10 +147,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/187
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/188
+  └── https://github.com/raymondji/git-stack-cli/pull/189
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/187
+  └── https://github.com/raymondji/git-stack-cli/pull/190
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -178,7 +178,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 12d0b2d] My second stack
+[mysecondstack e52dedd] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
