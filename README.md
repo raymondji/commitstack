@@ -10,6 +10,10 @@ Core usage:
 - `git stack branch`: list branches in the current stack, in order
 - `git stack push`: push branches in the current stack and open MRs/PRs
 
+## Status
+
+I've been using `git stack` productively for months and rarely encounter breaking bugs. But Git supports a huge number of usage patterns, so there's almost certainly a lot of bugs remaining.
+
 ## What is stacking?
 
 https://graphite.dev/blog/stacked-prs has a good overview on what it is and why you might want to do it.
@@ -76,7 +80,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 1 commit.
+Your branch is ahead of 'origin/main' by 2 commits.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -87,7 +91,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack 867e569] hello world
+[myfirststack 64ac420] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -99,11 +103,11 @@ Your branch is ahead of 'origin/main' by 1 commit.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 2304404] break
+[myfirststack-pt2 55d7813] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 19ea7e9] kitkat
+[myfirststack-pt2 8bea2bc] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -124,9 +128,9 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-19ea7e9 kitkat
-2304404 break
-867e569 hello world
+8bea2bc kitkat
+55d7813 break
+64ac420 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -136,8 +140,8 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/153
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/154
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/155
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/156
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs in the stack using:  │
@@ -145,10 +149,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/154
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/153
+  └── https://github.com/raymondji/git-stack-cli/pull/155
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/154
+  └── https://github.com/raymondji/git-stack-cli/pull/156
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -170,13 +174,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 1 commit.
+Your branch is ahead of 'origin/main' by 2 commits.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 1308d7b] My second stack
+[mysecondstack 6a7f651] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
