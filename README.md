@@ -20,7 +20,7 @@ Stacking branches is natively supported in Git, and has been made better with re
 
 However, if you stack frequently (or would like to, e.g. to create [small PRs](https://graphite.dev/guides/best-practices-managing-pr-size#why-pull-request-size-matters)), I think the out-of-the-box experience falls short:
 
-- Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's even a problem.
+- Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's a problem.
 - It's not clear how to push all branches in a stack except listing them out individually.
 - Once you've pushed your branches, you also need to manually set the target branches on Gitlab/Github. If you want to give reviewers context about other PRs in the stack, that's manual too.
 
@@ -28,13 +28,13 @@ One way to improve things is to adopt a lot of [custom git aliases and shell scr
 
 ## Why `git stack`?
 
-`git stack` aims to add just enough functionality to make "native stacking" more ergonomic.
+`git stack` aims to provide a small but useful feature set that makes working with native stacked branches easier.
 
-Many of the [existing](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) work great, but require external metadata to keep track of stacks. That means they can innovate more on features and UX, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git. It's stateless, and works by automatically parsing stacks from your commit structure.
+Many of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) require external metadata to keep track of stacks. They work really well and can use that external state to drive more powerful features, but as a user you can't just `git checkout -b myfeature` anymore. `git stack` makes different tradeoffs and works entirely on top of native Git. It's stateless, and works by automatically parsing stacks from your commit structure. It works most similarly to https://github.com/gitext-rs/git-stack.
 
-[Other](https://github.com/ezyang/ghstack) [options](https://github.com/spacedentist/spr/) that also work really well use a one-commit per pull request approach. This is inspired by tools like Phabricator and has definite advantages. However, it does require that you adopt this style of working wholesale. With `git stack`, you can keep one commit per branch/PR, or multiple, and use rebase or merge to manage your stack of branches.
+TODO: [Other](https://github.com/ezyang/ghstack) [options](https://github.com/spacedentist/spr/) model stacks using one branch per stack and one commit per pull request. This approach (inspired by Phabricator) can work really well with rebase workflows. However, this approach feels less native to Git, and trades off some of the flexibility of Git. `git stack` works entirely on top of native Git features, so you can use one commit per branch/PR, or multiple commits; and you can use `git rebase` or `git merge` to manage your stacked branches.
 
-In addition, `git stack` helps with the other half of the puzzle. It integrates with both Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that most of the popular stacking tools only support Github.
+Lastly, `git stack` helps with the other half of the puzzle. It integrates with both Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that most of the popular stacking tools only support Github.
 
 ## Installation
 
@@ -45,7 +45,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.32.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.33.0
 ```
 
 ## Getting started
@@ -80,7 +80,7 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 7 commits.
+Your branch is ahead of 'origin/main' by 2 commits.
   (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -91,7 +91,7 @@ Your branch is ahead of 'origin/main' by 7 commits.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack ac36cae] hello world
+[myfirststack d1a77ae] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -103,11 +103,11 @@ Your branch is ahead of 'origin/main' by 7 commits.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 775025b] break
+[myfirststack-pt2 aa08690] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 8ab3a74] kitkat
+[myfirststack-pt2 403c79b] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -128,9 +128,9 @@ Your branch is ahead of 'origin/main' by 7 commits.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-8ab3a74 kitkat
-775025b break
-ac36cae hello world
+403c79b kitkat
+aa08690 break
+d1a77ae hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -140,8 +140,8 @@ ac36cae hello world
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push --create-prs
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/194
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/193
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/195
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/196
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs at any point using:  │
@@ -149,10 +149,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/193
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/194
+  └── https://github.com/raymondji/git-stack-cli/pull/195
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/193
+  └── https://github.com/raymondji/git-stack-cli/pull/196
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -174,13 +174,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is ahead of 'origin/main' by 7 commits.
+Your branch is ahead of 'origin/main' by 2 commits.
   (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack 1c4accd] My second stack
+[mysecondstack 8f42afc] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
