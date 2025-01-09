@@ -235,7 +235,9 @@ func TestInferStacks(t *testing.T) {
 							Node: commitgraph.Node{
 								Hash: "c5",
 							},
-							StackBranchScore: map[string]int{},
+							StackBranchScore: map[string]int{
+								"feat3": 0,
+							},
 						},
 						"c4": {
 							Node: commitgraph.Node{
@@ -250,7 +252,9 @@ func TestInferStacks(t *testing.T) {
 							Node: commitgraph.Node{
 								Hash: "c3",
 							},
-							StackBranchScore: map[string]int{},
+							StackBranchScore: map[string]int{
+								"feat3": 0,
+							},
 						},
 						"c2": {
 							Node: commitgraph.Node{
@@ -265,7 +269,9 @@ func TestInferStacks(t *testing.T) {
 							Node: commitgraph.Node{
 								Hash: "c1",
 							},
-							StackBranchScore: map[string]int{},
+							StackBranchScore: map[string]int{
+								"feat3": 0,
+							},
 						},
 					},
 				},
@@ -316,7 +322,9 @@ func TestInferStacks(t *testing.T) {
 							Node: commitgraph.Node{
 								Hash: "c3",
 							},
-							StackBranchScore: map[string]int{},
+							StackBranchScore: map[string]int{
+								"featA/pt2": 0,
+							},
 						},
 						"c2": {
 							Node: commitgraph.Node{
