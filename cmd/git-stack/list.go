@@ -12,7 +12,7 @@ import (
 // TODO: add --contains flag to filter by stacks that contain branch X
 var listCmd = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"li"},
+	Aliases: []string{"ls"},
 	Short:   "List all stacks",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()

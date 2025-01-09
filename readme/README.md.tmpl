@@ -20,7 +20,7 @@ Stacking branches is natively supported in Git, and has been made better with re
 
 However, if you stack frequently (or would like to, e.g. to create [small PRs](https://graphite.dev/guides/best-practices-managing-pr-size#why-pull-request-size-matters)), I think the out-of-the-box experience falls short:
 
-- Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's even a problem.
+- Keeping track of which branches are stacked together, and in which order, is left to the user. If you modify your branches into some degenerate stack, it's also on you to figure out there's a problem.
 - It's not clear how to push all branches in a stack except listing them out individually.
 - Once you've pushed your branches, you also need to manually set the target branches on Gitlab/Github. If you want to give reviewers context about other PRs in the stack, that's manual too.
 
@@ -28,11 +28,13 @@ One way to improve things is to adopt a lot of [custom git aliases and shell scr
 
 ## Why `git stack`?
 
-`git stack` aims to add just enough functionality to make "native stacking" more ergonomic.
+`git stack` aims to provide a small but useful feature set that makes working with native stacked branches easier.
 
-There are many [great](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) already, but most of them require external metadata to keep track of stacks. That means they can innovate more on features and UX, but also that you can't just `git checkout -b myfeature` anymore. `git stack` works entirely on top of native Git. It's stateless, and works by automatically parsing stacks from your commit structure.
+Many of the [popular](https://graphite.dev/) [stacking](https://github.com/aviator-co/av) [tools](https://github.com/gitbutlerapp/gitbutler) require external metadata to keep track of stacks. They work really well and can use that external state to drive more powerful features, but as a user you can't just `git checkout -b myfeature` anymore. `git stack` makes different tradeoffs and works entirely on top of native Git. It's stateless, and works by automatically parsing stacks from your commit structure. It works most similarly to https://github.com/gitext-rs/git-stack.
 
-In addition, `git stack` helps with the other half of the puzzle. It integrates with both Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that most of the popular stacking tools only support Github.
+TODO: [Other](https://github.com/ezyang/ghstack) [options](https://github.com/spacedentist/spr/) model stacks using one branch per stack and one commit per pull request. This approach (inspired by Phabricator) can work really well with rebase workflows. However, this approach feels less native to Git, and trades off some of the flexibility of Git. `git stack` works entirely on top of native Git features, so you can use one commit per branch/PR, or multiple commits; and you can use `git rebase` or `git merge` to manage your stacked branches.
+
+Lastly, `git stack` helps with the other half of the puzzle. It integrates with both Gitlab and Github to automate creating and updating MRs/PRs from a stack. I was surprised to find that most of the popular stacking tools only support Github.
 
 ## Installation
 

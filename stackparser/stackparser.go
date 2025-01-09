@@ -21,7 +21,7 @@ type Commit struct {
 	// Values are 0 for any commits without branches,
 	// or 1+ for commmits with branches.
 	// A score of N indicates this commit was reachable following parent edges
-	// from a commit with score N+1
+	// from a commit with score N+1.
 	StackBranchScore map[string]int
 }
 
@@ -103,10 +103,6 @@ func (s Stack) DivergesFrom() map[string]struct{} {
 	name := s.Name
 	divergesFrom := map[string]struct{}{}
 	for _, c := range s.Commits {
-		if len(c.StackBranchScore) == 0 {
-			continue
-		}
-
 		for stackName := range c.StackBranchScore {
 			if stackName == name {
 				continue
@@ -189,7 +185,7 @@ func ParseStacks(log libgit.Log) ([]Stack, error) {
 		// Can we transform this into a single-source problem
 		// by making `defaultBranch` the only source
 		// instead of starting from the leaf commits?
-		err := inferStack(k, 1, graph, stack, 250)
+		err := parseStack(k, 1, graph, stack, 250)
 		if err != nil {
 			return nil, err
 		}
@@ -212,7 +208,7 @@ func sortStacks(stacks []Stack) {
 	})
 }
 
-func inferStack(
+func parseStack(
 	nodeKey string, branchCommitScore int,
 	graph dag, stack Stack,
 	remainingRecursionDepth int,
@@ -224,7 +220,9 @@ func inferStack(
 	commit := graph.commits[nodeKey]
 	stack.Commits[commit.Hash] = commit
 
-	if len(commit.LocalBranches) > 0 {
+	if len(commit.LocalBranches) == 0 {
+		commit.StackBranchScore[stack.Name] = 0
+	} else {
 		commit.StackBranchScore[stack.Name] = max(
 			commit.StackBranchScore[stack.Name],
 			branchCommitScore,
@@ -233,7 +231,7 @@ func inferStack(
 	}
 
 	for nextKey := range graph.parentEdges[nodeKey] {
-		err := inferStack(nextKey, branchCommitScore, graph, stack, remainingRecursionDepth-1)
+		err := parseStack(nextKey, branchCommitScore, graph, stack, remainingRecursionDepth-1)
 		if err != nil {
 			return err
 		}
