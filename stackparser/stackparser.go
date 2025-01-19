@@ -42,6 +42,7 @@ func (e NoTotalOrderError) Error() string {
 	return fmt.Sprintf("%s: %s", e.StackName, msgs[0])
 }
 
+// Returns branches in reverse lexicographic order. Guaranteed to return at least one branch.
 func (s Stack) Branches() []string {
 	var branches []string
 	for _, c := range s.Commits {

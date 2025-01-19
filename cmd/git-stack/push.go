@@ -13,6 +13,7 @@ import (
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/raymondji/git-stack-cli/slices"
 	"github.com/raymondji/git-stack-cli/stackparser"
+	"github.com/raymondji/git-stack-cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -47,6 +48,10 @@ var pushCmd = &cobra.Command{
 			return err
 		}
 		currCommit, err := git.GetShortCommitHash("HEAD")
+		if err != nil {
+			return err
+		}
+		currBranch, err := git.GetCurrentBranch()
 		if err != nil {
 			return err
 		}
@@ -167,10 +172,20 @@ var pushCmd = &cobra.Command{
 		if actionErr != nil {
 			return actionErr
 		}
+		prsBySourceBranch := map[string]githost.PullRequest{}
 		for _, pr := range prs {
-			// TODO: print a hereMarker for the current branch
-			fmt.Printf("Pushed %s: %s\n", pr.SourceBranch, pr.WebURL)
+			prsBySourceBranch[pr.SourceBranch] = pr
 		}
+
+		fmt.Println("Pushed branches:")
+		ui.PrintBranchesInStack(
+			branches,
+			true,
+			currBranch,
+			deps.theme,
+			prsBySourceBranch,
+			true,
+		)
 		return nil
 	},
 }

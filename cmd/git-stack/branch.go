@@ -10,6 +10,7 @@ import (
 	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/githost"
 	"github.com/raymondji/git-stack-cli/stackparser"
+	"github.com/raymondji/git-stack-cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -151,42 +152,14 @@ var branchCmd = &cobra.Command{
 
 		// TODO: if no heremarker, e.g. if I'm on another branch,
 		// render all branch names without indentation. Looks less ugly
-		for i, branch := range branches {
-			// if len(c.LocalBranches) == 0 && c.Hash == currCommit {
-			// 	fmt.Println("* " + theme.PrimaryColor.Render(fmt.Sprintf("(HEAD detached at %s)", c.Hash)))
-			// 	continue
-			// } else if len(c.LocalBranches) == 0 {
-			// 	continue
-			// }
-			var hereMarker, branchesSegment, suffix string
-			if totalOrder && i == 0 {
-				suffix = fmt.Sprintf(" (%s)", theme.TertiaryColor.Render("top"))
-			}
-			if branch == currBranch {
-				hereMarker = "*"
-				branchesSegment = theme.PrimaryColor.Render(branch)
-			} else {
-				hereMarker = " "
-				if totalOrder && i == 0 && branch != currBranch {
-					branchesSegment = theme.TertiaryColor.Render(branch)
-				} else {
-					branchesSegment = branch
-				}
-			}
-
-			fmt.Printf("%s %s%s\n", hereMarker, branchesSegment, suffix)
-			if branchPRsFlag {
-				if pr, ok := prsBySrcBranch[branch]; ok {
-					fmt.Printf("  └── %s\n", pr.WebURL)
-				} else {
-					fmt.Printf("  └── Not created yet\n")
-				}
-
-				if i != len(stack.Commits)-1 {
-					fmt.Println()
-				}
-			}
-		}
+		ui.PrintBranchesInStack(
+			branches,
+			totalOrder,
+			currBranch,
+			theme,
+			prsBySrcBranch,
+			branchPRsFlag,
+		)
 		benchmarkPoint("listCmd", "done printing branches")
 
 		return nil
