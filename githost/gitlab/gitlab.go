@@ -63,16 +63,16 @@ func (g gitlabClient) GetChangeReqeuest(repoPath string, sourceBranch string) (i
 	}
 }
 
-func (g gitlabClient) CreateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
-	if pr.Title == "" {
+func (g gitlabClient) CreateChangeRequest(repoPath string, cr internal.ChangeRequest) (internal.ChangeRequest, error) {
+	if cr.Title == "" {
 		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
 	opts := &gitlab.CreateMergeRequestOptions{
-		Title:        gitlab.Ptr(fmt.Sprintf("Draft: %s", pr.Title)),
-		Description:  &pr.Description,
-		SourceBranch: &pr.SourceBranch,
-		TargetBranch: &pr.TargetBranch,
+		Title:        gitlab.Ptr(fmt.Sprintf("Draft: %s", cr.Title)),
+		Description:  &cr.Description,
+		SourceBranch: &cr.SourceBranch,
+		TargetBranch: &cr.TargetBranch,
 	}
 
 	mr, _, err := g.client.MergeRequests.CreateMergeRequest(repoPath, opts)
@@ -83,33 +83,33 @@ func (g gitlabClient) CreateChangeRequest(repoPath string, pr internal.ChangeReq
 	return convertMR(mr), nil
 }
 
-func (g gitlabClient) UpdateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
-	if pr.ID == 0 {
+func (g gitlabClient) UpdateChangeRequest(repoPath string, cr internal.ChangeRequest) (internal.ChangeRequest, error) {
+	if cr.ID == 0 {
 		return internal.ChangeRequest{}, fmt.Errorf("merge request ID must be set")
 	}
-	if pr.Title == "" {
+	if cr.Title == "" {
 		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
 	opts := &gitlab.UpdateMergeRequestOptions{
-		Title:        &pr.Title,
-		Description:  &pr.Description,
-		TargetBranch: &pr.TargetBranch,
+		Title:        &cr.Title,
+		Description:  &cr.Description,
+		TargetBranch: &cr.TargetBranch,
 	}
 
-	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
+	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, cr.ID, opts)
 	if err != nil {
-		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, cr)
 	}
 
 	return convertMR(mr), nil
 }
 
-func (g gitlabClient) CloseChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
-	if pr.ID == 0 {
+func (g gitlabClient) CloseChangeRequest(repoPath string, cr internal.ChangeRequest) (internal.ChangeRequest, error) {
+	if cr.ID == 0 {
 		return internal.ChangeRequest{}, fmt.Errorf("merge request ID must be set")
 	}
-	if pr.Title == "" {
+	if cr.Title == "" {
 		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
@@ -117,9 +117,9 @@ func (g gitlabClient) CloseChangeRequest(repoPath string, pr internal.ChangeRequ
 		StateEvent: gitlab.Ptr("close"),
 	}
 
-	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
+	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, cr.ID, opts)
 	if err != nil {
-		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, cr)
 	}
 
 	return convertMR(mr), nil

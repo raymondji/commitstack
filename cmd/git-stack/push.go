@@ -185,6 +185,7 @@ var pushCmd = &cobra.Command{
 			deps.theme,
 			prsBySourceBranch,
 			true,
+			host.GetVocabulary(),
 		)
 		return nil
 	},

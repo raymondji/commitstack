@@ -140,7 +140,8 @@ var branchCmd = &cobra.Command{
 				}
 			}
 
-			err := spinner.New().Title("Fetching MRs...").Action(action).Run()
+			vocab := host.GetVocabulary()
+			err := spinner.New().Title(fmt.Sprintf("Fetching %s...", vocab.ChangeRequestNameShortPlural)).Action(action).Run()
 			if err != nil {
 				return err
 			}
@@ -159,6 +160,7 @@ var branchCmd = &cobra.Command{
 			theme,
 			prsBySrcBranch,
 			branchPRsFlag,
+			host.GetVocabulary(),
 		)
 		benchmarkPoint("listCmd", "done printing branches")
 
