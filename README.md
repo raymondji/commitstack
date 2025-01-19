@@ -45,7 +45,7 @@ brew install go
 
 To install `git stack`:
 ```
-go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.34.0
+go install github.com/raymondji/git-stack-cli/cmd/git-stack@0.35.0
 ```
 
 ## Getting started
@@ -80,7 +80,8 @@ This sample output is taken from `git stack learn --chapter=1 --mode=exec`.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ Next, let's create our first branch:             │
@@ -90,7 +91,7 @@ Your branch is up to date with 'origin/main'.
 > echo 'hello world' > myfirststack.txt
 > git add .
 > git commit -m 'hello world'
-[myfirststack dda5b9e] hello world
+[myfirststack d34c580] hello world
  1 file changed, 1 insertion(+)
  create mode 100644 myfirststack.txt
 ╭──────────────────────────────────────────────────╮
@@ -102,11 +103,11 @@ Your branch is up to date with 'origin/main'.
 > git checkout -b myfirststack-pt2
 > echo 'have a break' >> myfirststack.txt
 > git commit -am 'break'
-[myfirststack-pt2 dda22e0] break
+[myfirststack-pt2 87926b7] break
  1 file changed, 1 insertion(+)
 > echo 'have a kitkat' >> myfirststack.txt
 > git commit -am 'kitkat'
-[myfirststack-pt2 2a945c7] kitkat
+[myfirststack-pt2 c9cc9ec] kitkat
  1 file changed, 1 insertion(+)
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -127,9 +128,9 @@ Your branch is up to date with 'origin/main'.
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack log
-2a945c7 kitkat
-dda22e0 break
-dda5b9e hello world
+c9cc9ec kitkat
+87926b7 break
+d34c580 hello world
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can easily push all branches in the stack up  │
@@ -139,8 +140,8 @@ dda5b9e hello world
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git stack push --create-prs
-Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/199
-Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/198
+Pushed myfirststack-pt2: https://github.com/raymondji/git-stack-cli/pull/202
+Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/203
 ╭──────────────────────────────────────────────────╮
 │                                                  │
 │ We can quickly view the PRs at any point using:  │
@@ -148,10 +149,10 @@ Pushed myfirststack: https://github.com/raymondji/git-stack-cli/pull/198
 ╰──────────────────────────────────────────────────╯
 > git stack branch --prs
 * myfirststack-pt2 (top)
-  └── https://github.com/raymondji/git-stack-cli/pull/199
+  └── https://github.com/raymondji/git-stack-cli/pull/202
 
   myfirststack
-  └── https://github.com/raymondji/git-stack-cli/pull/198
+  └── https://github.com/raymondji/git-stack-cli/pull/203
 
 ╭──────────────────────────────────────────────────╮
 │                                                  │
@@ -173,12 +174,13 @@ Successfully rebased myfirststack-pt2 on main
 │                                                  │
 ╰──────────────────────────────────────────────────╯
 > git checkout main
-Your branch is up to date with 'origin/main'.
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
 > git checkout -b mysecondstack
 > echo 'buy one get one free' > mysecondstack.txt
 > git add .
 > git commit -m 'My second stack'
-[mysecondstack a3ddc36] My second stack
+[mysecondstack 566f341] My second stack
  1 file changed, 1 insertion(+)
  create mode 100644 mysecondstack.txt
 ╭──────────────────────────────────────────────────╮
