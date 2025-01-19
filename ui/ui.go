@@ -14,6 +14,7 @@ func PrintBranchesInStack(
 	theme config.Theme,
 	prsBySourceBranch map[string]githost.PullRequest,
 	showPRs bool,
+	vocab githost.Vocabulary,
 ) {
 	for i, branch := range branches {
 		// if len(c.LocalBranches) == 0 && c.Hash == currCommit {
@@ -43,7 +44,7 @@ func PrintBranchesInStack(
 			if pr, ok := prsBySourceBranch[branch]; ok {
 				fmt.Printf("  └── %s\n", pr.WebURL)
 			} else {
-				fmt.Printf("  └── No pull request\n")
+				fmt.Printf("  └── No %s\n", vocab.ChangeRequestName)
 			}
 
 			if i != len(branches)-1 {
@@ -61,6 +62,6 @@ func PrintBranchesInStack(
 	}
 	if showPRs && missingPRs {
 		fmt.Println()
-		fmt.Println(`some branches don't have pull requests yet (use "git stack push --create-prs" to open)`)
+		fmt.Println(`some branches don't have %s yet (use "git stack push --create-prs" to open)`, vocab.ChangeRequestNamePlural)
 	}
 }

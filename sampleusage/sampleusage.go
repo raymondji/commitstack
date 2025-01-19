@@ -152,7 +152,7 @@ func (s Sample) Cleanup() error {
 func (s Sample) cleanupBranches(repoPath string, names ...string) error {
 	for _, name := range names {
 		hasPR := true
-		pr, err := s.host.GetPullRequest(repoPath, name)
+		cr, err := s.host.GetChangeReqeuest(repoPath, name)
 		if errors.Is(err, githost.ErrDoesNotExist) {
 			hasPR = false
 		} else if err != nil {
@@ -160,7 +160,7 @@ func (s Sample) cleanupBranches(repoPath string, names ...string) error {
 		}
 
 		if hasPR {
-			_, err = s.host.ClosePullRequest(repoPath, pr)
+			_, err = s.host.CloseChangeRequest(repoPath, cr)
 			if err != nil {
 				return err
 			}

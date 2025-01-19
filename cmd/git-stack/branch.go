@@ -120,7 +120,7 @@ var branchCmd = &cobra.Command{
 			var actionErr error
 			action := func() {
 				prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
-					pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
+					pr, err := host.GetChangeReqeuest(deps.remote.URLPath, branch)
 					if errors.Is(err, githost.ErrDoesNotExist) {
 						return githost.PullRequest{}, nil
 					} else if err != nil {

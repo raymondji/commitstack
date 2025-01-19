@@ -84,7 +84,7 @@ var pushCmd = &cobra.Command{
 			// Gitlab will automatically mark mergeRequestA as merged after we push branchA and branchB.
 			// We don't want this behaviour.
 			prs, err := concurrent.Map(ctx, branches, func(ctx context.Context, branch string) (githost.PullRequest, error) {
-				pr, err := host.GetPullRequest(deps.remote.URLPath, branch)
+				pr, err := host.GetChangeReqeuest(deps.remote.URLPath, branch)
 				if errors.Is(err, githost.ErrDoesNotExist) {
 					return githost.PullRequest{}, nil
 				} else if err != nil {
@@ -92,7 +92,7 @@ var pushCmd = &cobra.Command{
 				}
 
 				if pr.TargetBranch != wantTargets[branch] {
-					return host.UpdatePullRequest(deps.remote.URLPath, githost.PullRequest{
+					return host.UpdateChangeRequest(deps.remote.URLPath, githost.PullRequest{
 						ID:           pr.ID,
 						Title:        pr.Title,
 						Description:  pr.Description,
@@ -136,7 +136,7 @@ var pushCmd = &cobra.Command{
 							return pr, nil
 						}
 
-						return host.CreatePullRequest(deps.remote.URLPath, githost.PullRequest{
+						return host.CreateChangeRequest(deps.remote.URLPath, githost.PullRequest{
 							Title:        branch,
 							SourceBranch: branch,
 							TargetBranch: wantTargets[branch],
@@ -150,7 +150,7 @@ var pushCmd = &cobra.Command{
 			// Update PRs with correct target branches and stack info.
 			return concurrent.Map(ctx, prs, func(ctx context.Context, pr githost.PullRequest) (githost.PullRequest, error) {
 				desc := formatPullRequestDescription(pr, prs)
-				pr, err := host.UpdatePullRequest(deps.remote.URLPath, githost.PullRequest{
+				pr, err := host.UpdateChangeRequest(deps.remote.URLPath, githost.PullRequest{
 					ID:           pr.ID,
 					Title:        pr.Title,
 					Description:  desc,

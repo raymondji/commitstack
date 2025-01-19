@@ -14,11 +14,21 @@ type gitlabClient struct {
 func New(personalAccessToken string) (internal.Host, error) {
 	client, err := gitlab.NewClient(personalAccessToken)
 	if err != nil {
-		return gitlabClient{}, fmt.Errorf("Failed to create client: %v", err)
+		return gitlabClient{}, fmt.Errorf("failed to create client: %v", err)
 	}
 	return gitlabClient{
 		client: client,
 	}, nil
+}
+
+func (g gitlabClient) GetVocabulary() internal.Vocabulary {
+	return internal.Vocabulary{
+		ChangeRequestNameCapitalized: "Merge request",
+		ChangeRequestName:            "merge request",
+		ChangeRequestNamePlural:      "merge requests",
+		ChangeRequestNameShort:       "mr",
+		ChangeRequestNameShortPlural: "mrs",
+	}
 }
 
 // e.g. for https://gitlab.com/raymondji/git-stacked-gitlab-test, the path is raymondji/git-stacked-gitlab-test
@@ -33,29 +43,29 @@ func (g gitlabClient) GetRepo(repoPath string) (internal.Repo, error) {
 	}, nil
 }
 
-func (g gitlabClient) GetPullRequest(repoPath string, sourceBranch string) (internal.PullRequest, error) {
+func (g gitlabClient) GetChangeReqeuest(repoPath string, sourceBranch string) (internal.ChangeRequest, error) {
 	opts := &gitlab.ListProjectMergeRequestsOptions{
 		State:        gitlab.Ptr("opened"),
 		SourceBranch: &sourceBranch,
 	}
 	mergeRequests, _, err := g.client.MergeRequests.ListProjectMergeRequests(repoPath, opts)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to list merge requests: %w", err)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to list merge requests: %w", err)
 	}
 	switch len(mergeRequests) {
 	case 0:
-		return internal.PullRequest{}, fmt.Errorf("%w, source branch: %s", internal.ErrDoesNotExist, sourceBranch)
+		return internal.ChangeRequest{}, fmt.Errorf("%w, source branch: %s", internal.ErrDoesNotExist, sourceBranch)
 	case 1:
 		mr := mergeRequests[0]
 		return convertMR(mr), nil
 	default:
-		return internal.PullRequest{}, fmt.Errorf("found multiple merge requests for source branch: %s", sourceBranch)
+		return internal.ChangeRequest{}, fmt.Errorf("found multiple merge requests for source branch: %s", sourceBranch)
 	}
 }
 
-func (g gitlabClient) CreatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g gitlabClient) CreateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
 	opts := &gitlab.CreateMergeRequestOptions{
@@ -67,18 +77,18 @@ func (g gitlabClient) CreatePullRequest(repoPath string, pr internal.PullRequest
 
 	mr, _, err := g.client.MergeRequests.CreateMergeRequest(repoPath, opts)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to create merge request: %w", err)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to create merge request: %w", err)
 	}
 
 	return convertMR(mr), nil
 }
 
-func (g gitlabClient) UpdatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g gitlabClient) UpdateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.ID == 0 {
-		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
+		return internal.ChangeRequest{}, fmt.Errorf("merge request ID must be set")
 	}
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
 	opts := &gitlab.UpdateMergeRequestOptions{
@@ -89,18 +99,18 @@ func (g gitlabClient) UpdatePullRequest(repoPath string, pr internal.PullRequest
 
 	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
 	}
 
 	return convertMR(mr), nil
 }
 
-func (g gitlabClient) ClosePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g gitlabClient) CloseChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.ID == 0 {
-		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
+		return internal.ChangeRequest{}, fmt.Errorf("merge request ID must be set")
 	}
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("merge request title cannot be empty")
 	}
 
 	opts := &gitlab.UpdateMergeRequestOptions{
@@ -109,14 +119,14 @@ func (g gitlabClient) ClosePullRequest(repoPath string, pr internal.PullRequest)
 
 	mr, _, err := g.client.MergeRequests.UpdateMergeRequest(repoPath, pr.ID, opts)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to update merge request: %w, mr: %+v", err, pr)
 	}
 
 	return convertMR(mr), nil
 }
 
-func convertMR(mr *gitlab.MergeRequest) internal.PullRequest {
-	return internal.PullRequest{
+func convertMR(mr *gitlab.MergeRequest) internal.ChangeRequest {
+	return internal.ChangeRequest{
 		ID:             mr.IID,
 		SourceBranch:   mr.SourceBranch,
 		TargetBranch:   mr.TargetBranch,

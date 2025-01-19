@@ -20,6 +20,16 @@ func New(personalAccessToken string) (internal.Host, error) {
 	}, nil
 }
 
+func (g *githubClient) GetVocabulary() internal.Vocabulary {
+	return internal.Vocabulary{
+		ChangeRequestNameCapitalized: "Pull request",
+		ChangeRequestName:            "pull request",
+		ChangeRequestNamePlural:      "pull requests",
+		ChangeRequestNameShort:       "pr",
+		ChangeRequestNameShortPlural: "prs",
+	}
+}
+
 func (g *githubClient) GetRepo(repoPath string) (internal.Repo, error) {
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
@@ -36,11 +46,11 @@ func (g *githubClient) GetRepo(repoPath string) (internal.Repo, error) {
 	}, nil
 }
 
-// GetPullRequest retrieves a pull request by its source branch.
-func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (internal.PullRequest, error) {
+// GetChangeReqeuest retrieves a pull request by its source branch.
+func (g *githubClient) GetChangeReqeuest(repoPath string, sourceBranch string) (internal.ChangeRequest, error) {
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return internal.PullRequest{}, err
+		return internal.ChangeRequest{}, err
 	}
 
 	opts := &github.PullRequestListOptions{
@@ -49,12 +59,12 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (int
 	}
 	prs, _, err := g.client.PullRequests.List(context.Background(), owner, repo, opts)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to list pull requests: %w", err)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to list pull requests: %w", err)
 	}
 
 	switch len(prs) {
 	case 0:
-		return internal.PullRequest{}, fmt.Errorf("%w, source branch: %s", internal.ErrDoesNotExist, sourceBranch)
+		return internal.ChangeRequest{}, fmt.Errorf("%w, source branch: %s", internal.ErrDoesNotExist, sourceBranch)
 	case 1:
 		return convertPR(prs[0]), nil
 	default:
@@ -62,18 +72,18 @@ func (g *githubClient) GetPullRequest(repoPath string, sourceBranch string) (int
 		for _, pr := range prs {
 			urls = append(urls, *pr.HTMLURL)
 		}
-		return internal.PullRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s, urls: %v", sourceBranch, urls)
+		return internal.ChangeRequest{}, fmt.Errorf("found multiple pull requests for source branch: %s, urls: %v", sourceBranch, urls)
 	}
 }
 
-func (g *githubClient) CreatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g *githubClient) CreateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return internal.PullRequest{}, err
+		return internal.ChangeRequest{}, err
 	}
 
 	// TODO: add optional support for draft PRs, not supported in every repo
@@ -86,24 +96,24 @@ func (g *githubClient) CreatePullRequest(repoPath string, pr internal.PullReques
 
 	createdPR, _, err := g.client.PullRequests.Create(context.Background(), owner, repo, newPR)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf(
+		return internal.ChangeRequest{}, fmt.Errorf(
 			"failed to create pull request: %w, contents: %+v", err, pr)
 	}
 
 	return convertPR(createdPR), nil
 }
 
-func (g *githubClient) UpdatePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g *githubClient) UpdateChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.ID == 0 {
-		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
+		return internal.ChangeRequest{}, fmt.Errorf("pull request ID must be set")
 	}
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return internal.PullRequest{}, err
+		return internal.ChangeRequest{}, err
 	}
 
 	updatedPR := &github.PullRequest{
@@ -116,23 +126,23 @@ func (g *githubClient) UpdatePullRequest(repoPath string, pr internal.PullReques
 
 	prResult, _, err := g.client.PullRequests.Edit(context.Background(), owner, repo, int(pr.ID), updatedPR)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to update pull request, pr: %+v, err: %w", pr, err)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to update pull request, pr: %+v, err: %w", pr, err)
 	}
 
 	return convertPR(prResult), nil
 }
 
-func (g githubClient) ClosePullRequest(repoPath string, pr internal.PullRequest) (internal.PullRequest, error) {
+func (g githubClient) CloseChangeRequest(repoPath string, pr internal.ChangeRequest) (internal.ChangeRequest, error) {
 	if pr.ID == 0 {
-		return internal.PullRequest{}, fmt.Errorf("pull request ID must be set")
+		return internal.ChangeRequest{}, fmt.Errorf("pull request ID must be set")
 	}
 	if pr.Title == "" {
-		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
+		return internal.ChangeRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
 	owner, repo, err := parseRepoPath(repoPath)
 	if err != nil {
-		return internal.PullRequest{}, err
+		return internal.ChangeRequest{}, err
 	}
 
 	updatedPR := &github.PullRequest{
@@ -141,14 +151,14 @@ func (g githubClient) ClosePullRequest(repoPath string, pr internal.PullRequest)
 
 	prResult, _, err := g.client.PullRequests.Edit(context.Background(), owner, repo, int(pr.ID), updatedPR)
 	if err != nil {
-		return internal.PullRequest{}, fmt.Errorf("failed to close pull request, pr: %+v, err: %w", pr, err)
+		return internal.ChangeRequest{}, fmt.Errorf("failed to close pull request, pr: %+v, err: %w", pr, err)
 	}
 
 	return convertPR(prResult), nil
 }
 
-func convertPR(pr *github.PullRequest) internal.PullRequest {
-	out := internal.PullRequest{
+func convertPR(pr *github.PullRequest) internal.ChangeRequest {
+	out := internal.ChangeRequest{
 		ID:             *pr.Number,
 		SourceBranch:   *pr.Head.Ref,
 		TargetBranch:   *pr.Base.Ref,

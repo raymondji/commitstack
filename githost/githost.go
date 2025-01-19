@@ -11,8 +11,9 @@ import (
 
 type (
 	Host        = internal.Host
-	PullRequest = internal.PullRequest
+	PullRequest = internal.ChangeRequest
 	Repo        = internal.Repo
+	Vocabulary  = internal.Vocabulary
 )
 
 var (

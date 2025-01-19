@@ -2,9 +2,9 @@ package internal
 
 import "errors"
 
-// Using PullRequest since it's the most widely used term, but this represents an
-// umbrella term including pull requests (github), merge requests (gitlab), diffs (phabricator), etc.
-type PullRequest struct {
+// Using ChangeRequest as a generic term to represent pull requests (github),
+// merge requests (gitlab), diffs (phabricator), etc.
+type ChangeRequest struct {
 	ID             int
 	Title          string
 	Description    string
@@ -20,11 +20,20 @@ type Repo struct {
 
 var ErrDoesNotExist = errors.New("does not exist")
 
+type Vocabulary struct {
+	ChangeRequestNameCapitalized string
+	ChangeRequestName            string
+	ChangeRequestNamePlural      string
+	ChangeRequestNameShort       string
+	ChangeRequestNameShortPlural string
+}
+
 type Host interface {
+	GetVocabulary() Vocabulary
 	GetRepo(repoPath string) (Repo, error)
-	// Returns ErrDoesNotExist if no pull request exists for the given sourceBranch
-	GetPullRequest(repoPath string, sourceBranch string) (PullRequest, error)
-	UpdatePullRequest(repoPath string, r PullRequest) (PullRequest, error)
-	CreatePullRequest(repoPaths string, r PullRequest) (PullRequest, error)
-	ClosePullRequest(repoPaths string, r PullRequest) (PullRequest, error)
+	// Returns ErrDoesNotExist if no change request exists for the given sourceBranch
+	GetChangeReqeuest(repoPath string, sourceBranch string) (ChangeRequest, error)
+	UpdateChangeRequest(repoPath string, r ChangeRequest) (ChangeRequest, error)
+	CreateChangeRequest(repoPath string, r ChangeRequest) (ChangeRequest, error)
+	CloseChangeRequest(repoPath string, r ChangeRequest) (ChangeRequest, error)
 }
