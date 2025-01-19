@@ -139,7 +139,7 @@ Your branch is ahead of 'origin/main' by 1 commit.
 │ for you.                                         │
 │                                                  │
 ╰──────────────────────────────────────────────────╯
-> git stack push --create-prs
+> git stack push --open
 Pushed branches:
 * myfirststack-pt2 (top)
   └── https://github.com/raymondji/git-stack-cli/pull/205

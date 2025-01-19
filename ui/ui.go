@@ -62,6 +62,6 @@ func PrintBranchesInStack(
 	}
 	if showPRs && missingPRs {
 		fmt.Println()
-		fmt.Println(`some branches don't have %s yet (use "git stack push --create-prs" to open)`, vocab.ChangeRequestNamePlural)
+		fmt.Printf("some branches don't have %s yet (use \"git stack push --open\" to open)\n", vocab.ChangeRequestNamePlural)
 	}
 }

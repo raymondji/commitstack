@@ -24,7 +24,7 @@ var pushCreatePRsFlag bool
 func init() {
 	pushCmd.Flags().BoolVarP(&pushSaferForceFlag, "safer-force", "f", false, "see git push --force-with-lease and --force-if-includes")
 	pushCmd.Flags().BoolVarP(&pushForceFlag, "force", "F", false, "see git push --force")
-	pushCmd.Flags().BoolVarP(&pushCreatePRsFlag, "create-prs", "c", false, "Don't create new pull requests. Existing ones are always updated.")
+	pushCmd.Flags().BoolVarP(&pushCreatePRsFlag, "open", "o", false, "Open new PRs/MRs. Existing ones are always updated.")
 }
 
 var pushCmd = &cobra.Command{
