@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/raymondji/git-stack-cli/concurrent"
 	"github.com/raymondji/git-stack-cli/libgit"
 	"github.com/raymondji/git-stack-cli/stackparser"
 	"github.com/spf13/cobra"
@@ -10,10 +12,12 @@ import (
 
 var rebaseInteractiveFlag bool
 var rebaseKeepBaseFlag bool
+var rebaseForceFlag bool
 
 func init() {
 	rebaseCmd.Flags().BoolVarP(&rebaseInteractiveFlag, "interactive", "i", false, "Use interactive rebase")
 	rebaseCmd.Flags().BoolVarP(&rebaseKeepBaseFlag, "keep-base", "k", false, "See git rebase --keep-base flag")
+	rebaseCmd.Flags().BoolVarP(&rebaseForceFlag, "force", "f", false, "Allow rebasing when some loss of state could occur")
 }
 
 var rebaseCmd = &cobra.Command{
@@ -28,8 +32,26 @@ var rebaseCmd = &cobra.Command{
 			return err
 		}
 		git, defaultBranch := deps.git, deps.repoCfg.DefaultBranch
-
-		log, err := git.LogAll(defaultBranch)
+		var currBranch, currCommit string
+		var log libgit.Log
+		err = concurrent.Run(
+			context.Background(),
+			func(ctx context.Context) error {
+				var err error
+				currCommit, err = git.GetShortCommitHash("HEAD")
+				return err
+			},
+			func(ctx context.Context) error {
+				var err error
+				currBranch, err = git.GetCurrentBranch()
+				return err
+			},
+			func(ctx context.Context) error {
+				var err error
+				log, err = git.LogAll(defaultBranch)
+				return err
+			},
+		)
 		if err != nil {
 			return err
 		}
@@ -37,21 +59,18 @@ var rebaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		currCommit, err := git.GetShortCommitHash("HEAD")
+		currStack, err := stackparser.GetCurrent(stacks, currCommit)
 		if err != nil {
 			return err
 		}
-		s, err := stackparser.GetCurrent(stacks, currCommit)
-		if err != nil {
-			return err
-		}
-		currBranch, err := git.GetCurrentBranch()
-		if err != nil {
-			return err
-		}
-		if currBranch != s.Name {
-			return fmt.Errorf("must be on the tip of the stack to rebase, currently checked out: %s, tip: %s",
-				currBranch, s.Name)
+
+		if !rebaseForceFlag {
+			if currBranch != currStack.Name {
+				return fmt.Errorf("warning: rebase from the tip of the stack to maintain the association between branches, use --force to allow")
+			}
+			if len(currStack.DivergesFrom()) > 0 {
+				return fmt.Errorf("warning: rebasing may lose the association between divergent stacks, use --force to allow")
+			}
 		}
 
 		rebaseOpts := libgit.RebaseOpts{
@@ -68,7 +87,7 @@ var rebaseCmd = &cobra.Command{
 			return err
 		}
 		if !rebaseInteractiveFlag {
-			fmt.Printf("Successfully rebased %s on %s\n", s.Name, newBase)
+			fmt.Printf("Successfully rebased %s on %s\n", currStack.Name, newBase)
 		}
 		return nil
 	},

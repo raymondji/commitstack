@@ -11,10 +11,9 @@ import (
 )
 
 var logCmd = &cobra.Command{
-	Use:     "log [stack]",
-	Aliases: []string{"lo"},
-	Short:   "Log commits in the stack",
-	Args:    cobra.MaximumNArgs(1),
+	Use:   "log [stack]",
+	Short: "Log commits in the stack",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		deps, err := initDeps()
 		if err != nil {
