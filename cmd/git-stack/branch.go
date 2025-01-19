@@ -18,7 +18,7 @@ var branchPRsFlag bool
 
 func init() {
 	branchCmd.Flags().BoolVar(&branchPRsFlag, "prs", false, "Whether to show PRs for each branch")
-	branchCmd.Flags().BoolVar(&branchPRsFlag, "mrs", false, "Whether to show MRs for each branch. Alias for --prs")
+	branchCmd.Flags().BoolVar(&branchPRsFlag, "mrs", false, "Whether to show MRs for each branch")
 }
 
 var branchCmd = &cobra.Command{
