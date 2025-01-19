@@ -58,9 +58,8 @@ func (g gitlabClient) CreatePullRequest(repoPath string, pr internal.PullRequest
 		return internal.PullRequest{}, fmt.Errorf("pull request title cannot be empty")
 	}
 
-	// TODO: make it a draft
 	opts := &gitlab.CreateMergeRequestOptions{
-		Title:        &pr.Title,
+		Title:        gitlab.Ptr(fmt.Sprintf("Draft: %s", pr.Title)),
 		Description:  &pr.Description,
 		SourceBranch: &pr.SourceBranch,
 		TargetBranch: &pr.TargetBranch,
